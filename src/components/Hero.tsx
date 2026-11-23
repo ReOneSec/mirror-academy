@@ -16,8 +16,11 @@ export default function Hero() {
             Reflect Your Strength!
           </h1>
           <div className="mirror-line mt-[0.14em] h-[3px] w-full bg-gold" aria-hidden="true" />
-          <div className="mirror-reflection-wrap mt-[0.06em]" aria-hidden="true">
-            <p className="mirror-reflection w-display font-extrabold uppercase leading-[0.92] tracking-[-0.01em]">
+          <div
+            className="mirror-reflection-wrap mt-[0.06em] h-[0.58em] overflow-hidden select-none pointer-events-none [mask-image:linear-gradient(to_bottom,#000_0%,transparent_92%)] [-webkit-mask-image:linear-gradient(to_bottom,#000_0%,transparent_92%)]"
+            aria-hidden="true"
+          >
+            <p className="mirror-reflection w-display scale-y-[-1] origin-center opacity-20 font-extrabold uppercase leading-[0.92] tracking-[-0.01em]">
               Reflect Your Strength!
             </p>
           </div>

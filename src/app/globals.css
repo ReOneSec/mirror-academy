@@ -109,6 +109,7 @@ p {
 
 /* Trim a label to its cap height so it centres on its letters inside pills and buttons */
 .trim-cap {
+  /* text-box is progressive enhancement for browsers supporting CSS text-box-trim */
   text-box: trim-both cap alphabetic;
 }
 
@@ -119,6 +120,7 @@ p {
 .mirror-reflection-wrap {
   height: 0.58em;
   overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
   mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
   user-select: none;
   pointer-events: none;
