@@ -70,6 +70,39 @@ export default function LocationContact() {
             </div>
           </div>
         </div>
+
+        {/* Embedded Interactive Google Map */}
+        <div className="mt-10 overflow-hidden rounded-xl border border-rule bg-paper shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-rule bg-sheet px-5 py-3.5 text-sm">
+            <div className="flex items-center gap-2.5 font-medium text-ink">
+              <Icon name="map" size={20} />
+              <span>Mirror Academy on Google Maps &mdash; Rallis Mess, Berhampore</span>
+            </div>
+            <a
+              href={SITE.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-semibold text-ink transition-colors hover:text-gold text-xs uppercase tracking-wider"
+            >
+              Open in Google Maps
+              <Icon name="external-link" size={16} />
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+          </div>
+          <div className="relative w-full h-[360px] sm:h-[420px]">
+            <iframe
+              src={SITE.mapsEmbedUrl}
+              title="Mirror Academy Google Map Location"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              className="h-full w-full"
+            />
+          </div>
+        </div>
       </div>
     </section>
   );

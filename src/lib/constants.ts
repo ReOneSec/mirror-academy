@@ -14,7 +14,9 @@ export const SITE = {
   address:
     'Near Jamindari Koshaikhana more, Majdia West, Gorabazar, Berhampore.',
   mapsUrl:
-    'https://www.google.com/maps/search/Near+Jamindari+Koshaikhana+more,+Majdia+West,+Gorabazar,+Berhampore',
+    'https://www.google.com/maps/place/Rallis+Mess/@24.0821424,88.241972,17z/data=!3m1!4b1!4m6!3m5!1s0x39f97f00455d06a9:0x22db12fe9d1a79a5!8m2!3d24.0821424!4d88.241972!16s%2Fg%2F11t0vd_nsv',
+  mapsEmbedUrl:
+    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3642.550115573609!2d88.24197197603003!3d24.08214237595819!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f97f00455d06a9%3A0x22db12fe9d1a79a5!2sRallis%20Mess!5e0!3m2!1sen!2sin!4v1795456645526!5m2!1sen!2sin',
 } as const;
 
 export interface Course {
