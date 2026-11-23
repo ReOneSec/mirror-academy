@@ -40,10 +40,10 @@ export default function Hero() {
 
         <div className="hero-text flex flex-col gap-3 sm:flex-row sm:gap-4">
           <a
-            href="#enquiry"
+            href="#registration"
             className="inline-flex items-center justify-center rounded-lg bg-gold px-6 py-3 text-sm font-bold text-navy transition-colors hover:bg-gold-hover focus-visible:ring-2 focus-visible:ring-white touch-action-manipulation"
           >
-            Enquire now
+            Register now
           </a>
           <a
             href={SITE.phoneTel}

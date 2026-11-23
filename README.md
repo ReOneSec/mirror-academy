@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mirror Academy — Official Web App & Student Admissions Portal
 
-## Getting Started
+> **"Reflect Your Strength!"**  
+> Established 2018 in Berhampore, Murshidabad, West Bengal.  
+> Specialised coaching for WBPSC, WBCS, Medical & Engineering, Uniformed Forces, and Teaching examinations.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🌟 Key Features
+
+1. **Brand-Grounded Landing Page**
+   - High-performance, mobile-first design built with Next.js 16 (App Router) and Tailwind CSS.
+   - 4 Examination Streams with 18 authentic courses (Public Services, Medical & Engg., Force, Teaching).
+   - Verbatim contact details: `Near Jamindari Koshaikhana more, Majdia West, Gorabazar, Berhampore`.
+   - Clickable telephone link: `tel:9732424300`.
+   - Official email: `mirrorexams@gmail.com`.
+
+2. **Student Registration System**
+   - Interactive batch selection: **Free batch** (Orientation) vs **Paid batch** (Full Course).
+   - Form fields: Student name (max 100 chars), Contact number (10-digit numeric filter), Gender (`Male` / `Female`), Residential address (max 300 chars), Course dropdown, and Questions/notes (max 400 chars with live counter).
+   - Live database storage in Supabase PostgreSQL with Row Level Security (RLS).
+   - In-memory rate limiting and Cloudflare Turnstile bot protection support.
+
+3. **Student "View Response Preview" Tab**
+   - Students can enter their registered mobile number anytime to view their submitted registration card, status (`Application Received`), course details, and batch type.
+
+4. **Dedicated Institute Admin Portal (`/admin`)**
+   - Protected with **Supabase Auth** (`@supabase/ssr`).
+   - Default administrator account: `mirrorexams@gmail.com`
+   - **Live Metrics Dashboard:** Total applications, Free batch count, Paid batch count, Pending follow-ups, Contacted, and Admitted counts.
+   - **Real-Time Filters:** Instant search across student names, phone numbers, courses, addresses, or remarks; filter by batch type, stream, status, or gender.
+   - **One-Click Communication:** Direct `tel:` call button and direct WhatsApp chat launcher (`https://wa.me/91...`).
+   - **Status Management:** Immediate status updates (`new`, `contacted`, `admitted`, `cancelled`) persisted directly to Supabase.
+   - **Export to CSV:** Download all or filtered student records with a single click formatted for Excel / Google Sheets.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 20+ (Tested on Node 25.4.0)
+- Supabase project credentials
+
+### Environment Setup
+
+Create `.env.local` inside `mirror-academy`:
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+
+# Site URL
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Admin Portal Configuration
+ADMIN_PASSWORD=mirroradmin2018
+ADMIN_SESSION_SECRET=mirror_academy_admin_secret_key_berhampore_2018
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation & Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd mirror-academy
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Visit:
+- Public Website: [http://localhost:3000](http://localhost:3000)
+- Admin Portal: [http://localhost:3000/admin](http://localhost:3000/admin)
+  - **Email:** ``
+  - **Password:** ``
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔒 Security Best Practices
+- The secret `SUPABASE_SERVICE_ROLE_KEY` is kept strictly server-side and never exposed to the client bundle.
+- The Admin Portal endpoints (`/api/admin/*`) require a cryptographically verified HMAC session token.
+- Character limits are strictly enforced on both the client and server (`name <= 100`, `address <= 300`, `message <= 400`, `phone = 10 digits`).

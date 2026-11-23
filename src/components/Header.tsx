@@ -46,10 +46,10 @@ export default function Header() {
             <span className="tabular-nums">{SITE.phone}</span>
           </a>
           <a
-            href="#enquiry"
+            href="#registration"
             className="rounded-lg bg-gold px-4 py-2 text-sm font-bold text-navy transition-colors hover:bg-gold-hover focus-visible:ring-2 focus-visible:ring-white"
           >
-            Enquire now
+            Register now
           </a>
         </nav>
 
@@ -94,11 +94,18 @@ export default function Header() {
             <span className="tabular-nums">{SITE.phone}</span>
           </a>
           <a
-            href="#enquiry"
+            href={SITE.emailMailto}
+            className="flex items-center gap-1.5 py-2 text-sm font-medium text-white/90 hover:text-gold"
+            aria-label={`Email ${SITE.email}`}
+          >
+            <span className="truncate">{SITE.email}</span>
+          </a>
+          <a
+            href="#registration"
             className="mt-2 block rounded-lg bg-gold px-4 py-2 text-center text-sm font-bold text-navy hover:bg-gold-hover"
             onClick={() => setMenuOpen(false)}
           >
-            Enquire now
+            Register now
           </a>
         </nav>
       )}

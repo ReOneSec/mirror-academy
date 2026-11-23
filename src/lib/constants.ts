@@ -9,6 +9,8 @@ export const SITE = {
   phone: '9732424300',
   phoneTel: 'tel:9732424300',
   phoneDisplay: '973 242 4300',
+  email: 'mirrorexams@gmail.com',
+  emailMailto: 'mailto:mirrorexams@gmail.com',
   address:
     'Near Jamindari Koshaikhana more, Majdia West, Gorabazar, Berhampore.',
   mapsUrl:
@@ -68,6 +70,17 @@ export const COURSE_STREAMS: CourseStream[] = [
       { name: 'NET', slug: 'net', sortOrder: 16 },
       { name: 'SET', slug: 'set', sortOrder: 17 },
       { name: 'TET', slug: 'tet', sortOrder: 18 },
+    ],
+  },
+  {
+    stream: 'Interview',
+    slug: 'interview',
+    courses: [
+      { name: 'Primary TET Mock Interview', slug: 'primary-tet-mock-interview', sortOrder: 19 },
+      { name: 'SSC Group C Mock Interview', slug: 'ssc-group-c-mock-interview', sortOrder: 20 },
+      { name: 'SSC Group D Mock Interview', slug: 'ssc-group-d-mock-interview', sortOrder: 21 },
+      { name: 'WBP Constable Mock Interview', slug: 'wbp-constable-mock-interview', sortOrder: 22 },
+      { name: 'Police SI Mock Interview', slug: 'police-si-mock-interview', sortOrder: 23 },
     ],
   },
 ];

@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { COURSE_STREAMS } from '@/lib/constants';
-import { ScrollIcon, StethoscopeIcon, ShieldIcon, BookOpenIcon } from '@/components/Icons';
+import { ScrollIcon, StethoscopeIcon, ShieldIcon, BookOpenIcon, InterviewIcon } from '@/components/Icons';
 import { Suspense } from 'react';
 
 const STREAM_ICONS: Record<string, React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>> = {
@@ -10,6 +10,7 @@ const STREAM_ICONS: Record<string, React.ComponentType<{ className?: string; 'ar
   'medical-engg': StethoscopeIcon,
   'force': ShieldIcon,
   'teaching': BookOpenIcon,
+  'interview': InterviewIcon,
 };
 
 function CourseStreamsInner() {

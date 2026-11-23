@@ -12,10 +12,10 @@ export default function HowAdmission() {
               1
             </span>
             <div>
-              <h3 className="mb-1 font-bold text-navy">Enquire</h3>
+              <h3 className="mb-1 font-bold text-navy">Register as a student</h3>
               <p className="text-sm leading-relaxed text-slate">
-                Fill out the form below with your name, phone, and the course
-                you\u2019re interested in.
+                Select your batch (Free or Paid), fill in your details, and submit
+                your registration below.
               </p>
             </div>
           </li>
