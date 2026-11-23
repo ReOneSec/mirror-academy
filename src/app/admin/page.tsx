@@ -305,8 +305,8 @@ export default function AdminPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-navy/20 border-t-navy" />
-          <p className="text-sm font-medium text-slate">Verifying Supabase Auth session…</p>
+          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[#021b44]/20 border-t-[#021b44]" />
+          <p className="text-sm font-medium text-slate-600">Verifying Supabase Auth session…</p>
         </div>
       </div>
     );
@@ -318,7 +318,7 @@ export default function AdminPage() {
       <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
         <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-navy/20 bg-navy p-2 shadow-sm">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#021b44]/20 bg-[#021b44] p-2 shadow-sm">
               <Image
                 src="/brand/logo.jpg"
                 alt="Mirror Academy logo"
@@ -328,16 +328,16 @@ export default function AdminPage() {
                 priority
               />
             </div>
-            <h1 className="text-2xl font-bold text-navy">{SITE.name}</h1>
+            <h1 className="text-2xl font-bold text-[#021b44]">{SITE.name}</h1>
             <div className="mt-1 flex items-center justify-center gap-1.5">
               <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
                 Supabase Auth
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-gold">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#b45309]">
                 Admin Portal
               </span>
             </div>
-            <p className="mt-2 text-xs text-slate">
+            <p className="mt-2 text-xs text-slate-600">
               Sign in with your institute admin credentials to manage student registrations.
             </p>
           </div>
@@ -369,7 +369,7 @@ export default function AdminPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="mirrorexams@gmail.com"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:outline-none focus:ring-2 focus:ring-[#021b44]/20"
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
                   <MailIcon className="h-4 w-4" aria-hidden="true" />
@@ -388,7 +388,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-slate-500 hover:text-navy"
+                  className="text-xs text-slate-500 hover:text-[#021b44]"
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
@@ -402,7 +402,7 @@ export default function AdminPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password…"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20"
+                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:outline-none focus:ring-2 focus:ring-[#021b44]/20"
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
                   <LockIcon className="h-4 w-4" aria-hidden="true" />
@@ -413,7 +413,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={loginLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-navy py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-navy-light disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#021b44] py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b2f6b] disabled:opacity-60"
             >
               {loginLoading ? (
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -426,7 +426,7 @@ export default function AdminPage() {
           <div className="mt-6 border-t border-slate-100 pt-4 text-center">
             <Link
               href="/"
-              className="text-xs font-medium text-slate-500 hover:text-navy underline-offset-4 hover:underline"
+              className="text-xs font-medium text-slate-500 hover:text-[#021b44] underline-offset-4 hover:underline"
             >
               &larr; Back to Mirror Academy website
             </Link>
@@ -441,46 +441,46 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-50 pb-16">
       {/* Toast notification */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white shadow-lg animate-fade-in">
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-lg bg-[#021b44] px-4 py-3 text-sm font-medium text-white shadow-lg animate-fade-in">
           <CheckCircleIcon className="h-5 w-5 text-gold" aria-hidden="true" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-navy/20 bg-navy text-white shadow-md">
+      <header className="sticky top-0 z-40 border-b border-[#0b2f6b] bg-[#021b44] text-white shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <Image
               src="/brand/logo.jpg"
               alt="Mirror Academy logo"
-              width={34}
-              height={34}
-              className="rounded-full ring-2 ring-gold/40"
+              width={36}
+              height={36}
+              className="rounded-full ring-2 ring-gold/60"
             />
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold tracking-tight">{SITE.name}</span>
-                <span className="rounded-md bg-gold px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-navy">
+                <span className="text-base font-bold tracking-tight text-white">{SITE.name}</span>
+                <span className="rounded-md bg-gold px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#021b44]">
                   Admin
                 </span>
               </div>
-              <p className="text-[11px] text-white/60">Student Admissions &amp; Enquiries</p>
+              <p className="text-[11px] font-medium text-white/70">Student Admissions &amp; Enquiries</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             {/* Authenticated user pill */}
-            <div className="hidden md:flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1 text-xs text-white/90">
+            <div className="hidden md:flex items-center gap-2 rounded-lg bg-white/10 border border-white/20 px-3 py-1.5 text-xs text-white">
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span className="truncate max-w-[180px] font-medium">{user?.email}</span>
+              <span className="truncate max-w-[180px] font-semibold">{user?.email}</span>
             </div>
 
             <button
               type="button"
               onClick={loadRegistrations}
               disabled={dataLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20 hover:border-white/40 disabled:opacity-50"
               title="Refresh data"
             >
               <RefreshIcon
@@ -493,7 +493,7 @@ export default function AdminPage() {
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center gap-1 rounded-lg border border-white/20 px-3 py-1.5 text-xs font-medium text-white/90 hover:bg-white/10 transition"
+              className="inline-flex items-center gap-1 rounded-lg border border-white/25 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/15 hover:border-white/40 transition"
             >
               Public Site &rarr;
             </Link>
@@ -501,7 +501,7 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600/80 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-600"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
               title="Sign out from Supabase"
             >
               <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -517,7 +517,7 @@ export default function AdminPage() {
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
             <p className="text-xs font-medium text-slate-500">Total Applications</p>
-            <p className="mt-1 text-2xl font-black text-navy">{stats.total}</p>
+            <p className="mt-1 text-2xl font-black text-[#021b44]">{stats.total}</p>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
@@ -562,7 +562,7 @@ export default function AdminPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by student name, phone, course, address, or remarks…"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-navy focus:bg-white focus:outline-none focus:ring-1 focus:ring-navy"
+                className="w-full rounded-lg border border-slate-300 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#021b44]"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                 <SearchIcon className="h-4 w-4" aria-hidden="true" />
@@ -584,7 +584,7 @@ export default function AdminPage() {
               <select
                 value={batchFilter}
                 onChange={(e) => setBatchFilter(e.target.value as typeof batchFilter)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-navy focus:outline-none"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
                 aria-label="Filter by batch"
               >
                 <option value="all">All Batches</option>
@@ -596,7 +596,7 @@ export default function AdminPage() {
               <select
                 value={streamFilter}
                 onChange={(e) => setStreamFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-navy focus:outline-none"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
                 aria-label="Filter by stream"
               >
                 <option value="all">All Streams</option>
@@ -611,7 +611,7 @@ export default function AdminPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-navy focus:outline-none"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
                 aria-label="Filter by status"
               >
                 <option value="all">All Statuses</option>
@@ -625,7 +625,7 @@ export default function AdminPage() {
               <select
                 value={genderFilter}
                 onChange={(e) => setGenderFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-navy focus:outline-none"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
                 aria-label="Filter by gender"
               >
                 <option value="all">All Genders</option>
@@ -637,7 +637,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 onClick={exportToCSV}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-navy-light"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#021b44] px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0b2f6b]"
               >
                 <DownloadIcon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Export CSV</span>
@@ -674,7 +674,7 @@ export default function AdminPage() {
                 setStatusFilter('all');
                 setGenderFilter('all');
               }}
-              className="text-navy hover:underline"
+              className="font-semibold text-[#021b44] hover:underline"
             >
               Reset all filters
             </button>
@@ -693,7 +693,7 @@ export default function AdminPage() {
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                <thead className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700">
                   <tr>
                     <th scope="col" className="px-4 py-3.5">
                       Student
@@ -735,7 +735,7 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedRecord(record)}
-                            className="text-left font-bold text-navy hover:text-gold hover:underline focus:outline-none"
+                            className="text-left font-bold text-[#021b44] hover:text-[#0b2f6b] hover:underline focus:outline-none text-[13px]"
                           >
                             {record.name}
                           </button>
@@ -756,7 +756,7 @@ export default function AdminPage() {
                           <div className="mt-1 flex items-center gap-2">
                             <a
                               href={`tel:${record.phone}`}
-                              className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-navy hover:bg-navy hover:text-white transition"
+                              className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-[#021b44] hover:bg-[#021b44] hover:text-white transition"
                               title="Call student"
                             >
                               <PhoneIcon className="h-3 w-3" aria-hidden="true" />
@@ -778,12 +778,12 @@ export default function AdminPage() {
                         {/* Batch Type Badge */}
                         <td className="px-4 py-3.5">
                           {record.batchType === 'Paid batch' ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 font-bold text-amber-900">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300/60 px-2.5 py-0.5 font-bold text-amber-900">
                               <SparklesIcon className="h-3 w-3 text-amber-600" aria-hidden="true" />
                               Paid batch
                             </span>
                           ) : (
-                            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 font-bold text-blue-800">
+                            <span className="inline-flex items-center rounded-full bg-blue-100 border border-blue-300/60 px-2.5 py-0.5 font-bold text-blue-900">
                               Free batch
                             </span>
                           )}
@@ -816,13 +816,13 @@ export default function AdminPage() {
                           <select
                             value={record.status}
                             onChange={(e) => handleStatusChange(record.id, e.target.value)}
-                            className={`rounded-lg border px-2 py-1 text-[11px] font-semibold transition focus:outline-none ${
+                            className={`rounded-lg border px-2 py-1 text-[11px] font-bold transition focus:outline-none ${
                               record.status === 'new'
-                                ? 'border-orange-300 bg-orange-50 text-orange-800'
+                                ? 'border-amber-300 bg-amber-50 text-amber-900'
                                 : record.status === 'contacted'
-                                ? 'border-indigo-300 bg-indigo-50 text-indigo-800'
+                                ? 'border-indigo-300 bg-indigo-50 text-indigo-900'
                                 : record.status === 'admitted'
-                                ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                                ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
                                 : 'border-slate-300 bg-slate-100 text-slate-700'
                             }`}
                           >
@@ -838,14 +838,14 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedRecord(record)}
-                            className="mr-2 text-navy hover:text-gold hover:underline font-semibold"
+                            className="mr-2 font-bold text-[#021b44] hover:text-[#0b2f6b] hover:underline"
                           >
                             View
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDelete(record.id, record.name)}
-                            className="text-red-600 hover:text-red-800 hover:underline"
+                            className="font-medium text-red-600 hover:text-red-800 hover:underline"
                             title="Delete registration"
                           >
                             Delete
@@ -873,7 +873,7 @@ export default function AdminPage() {
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     Application Details
                   </span>
-                  <h3 className="text-xl font-bold text-navy break-words [overflow-wrap:anywhere]">{selectedRecord.name}</h3>
+                  <h3 className="text-xl font-bold text-[#021b44] break-words [overflow-wrap:anywhere]">{selectedRecord.name}</h3>
                 </div>
                 <button
                   type="button"
@@ -888,17 +888,17 @@ export default function AdminPage() {
               <dl className="grid grid-cols-2 gap-4 text-xs">
                 <div>
                   <dt className="font-medium text-slate-400">Batch Type</dt>
-                  <dd className="mt-0.5 font-bold text-navy">{selectedRecord.batchType}</dd>
+                  <dd className="mt-0.5 font-bold text-[#021b44]">{selectedRecord.batchType}</dd>
                 </div>
 
                 <div>
                   <dt className="font-medium text-slate-400">Gender</dt>
-                  <dd className="mt-0.5 font-bold text-navy">{selectedRecord.gender}</dd>
+                  <dd className="mt-0.5 font-bold text-[#021b44]">{selectedRecord.gender}</dd>
                 </div>
 
                 <div>
                   <dt className="font-medium text-slate-400">Selected Course</dt>
-                  <dd className="mt-0.5 font-bold text-navy">
+                  <dd className="mt-0.5 font-bold text-[#021b44]">
                     {selectedRecord.courseName}{' '}
                     <span className="font-normal text-slate-500">({selectedRecord.stream})</span>
                   </dd>
@@ -906,8 +906,8 @@ export default function AdminPage() {
 
                 <div>
                   <dt className="font-medium text-slate-400">Contact Number</dt>
-                  <dd className="mt-0.5 font-bold text-navy tabular-nums">
-                    <a href={`tel:${selectedRecord.phone}`} className="hover:underline text-navy">
+                  <dd className="mt-0.5 font-bold text-[#021b44] tabular-nums">
+                    <a href={`tel:${selectedRecord.phone}`} className="hover:underline text-[#021b44]">
                       {selectedRecord.phone}
                     </a>
                   </dd>
@@ -956,7 +956,7 @@ export default function AdminPage() {
               <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
                 <a
                   href={`tel:${selectedRecord.phone}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-navy px-4 py-2 text-xs font-bold text-white hover:bg-navy-light"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#021b44] hover:bg-[#0b2f6b] px-4 py-2 text-xs font-bold text-white shadow-xs"
                 >
                   <PhoneIcon className="h-3.5 w-3.5" aria-hidden="true" />
                   Call {selectedRecord.phone}
