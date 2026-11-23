@@ -1,167 +1,248 @@
 @import "tailwindcss";
 
 /*
- * Mirror Academy design tokens
- * Palette derived from the brand logo (public/brand/logo.jpg):
- *   deep navy field  ≈ #021B44
- *   signature gold   ≈ #FFC501
+ * Mirror Academy design tokens. See DESIGN.md for the reasoning.
+ *
+ *   ink    #021B44  the navy field of the logo: text on paper, dark grounds
+ *   ink-2  #0B2F6B  one step up from ink: raised surfaces and hover on navy
+ *   gold   #FFC501  the logo's M: filled bubbles, primary action on navy, the mirror line
+ *   paper  #F5F7FB  cool exam-paper white (deliberately not cream)
+ *   rule   #CBD4E4  the blue of a ruled answer sheet: hairlines and field borders
+ *   muted  #465470  secondary text on paper (7.4:1 on paper)
  */
 @theme inline {
-  /* Navy scale */
-  --color-navy-950: #010d24;
-  --color-navy-900: #021b44;
-  --color-navy-800: #0a2a5e;
-  --color-navy-700: #143a7a;
-  --color-navy-600: #24519c;
-  --color-navy: #021b44;
-  --color-navy-light: #0a2a5e;
-
-  /* Gold scale */
-  --color-gold-200: #ffe9a3;
-  --color-gold-300: #ffd84d;
-  --color-gold-400: #ffc501;
-  --color-gold-500: #f0b400;
-  --color-gold-600: #c99200;
+  --color-ink: #021b44;
+  --color-ink-2: #0b2f6b;
+  --color-ink-3: #143d82;
   --color-gold: #ffc501;
-  --color-gold-hover: #f0b400;
-
-  /* Neutrals */
-  --color-paper: #faf8f3;
-  --color-chalk: #f4f2ec;
-  --color-ink: #0f1a2e;
-  --color-slate: #4f5b72;
-  --color-line: #e6e2d8;
+  --color-gold-2: #ffd43d;
+  --color-gold-soft: #ffe899;
+  --color-paper: #f5f7fb;
+  --color-sheet: #ffffff;
+  --color-rule: #cbd4e4;
+  --color-rule-strong: #9aa4b4;
+  --color-muted: #465470;
   --color-white: #ffffff;
 
-  /* Status */
-  --color-success: #15803d;
-  --color-error: #c2261d;
+  --color-success: #067647;
+  --color-error: #b42318;
 
-  /* Type */
-  --font-sans: var(--font-sans-face), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  /* One family. The width axis does the work a second face would:
+     125 for display (like the logo's wide MIRROR), 100 for reading, 87 for dense labels. */
+  --font-sans: var(--font-anek), ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --background: var(--color-paper);
-  --foreground: var(--color-ink);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  text-rendering: optimizeLegibility;
+  color-scheme: light;
+  /* Kubai icon inks on paper: navy primary, secondary = navy at 40% over white */
+  --ki-a: #021b44;
+  --ki-b: #9aa4b4;
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5.5rem;
+  -webkit-tap-highlight-color: rgb(2 27 68 / 0.12);
+  touch-action: manipulation;
+}
+
+@media (pointer: fine) {
+  html {
+    overscroll-behavior: none;
+  }
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-variation-settings: "wdth" 100;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+[id] {
+  scroll-margin-top: 5rem;
 }
 
 ::selection {
-  background: var(--color-gold-300);
-  color: var(--color-navy-950);
+  background: var(--color-gold);
+  color: var(--color-ink);
 }
 
-/* Focus visible ring — high contrast on light and dark surfaces */
-*:focus-visible {
-  outline: 2px solid var(--color-gold-400);
-  outline-offset: 3px;
-  border-radius: 6px;
+/* One focus indicator for everything: a 2px ring outside the element.
+   Navy on paper, gold on navy (see .on-ink). Fields override only its colour.
+   In the base layer so component rules (error fields) can recolour it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .on-ink :focus-visible {
+    outline-color: var(--color-gold);
+  }
 }
 
-/* ---------- Decorative surfaces ---------- */
-
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+.on-ink {
+  --ki-a: #ffc501;
+  --ki-b: #ffe899;
 }
 
-.bg-dots {
-  background-image: radial-gradient(rgb(2 27 68 / 0.09) 1px, transparent 1px);
-  background-size: 22px 22px;
+@layer components {
+/* Width axis presets */
+.w-display {
+  font-variation-settings: "wdth" 125;
 }
 
-.text-gradient-gold {
-  background: linear-gradient(100deg, #ffe9a3 0%, #ffc501 45%, #f0b400 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.w-narrow {
+  font-variation-settings: "wdth" 87;
 }
 
-/* Custom select chevron */
-.select-chevron {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f5b72' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.9rem center;
-  background-size: 1.1rem;
+/* Trim a label to its cap height so it centres on its letters inside pills and buttons */
+.trim-cap {
+  text-box: trim-both cap alphabetic;
 }
 
-/* ---------- Motion (CSS only, respects reduced motion) ---------- */
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fadeScale {
-  from { opacity: 0; transform: scale(0.94); }
-  to { opacity: 1; transform: scale(1); }
+/* ---------- Hero: the headline and its reflection ---------- */
+
+.mirror-reflection-wrap {
+  height: 0.58em;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+  user-select: none;
+  pointer-events: none;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.mirror-reflection {
+  transform: scaleY(-1);
+  transform-origin: center;
+  opacity: 0.2;
 }
 
-@keyframes spinSlow {
-  to { transform: rotate(360deg); }
+/* The single orchestrated moment on the page: the mirror line draws, then the
+   reflection rises into it once. Nothing else moves unless the visitor acts. */
+@keyframes reflect-in {
+  from {
+    opacity: 0;
+    transform: scaleY(-1) translateY(0.25em);
+  }
+  to {
+    opacity: 0.2;
+    transform: scaleY(-1) translateY(0);
+  }
 }
 
-@keyframes menuIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes mirror-line {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .anim-fade-up {
-    animation: fadeUp 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  .mirror-reflection {
+    animation: reflect-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 350ms both;
   }
-  .anim-fade-scale {
-    animation: fadeScale 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
-  .anim-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  .anim-spin-slow {
-    animation: spinSlow 40s linear infinite;
-  }
-  .anim-menu {
-    animation: menuIn 220ms ease-out both;
-  }
-  .delay-1 { animation-delay: 80ms; }
-  .delay-2 { animation-delay: 160ms; }
-  .delay-3 { animation-delay: 240ms; }
-  .delay-4 { animation-delay: 320ms; }
-  .delay-5 { animation-delay: 400ms; }
-
-  /* Scroll-driven reveal where supported; content stays visible elsewhere */
-  @supports (animation-timeline: view()) {
-    .reveal {
-      animation: fadeUp linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 35%;
-    }
+  .mirror-line {
+    transform-origin: left;
+    animation: mirror-line 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+}
+
+@layer components {
+/* ---------- Answer-sheet bubbles (course picker) ---------- */
+
+.bubble {
+  display: inline-block;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--color-ink);
+  background: var(--color-sheet);
+  transition:
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.course-option:hover .bubble {
+  background: var(--color-gold-soft);
+}
+
+.course-option[data-marked="true"] .bubble {
+  background: var(--color-ink);
+  box-shadow: inset 0 0 0 3px var(--color-sheet);
+}
+
+/* ---------- Form fields ---------- */
+
+.field {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--color-rule-strong);
+  background-color: var(--color-sheet);
+  color: var(--color-ink);
+  padding: 0.75rem 0.875rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 150ms ease-out;
+}
+
+.field::placeholder {
+  color: #6b7790;
+}
+
+.field:hover {
+  border-color: var(--color-muted);
+}
+
+/* Focus draws over the border, not around it: one 2px line, never a border plus a ring */
+.field:focus-visible {
+  border-color: var(--color-ink);
+  outline-offset: -1px;
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+/* Error fields keep the same single ring, in the error colour */
+.field[aria-invalid="true"]:focus-visible {
+  outline-color: var(--color-error);
+}
+
+select.field {
+  /* Explicit colours for Windows high-contrast and dark-mode native popups */
+  background-color: var(--color-sheet);
+  color: var(--color-ink);
+}
+}
+
+@layer components {
+  /* Native selects ignore line-height; match the inputs' 50px box */
+  select.field {
+    height: 3.125rem;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }

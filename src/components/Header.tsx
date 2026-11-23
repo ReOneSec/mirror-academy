@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SITE, NAV_LINKS } from '@/lib/constants';
-import { PhoneIcon, MenuIcon, CloseIcon, ArrowRightIcon } from '@/components/Icons';
+import Icon from '@/components/icons/Icon';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 8);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setMenuOpen(false);
     };
@@ -29,104 +29,84 @@ export default function Header() {
     };
   }, []);
 
-
   return (
     <header
-      className={`sticky top-0 z-50 text-white transition-[background-color,box-shadow,border-color] duration-300 ${
-        menuOpen
-          ? 'border-b border-white/10 bg-navy-950 shadow-[0_8px_30px_-12px_rgb(0_0_0/0.5)]'
-          : scrolled
-            ? 'border-b border-white/10 bg-navy-950/85 shadow-[0_8px_30px_-12px_rgb(0_0_0/0.5)] backdrop-blur-xl'
-            : 'border-b border-transparent bg-navy-900'
+      className={`on-ink sticky top-0 z-50 bg-ink text-white transition-[border-color] duration-200 border-b ${
+        scrolled || menuOpen ? 'border-white/15' : 'border-transparent'
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:h-[4.5rem] sm:px-6 lg:px-8">
-        <a href="#" className="group flex items-center gap-3" aria-label={`${SITE.name} — home`}>
-          <span className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-gold-400/60 transition group-hover:ring-gold-400">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8">
+        <a href="#top" className="flex items-center gap-3" aria-label={`${SITE.name}, back to top`}>
+          <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full">
             <Image
               src="/brand/logo.jpg"
               alt=""
-              width={80}
-              height={80}
-              className="h-full w-full scale-[1.06] object-cover"
+              width={40}
+              height={40}
+              className="h-full w-full scale-[1.08] object-cover"
               priority
             />
           </span>
-          <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-semibold tracking-tight sm:text-xl">
-              {SITE.name}
-            </span>
-            <span className="mt-1 hidden text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-gold-300/90 sm:block">
-              Berhampore · Since {SITE.since}
-            </span>
+          <span translate="no" className="w-display text-lg font-bold leading-none tracking-tight">
+            {SITE.name}
           </span>
         </a>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Main">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="rounded-full px-3.5 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+              className="text-[0.95rem] font-medium text-white/80 underline-offset-[6px] transition-colors hover:text-white hover:underline hover:decoration-gold hover:decoration-2"
             >
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-5 md:flex">
           <a
             href={SITE.phoneTel}
-            className="flex items-center gap-2 text-sm font-medium text-white/85 transition-colors hover:text-gold-300"
-            aria-label={`Call ${SITE.phone}`}
+            className="text-[0.95rem] font-medium tabular-nums text-white/85 underline-offset-[6px] transition-colors hover:text-white hover:underline hover:decoration-gold hover:decoration-2"
           >
-            <PhoneIcon className="h-4 w-4 text-gold-400" aria-hidden="true" />
-            <span className="tabular-nums lg:inline">{SITE.phone}</span>
+            <span className="sr-only">Call </span>
+            {SITE.phoneDisplay}
           </a>
           <a
             href="#enquiry"
-            className="group inline-flex items-center gap-1.5 rounded-full bg-gold-400 px-5 py-2.5 text-sm font-bold text-navy-950 shadow-[0_6px_20px_-6px_rgb(255_197_1/0.6)] transition hover:-translate-y-px hover:bg-gold-300"
+            className="rounded-md bg-gold px-4 py-2.5 text-[0.95rem] font-semibold text-ink transition-colors hover:bg-gold-2"
           >
-            Enquire now
-            <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            Enquire Now
           </a>
         </div>
 
-        {/* Mobile menu button */}
         <button
           type="button"
-          className="-mr-1 inline-flex h-11 w-11 items-center justify-center rounded-full text-white transition hover:bg-white/10 md:hidden"
+          className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors hover:bg-ink-2 md:hidden"
           onClick={() => setMenuOpen((v) => !v)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
           aria-controls="mobile-nav"
         >
-          {menuOpen ? (
-            <CloseIcon className="h-6 w-6" aria-hidden="true" />
-          ) : (
-            <MenuIcon className="h-6 w-6" aria-hidden="true" />
-          )}
+          <Icon name={menuOpen ? 'circle-x' : 'menu'} size={24} />
         </button>
       </div>
 
-      {/* Mobile nav */}
       {menuOpen && (
         <nav
           id="mobile-nav"
-          className="anim-menu border-t border-white/10 px-4 pb-6 pt-3 md:hidden"
-          aria-label="Mobile navigation"
+          className="border-t border-white/15 px-5 pb-6 pt-2 md:hidden"
+          aria-label="Mobile"
         >
-          <ul className="flex flex-col">
+          <ul>
             {NAV_LINKS.map((link) => (
-              <li key={link.href}>
+              <li key={link.href} className="border-b border-white/10">
                 <a
                   href={link.href}
-                  className="flex items-center justify-between border-b border-white/5 py-3.5 text-base font-medium text-white/90 hover:text-gold-300"
+                  className="block py-3.5 text-lg font-medium text-white"
                   onClick={() => setMenuOpen(false)}
                 >
                   {link.label}
-                  <ArrowRightIcon className="h-4 w-4 text-white/40" aria-hidden="true" />
                 </a>
               </li>
             ))}
@@ -134,18 +114,17 @@ export default function Header() {
           <div className="mt-5 grid grid-cols-2 gap-3">
             <a
               href={SITE.phoneTel}
-              className="flex items-center justify-center gap-2 rounded-full border border-white/20 px-4 py-3 text-sm font-semibold text-white hover:border-white/40"
-              aria-label={`Call ${SITE.phone}`}
+              className="flex items-center justify-center gap-2 rounded-md border border-white/30 px-4 py-3 font-semibold transition-colors hover:border-white/60"
             >
-              <PhoneIcon className="h-4 w-4 text-gold-400" aria-hidden="true" />
-              Call us
+              <Icon name="phone" size={20} />
+              Call Now
             </a>
             <a
               href="#enquiry"
-              className="flex items-center justify-center rounded-full bg-gold-400 px-4 py-3 text-sm font-bold text-navy-950 hover:bg-gold-300"
+              className="flex items-center justify-center rounded-md bg-gold px-4 py-3 font-semibold text-ink transition-colors hover:bg-gold-2"
               onClick={() => setMenuOpen(false)}
             >
-              Enquire now
+              Enquire Now
             </a>
           </div>
         </nav>

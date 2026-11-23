@@ -1,179 +1,149 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState, type MouseEvent } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
-import {
-  ScrollIcon,
-  StethoscopeIcon,
-  ShieldIcon,
-  BookOpenIcon,
-  ArrowRightIcon,
-} from '@/components/Icons';
-
-type IconType = React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
-
-const STREAM_ICONS: Record<string, IconType> = {
-  'public-services': ScrollIcon,
-  'medical-engg': StethoscopeIcon,
-  force: ShieldIcon,
-  teaching: BookOpenIcon,
-};
-
-/** Pre-select a course in the enquiry form, then let the anchor scroll there. */
-function prefillCourse(slug: string) {
-  const select = document.getElementById('enquiry-course') as HTMLSelectElement | null;
-  if (select) {
-    select.value = slug;
-    select.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-}
+import { COURSE_EVENT, chooseCourse } from '@/lib/courseSelection';
+import Icon from '@/components/icons/Icon';
+import { STREAM_ICONS } from '@/components/streamIcons';
 
 function SectionHeading() {
   return (
     <div className="max-w-2xl">
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold-600">
-        Courses
-      </p>
-      <h2 id="courses-heading" className="mt-3 font-display text-4xl font-semibold tracking-tight text-navy-900 sm:text-5xl">
-        Courses we offer
+      <h2
+        id="courses-heading"
+        className="w-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl"
+      >
+        Courses on Offer
       </h2>
-      <p className="mt-4 text-lg leading-relaxed text-slate">
-        {ALL_COURSES.length} courses across {COURSE_STREAMS.length} streams. Pick
-        a course to start your enquiry.
+      <p className="mt-4 text-lg leading-relaxed text-muted">
+        {ALL_COURSES.length} courses across {COURSE_STREAMS.length} streams. Mark a course to
+        start your enquiry with it filled in.
       </p>
     </div>
   );
 }
 
-function CourseStreamsInner() {
+function useMarkedCourse() {
+  const [marked, setMarked] = useState<string | null>(null);
+  useEffect(() => {
+    const onCourse = (e: Event) => setMarked((e as CustomEvent<string>).detail || null);
+    window.addEventListener(COURSE_EVENT, onCourse);
+    return () => window.removeEventListener(COURSE_EVENT, onCourse);
+  }, []);
+  return marked;
+}
+
+/** Reads the URL, so it suspends during prerender; the fallback renders the same sheet unfiltered. */
+function AnswerSheetFromUrl() {
   const searchParams = useSearchParams();
+  return <AnswerSheet searchParams={searchParams} />;
+}
+
+function AnswerSheet({ searchParams }: { searchParams: URLSearchParams | ReturnType<typeof useSearchParams> }) {
   const router = useRouter();
+  const marked = useMarkedCourse();
   const activeStream = searchParams.get('stream') ?? 'all';
 
-  const chips = [
-    { label: 'All', slug: 'all', count: ALL_COURSES.length },
+  const filters = [
+    { label: 'All streams', slug: 'all', count: ALL_COURSES.length },
     ...COURSE_STREAMS.map((s) => ({ label: s.stream, slug: s.slug, count: s.courses.length })),
   ];
 
-  const filteredStreams =
+  const rows =
     activeStream === 'all'
       ? COURSE_STREAMS
       : COURSE_STREAMS.filter((s) => s.slug === activeStream);
 
   function selectStream(slug: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (slug === 'all') {
-      params.delete('stream');
-    } else {
-      params.set('stream', slug);
-    }
+    if (slug === 'all') params.delete('stream');
+    else params.set('stream', slug);
     const qs = params.toString();
-    router.replace(qs ? `?${qs}` : '/', { scroll: false });
+    router.replace(qs ? `/?${qs}#courses` : '/#courses', { scroll: false });
+  }
+
+  function courseHref(slug: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('course', slug);
+    return `/?${params.toString()}#enquiry`;
+  }
+
+  function onMark(e: MouseEvent<HTMLAnchorElement>, slug: string) {
+    // Let Cmd/Ctrl/middle click open the deep link in a new tab as usual
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    chooseCourse(slug);
+    window.history.replaceState(null, '', courseHref(slug));
+    document.getElementById('enquiry')?.scrollIntoView();
   }
 
   return (
     <>
-      {/* Filter chips */}
-      <div
-        className="-mx-4 mt-10 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0"
-        role="group"
-        aria-label="Filter courses by stream"
-      >
-        <div className="inline-flex gap-2 rounded-full border border-line bg-white p-1.5 shadow-sm">
-          {chips.map((chip) => {
-            const isActive = chip.slug === activeStream;
-            return (
-              <button
-                key={chip.slug}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => selectStream(chip.slug)}
-                className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? 'bg-navy-900 text-white shadow'
-                    : 'text-slate hover:bg-chalk hover:text-navy-900'
-                }`}
-              >
-                {chip.label}
-                <span
-                  className={`rounded-full px-1.5 py-px text-[0.7rem] tabular-nums ${
-                    isActive ? 'bg-gold-400 text-navy-950' : 'bg-chalk text-slate'
-                  }`}
-                >
-                  {chip.count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Stream cards */}
-      <div
-        className={`mt-8 grid gap-5 ${filteredStreams.length > 1 ? 'md:grid-cols-2' : ''}`}
-        aria-live="polite"
-      >
-        {filteredStreams.map((stream) => {
-          const Icon = STREAM_ICONS[stream.slug];
-          const index = COURSE_STREAMS.findIndex((s) => s.slug === stream.slug) + 1;
+      <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Show courses by stream">
+        {filters.map((f) => {
+          const isActive = f.slug === activeStream;
           return (
-            <article
-              key={stream.slug}
-              className="reveal group relative overflow-hidden rounded-3xl border border-line bg-white p-6 shadow-[0_1px_2px_rgb(2_27_68/0.04)] transition duration-300 hover:-translate-y-1 hover:border-gold-400/60 hover:shadow-[0_24px_48px_-24px_rgb(2_27_68/0.25)] sm:p-8"
+            <button
+              key={f.slug}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => selectStream(f.slug)}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-md border px-3.5 text-[0.95rem] font-medium transition-colors ${
+                isActive
+                  ? 'border-ink bg-ink text-white'
+                  : 'border-rule-strong bg-sheet text-ink hover:border-ink'
+              }`}
             >
-              <div
-                className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-gold-400/0 blur-3xl transition duration-500 group-hover:bg-gold-400/20"
-                aria-hidden="true"
-              />
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-navy-900 text-gold-400 shadow-inner">
-                    {Icon && <Icon className="h-6 w-6" aria-hidden="true" />}
-                  </span>
-                  <div>
-                    <h3 className="font-display text-2xl font-semibold text-navy-900">
-                      {stream.stream}
-                    </h3>
-                    <p className="text-sm text-slate">
-                      {stream.courses.length} courses
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className="hidden font-display text-4xl font-semibold text-navy-900/10 sm:block"
-                  aria-hidden="true"
-                >
-                  {String(index).padStart(2, '0')}
-                </span>
-              </div>
-
-              <ul className="mt-6 flex flex-wrap gap-2">
-                {stream.courses.map((course) => (
-                  <li key={course.slug}>
-                    <a
-                      href="#enquiry"
-                      onClick={() => prefillCourse(course.slug)}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-3.5 py-2 text-sm font-semibold text-navy-900 transition hover:border-navy-900 hover:bg-navy-900 hover:text-white"
-                      aria-label={`Enquire about ${course.name}`}
-                    >
-                      {course.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-
-              <a
-                href="#enquiry"
-                onClick={() => prefillCourse(stream.courses[0].slug)}
-                className="mt-7 inline-flex items-center gap-1.5 text-sm font-bold text-navy-900 underline-offset-4 hover:underline"
-              >
-                Enquire about {stream.stream}
-                <ArrowRightIcon className="h-4 w-4 text-gold-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-              </a>
-            </article>
+              {f.label}
+              <span className={`tabular-nums ${isActive ? 'text-gold' : 'text-muted'}`}>
+                {f.count}
+              </span>
+            </button>
           );
         })}
+      </div>
+
+      {/* The answer sheet: one ruled surface, a row per stream, a bubble per course */}
+      <div className="mt-6 overflow-hidden rounded-lg border border-rule bg-sheet" aria-live="polite">
+        {rows.map((stream) => (
+          <section
+            key={stream.slug}
+            aria-labelledby={`stream-${stream.slug}`}
+            className="grid gap-4 border-b border-rule px-5 py-6 last:border-b-0 sm:px-7 md:grid-cols-[15rem_1fr] md:gap-8"
+          >
+            <div className="flex items-center gap-3 md:items-start">
+              <Icon name={STREAM_ICONS[stream.slug]} size={28} />
+              <div className="min-w-0">
+                <h3 id={`stream-${stream.slug}`} className="text-xl font-semibold leading-tight">
+                  {stream.stream}
+                </h3>
+                <p className="mt-0.5 text-[0.95rem] text-muted">
+                  {stream.courses.length} courses
+                </p>
+              </div>
+            </div>
+
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3 lg:grid-cols-4">
+              {stream.courses.map((course) => (
+                <li key={course.slug}>
+                  <a
+                    href={courseHref(course.slug)}
+                    onClick={(e) => onMark(e, course.slug)}
+                    data-marked={marked === course.slug}
+                    className="course-option -mx-2 flex min-h-11 items-center gap-3 rounded-md px-2 font-medium transition-colors hover:bg-paper"
+                    aria-label={`Enquire about ${course.name}`}
+                  >
+                    <span className="bubble" aria-hidden="true" />
+                    <span translate="no" className="min-w-0 break-words">
+                      {course.name}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
       </div>
     </>
   );
@@ -181,20 +151,11 @@ function CourseStreamsInner() {
 
 export default function CourseStreams() {
   return (
-    <section id="courses" aria-labelledby="courses-heading" className="relative bg-paper py-20 sm:py-28">
-      <div className="bg-dots pointer-events-none absolute inset-x-0 top-0 h-72 opacity-60 [mask-image:linear-gradient(to_bottom,#000,transparent)]" aria-hidden="true" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="courses" aria-labelledby="courses-heading" className="py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading />
-        <Suspense
-          fallback={
-            <div className="mt-10 grid gap-5 md:grid-cols-2" aria-hidden="true">
-              {COURSE_STREAMS.map((s) => (
-                <div key={s.slug} className="h-56 animate-pulse rounded-3xl border border-line bg-white" />
-              ))}
-            </div>
-          }
-        >
-          <CourseStreamsInner />
+        <Suspense fallback={<AnswerSheet searchParams={new URLSearchParams()} />}>
+          <AnswerSheetFromUrl />
         </Suspense>
       </div>
     </section>
