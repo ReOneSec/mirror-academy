@@ -243,3 +243,74 @@ export function UsersIcon(props: IconProps) {
     </svg>
   );
 }
+
+function BaseIcon({ children, ...props }: IconProps & { children: React.ReactNode }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      {children}
+    </svg>
+  );
+}
+
+export function ArrowRightIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </BaseIcon>
+  );
+}
+
+export function ArrowUpRightIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <line x1="7" y1="17" x2="17" y2="7" />
+      <polyline points="7 7 17 7 17 17" />
+    </BaseIcon>
+  );
+}
+
+export function CheckIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <polyline points="20 6 9 17 4 12" />
+    </BaseIcon>
+  );
+}
+
+export function SparkleIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+      <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" />
+    </BaseIcon>
+  );
+}
+
+export function MessageIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </BaseIcon>
+  );
+}
+
+export function BuildingIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <path d="M3 21h18" />
+      <path d="M5 21V8l7-5 7 5v13" />
+      <path d="M9 21v-6h6v6" />
+      <path d="M9 10h.01M15 10h.01" />
+    </BaseIcon>
+  );
+}

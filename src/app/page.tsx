@@ -22,8 +22,8 @@ export default function Home() {
         <CourseStreams />
         <WhyMirror />
         <HowAdmission />
-        <LocationContact />
         <EnquiryForm />
+        <LocationContact />
       </main>
       <Footer />
     </>
