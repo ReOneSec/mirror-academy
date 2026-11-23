@@ -1,112 +1,140 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SITE, NAV_LINKS } from '@/lib/constants';
-import { PhoneIcon, MenuIcon, CloseIcon } from '@/components/Icons';
+import Icon from '@/components/icons/Icon';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onMq = () => {
+      if (mq.matches) setMenuOpen(false);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('keydown', onKey);
+    mq.addEventListener('change', onMq);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('keydown', onKey);
+      mq.removeEventListener('change', onMq);
+    };
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-navy text-white shadow-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Logo + name */}
-        <a href="#" className="flex items-center gap-3 focus-visible:outline-gold">
-          <Image
-            src="/brand/logo.jpg"
-            alt="Mirror Academy logo"
-            width={40}
-            height={40}
-            className="rounded-full"
-            priority
-          />
-          <span className="text-lg font-bold tracking-tight">
-            Mirror Academy
+    <header
+      className={`on-ink sticky top-0 z-50 bg-ink text-white transition-[border-color] duration-200 border-b ${
+        scrolled || menuOpen ? 'border-white/15' : 'border-transparent'
+      }`}
+    >
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] sm:px-8">
+        <a href="#top" className="flex items-center gap-3" aria-label={`${SITE.name}, back to top`}>
+          <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full">
+            <Image
+              src="/brand/logo.jpg"
+              alt=""
+              width={40}
+              height={40}
+              className="h-full w-full scale-[1.08] object-cover"
+              priority
+            />
+          </span>
+          <span translate="no" className="w-display text-lg font-bold leading-none tracking-tight">
+            {SITE.name}
           </span>
         </a>
 
-        {/* Desktop nav */}
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Main">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-white/90 transition-colors hover:text-gold focus-visible:text-gold"
+              className="text-[0.95rem] font-medium text-white/80 underline-offset-[6px] transition-colors hover:text-white hover:underline hover:decoration-gold hover:decoration-2"
             >
               {link.label}
             </a>
           ))}
+        </nav>
+
+        <div className="hidden items-center gap-5 md:flex">
           <a
             href={SITE.phoneTel}
-            className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-gold"
-            aria-label={`Call ${SITE.phone}`}
+            className="text-[0.95rem] font-medium tabular-nums text-white/85 underline-offset-[6px] transition-colors hover:text-white hover:underline hover:decoration-gold hover:decoration-2"
           >
-            <PhoneIcon className="h-4 w-4" aria-hidden="true" />
-            <span className="tabular-nums">{SITE.phone}</span>
+            <span className="sr-only">Call </span>
+            {SITE.phoneDisplay}
           </a>
           <a
             href="#registration"
-            className="rounded-lg bg-gold px-4 py-2 text-sm font-bold text-navy transition-colors hover:bg-gold-hover focus-visible:ring-2 focus-visible:ring-white"
+            className="rounded-md bg-gold px-4 py-2.5 text-[0.95rem] font-bold text-ink transition-colors hover:bg-gold-2"
           >
             Register now
           </a>
-        </nav>
+        </div>
 
-        {/* Mobile menu button */}
         <button
           type="button"
-          className="rounded-lg p-2 text-white md:hidden hover:bg-navy-light focus-visible:ring-2 focus-visible:ring-gold"
-          onClick={() => setMenuOpen(!menuOpen)}
+          className="-mr-2 inline-flex h-11 w-11 items-center justify-center rounded-md transition-colors hover:bg-ink-2 md:hidden"
+          onClick={() => setMenuOpen((v) => !v)}
           aria-label={menuOpen ? 'Close menu' : 'Open menu'}
           aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
         >
-          {menuOpen ? (
-            <CloseIcon className="h-6 w-6" aria-hidden="true" />
-          ) : (
-            <MenuIcon className="h-6 w-6" aria-hidden="true" />
-          )}
+          <Icon name={menuOpen ? 'circle-x' : 'menu'} size={24} />
         </button>
       </div>
 
-      {/* Mobile nav */}
       {menuOpen && (
         <nav
-          className="border-t border-white/10 bg-navy px-4 pb-4 pt-2 md:hidden"
-          aria-label="Mobile navigation"
+          id="mobile-nav"
+          className="border-t border-white/15 px-5 pb-6 pt-2 md:hidden"
+          aria-label="Mobile"
         >
-          {NAV_LINKS.map((link) => (
+          <ul>
+            {NAV_LINKS.map((link) => (
+              <li key={link.href} className="border-b border-white/10">
+                <a
+                  href={link.href}
+                  className="block py-3.5 text-lg font-medium text-white"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-5 grid grid-cols-2 gap-3">
             <a
-              key={link.href}
-              href={link.href}
-              className="block py-2 text-sm font-medium text-white/90 hover:text-gold"
+              href={SITE.phoneTel}
+              className="flex items-center justify-center gap-2 rounded-md border border-white/30 px-4 py-3 font-semibold transition-colors hover:border-white/60"
+            >
+              <Icon name="phone" size={20} />
+              Call Now
+            </a>
+            <a
+              href="#registration"
+              className="flex items-center justify-center rounded-md bg-gold px-4 py-3 font-bold text-ink transition-colors hover:bg-gold-2"
               onClick={() => setMenuOpen(false)}
             >
-              {link.label}
+              Register now
             </a>
-          ))}
-          <a
-            href={SITE.phoneTel}
-            className="flex items-center gap-1.5 py-2 text-sm font-medium text-white/90 hover:text-gold"
-            aria-label={`Call ${SITE.phone}`}
-          >
-            <PhoneIcon className="h-4 w-4" aria-hidden="true" />
-            <span className="tabular-nums">{SITE.phone}</span>
-          </a>
-          <a
-            href={SITE.emailMailto}
-            className="flex items-center gap-1.5 py-2 text-sm font-medium text-white/90 hover:text-gold"
-            aria-label={`Email ${SITE.email}`}
-          >
-            <span className="truncate">{SITE.email}</span>
-          </a>
-          <a
-            href="#registration"
-            className="mt-2 block rounded-lg bg-gold px-4 py-2 text-center text-sm font-bold text-navy hover:bg-gold-hover"
-            onClick={() => setMenuOpen(false)}
-          >
-            Register now
-          </a>
+          </div>
+          <div className="mt-3 text-center">
+            <a
+              href={SITE.emailMailto}
+              className="inline-flex items-center gap-2 text-xs text-white/70 hover:text-gold"
+            >
+              <span>{SITE.email}</span>
+            </a>
+          </div>
         </nav>
       )}
     </header>

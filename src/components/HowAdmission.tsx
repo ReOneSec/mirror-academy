@@ -1,53 +1,63 @@
+const STEPS = [
+  {
+    title: 'Register as a student',
+    body: 'Select your batch (Free batch or Paid batch), fill in your details, and submit your registration.',
+  },
+  {
+    title: 'Get a call back',
+    body: 'Our team will call you to discuss the course, batch timing, and answer your questions.',
+  },
+  {
+    title: 'Visit and enrol',
+    body: 'Visit our campus in Berhampore, meet the faculty, and complete your enrolment.',
+  },
+];
+
 export default function HowAdmission() {
   return (
-    <section className="bg-chalk py-16 sm:py-20">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        <h2 className="mb-10 text-2xl font-bold text-navy sm:text-3xl">
-          How admission works
+    <section
+      id="admission"
+      aria-labelledby="admission-heading"
+      className="on-ink bg-ink py-20 text-white sm:py-28"
+    >
+      <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <h2
+          id="admission-heading"
+          className="w-display max-w-2xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl"
+        >
+          How Admission Works
         </h2>
 
-        <ol className="grid gap-8 sm:grid-cols-3">
-          <li className="flex gap-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-lg font-bold text-navy">
-              1
-            </span>
-            <div>
-              <h3 className="mb-1 font-bold text-navy">Register as a student</h3>
-              <p className="text-sm leading-relaxed text-slate">
-                Select your batch (Free or Paid), fill in your details, and submit
-                your registration below.
-              </p>
-            </div>
-          </li>
-
-          <li className="flex gap-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-lg font-bold text-navy">
-              2
-            </span>
-            <div>
-              <h3 className="mb-1 font-bold text-navy">Get a call back</h3>
-              <p className="text-sm leading-relaxed text-slate">
-                Our team will call you to discuss the course, schedule, and
-                answer your questions.{' '}
-                <span className="todo-badge">TODO — confirm with owner</span>
-              </p>
-            </div>
-          </li>
-
-          <li className="flex gap-4">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-lg font-bold text-navy">
-              3
-            </span>
-            <div>
-              <h3 className="mb-1 font-bold text-navy">Visit and enrol</h3>
-              <p className="text-sm leading-relaxed text-slate">
-                Visit our campus in Berhampore, meet the faculty, and complete
-                your enrolment.{' '}
-                <span className="todo-badge">TODO — confirm with owner</span>
-              </p>
-            </div>
-          </li>
+        {/* A real sequence, so it is numbered; the numerals carry the section */}
+        <ol className="mt-12 grid gap-0 border-t border-white/20 md:grid-cols-3">
+          {STEPS.map(({ title, body }, i) => (
+            <li
+              key={title}
+              className="grid grid-cols-[3.5rem_1fr] gap-x-4 border-b border-white/20 py-8 md:block md:border-b-0 md:border-l md:px-8 md:first:border-l-0 md:first:pl-0"
+            >
+              <span
+                className="w-display text-5xl font-extrabold leading-none text-gold tabular-nums md:text-7xl"
+                aria-hidden="true"
+              >
+                {i + 1}
+              </span>
+              <div className="md:mt-8">
+                <h3 className="text-xl font-semibold">
+                  <span className="sr-only">Step {i + 1}: </span>
+                  {title}
+                </h3>
+                <p className="mt-2 max-w-xs leading-relaxed text-white/75">{body}</p>
+              </div>
+            </li>
+          ))}
         </ol>
+
+        <a
+          href="#registration"
+          className="mt-12 inline-flex items-center justify-center rounded-md bg-gold px-6 py-3.5 text-[1.0625rem] font-bold text-ink transition-colors hover:bg-gold-2"
+        >
+          Register as a student (Step 1)
+        </a>
       </div>
     </section>
   );

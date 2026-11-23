@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef, type FormEvent } from 'react';
-import { COURSE_STREAMS } from '@/lib/constants';
+import { useState, useRef, useEffect, type FormEvent } from 'react';
+import { COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
+import { COURSE_EVENT, announceCourse } from '@/lib/courseSelection';
 import {
   CheckCircleIcon,
   AlertCircleIcon,
@@ -27,6 +28,7 @@ export default function EnquiryForm() {
   const [gender, setGender] = useState<GenderType>('Male');
   const [addressText, setAddressText] = useState('');
   const [messageText, setMessageText] = useState('');
+  const [selectedCourseSlug, setSelectedCourseSlug] = useState('');
 
   // Registration state
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -34,13 +36,40 @@ export default function EnquiryForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [lastRegisteredPhone, setLastRegisteredPhone] = useState<string>('');
 
+  const formRef = useRef<HTMLFormElement>(null);
+  const dirtyRef = useRef(false);
+
   // Lookup state
   const [lookupPhone, setLookupPhone] = useState('');
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupError, setLookupError] = useState('');
   const [lookupResults, setLookupResults] = useState<RegistrationRecord[] | null>(null);
 
-  const formRef = useRef<HTMLFormElement>(null);
+  // A course deep link (?course=wbcs) or answer sheet selection arrives pre-filled
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get('course');
+    if (slug && ALL_COURSES.some((c) => c.slug === slug)) {
+      setSelectedCourseSlug(slug);
+    }
+
+    const onCourse = (e: Event) => {
+      const courseSlug = (e as CustomEvent<string>).detail;
+      if (courseSlug && ALL_COURSES.some((c) => c.slug === courseSlug)) {
+        setSelectedCourseSlug(courseSlug);
+      }
+    };
+    window.addEventListener(COURSE_EVENT, onCourse);
+    return () => window.removeEventListener(COURSE_EVENT, onCourse);
+  }, []);
+
+  // Warn before leaving with a half-filled form
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current && status !== 'success') e.preventDefault();
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [status]);
 
   // Form submit handler
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -51,9 +80,9 @@ export default function EnquiryForm() {
     const formData = new FormData(e.currentTarget);
     const name = (formData.get('name') as string)?.trim() ?? '';
     const phone = (formData.get('phone') as string)?.trim() ?? '';
-    const courseSlug = (formData.get('courseSlug') as string) ?? '';
-    const address = (formData.get('address') as string)?.trim() ?? '';
-    const message = (formData.get('message') as string)?.trim() ?? '';
+    const courseSlug = (formData.get('courseSlug') as string) || selectedCourseSlug;
+    const address = addressText.trim();
+    const message = messageText.trim();
 
     // Validation
     const errors: Record<string, string> = {};
@@ -119,6 +148,7 @@ export default function EnquiryForm() {
         setLastRegisteredPhone(phone);
         setAddressText('');
         setMessageText('');
+        dirtyRef.current = false;
         formRef.current?.reset();
       } else {
         setStatus('error');
@@ -171,21 +201,21 @@ export default function EnquiryForm() {
   }
 
   return (
-    <section id="registration" className="bg-chalk py-16 sm:py-20 scroll-mt-16">
-      <div className="mx-auto max-w-2xl px-4 sm:px-6">
+    <section id="registration" className="border-t border-rule bg-sheet py-20 sm:py-28 scroll-mt-16">
+      <div className="mx-auto max-w-2xl px-5 sm:px-8">
         {/* Section Header */}
         <div className="mb-8 text-center sm:text-left">
-          <h2 className="mb-2 text-2xl font-bold text-navy sm:text-3xl">
+          <h2 className="w-display text-3xl font-bold leading-tight text-ink sm:text-4xl">
             Register as a student
           </h2>
-          <p className="text-sm text-slate">
+          <p className="mt-2 text-base text-muted">
             Select your batch type, fill in your details, or view your submitted response anytime.
           </p>
         </div>
 
         {/* Top Navigation Tabs */}
         <div
-          className="mb-8 flex rounded-xl border border-slate/20 bg-white p-1 shadow-xs"
+          className="mb-8 flex rounded-xl border border-rule bg-paper p-1 shadow-xs"
           role="tablist"
           aria-label="Student Registration and Response Preview Tabs"
         >
@@ -196,8 +226,8 @@ export default function EnquiryForm() {
             onClick={() => setActiveTab('register')}
             className={`flex-1 rounded-lg py-2.5 text-center text-sm font-semibold transition-all touch-action-manipulation ${
               activeTab === 'register'
-                ? 'bg-navy text-white shadow-xs'
-                : 'text-slate hover:text-navy'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-muted hover:text-ink'
             }`}
           >
             Register as a student
@@ -215,8 +245,8 @@ export default function EnquiryForm() {
             }}
             className={`flex-1 rounded-lg py-2.5 text-center text-sm font-semibold transition-all touch-action-manipulation ${
               activeTab === 'lookup'
-                ? 'bg-navy text-white shadow-xs'
-                : 'text-slate hover:text-navy'
+                ? 'bg-ink text-white shadow-xs'
+                : 'text-muted hover:text-ink'
             }`}
           >
             View response preview
@@ -225,21 +255,21 @@ export default function EnquiryForm() {
 
         {/* Tab 1: Registration Form */}
         {activeTab === 'register' && (
-          <div className="rounded-2xl border border-slate/15 bg-white p-6 shadow-sm sm:p-8">
+          <div className="rounded-2xl border border-rule bg-white p-6 shadow-sm sm:p-8">
             {status === 'success' ? (
               <div className="text-center py-4" role="alert" aria-live="polite">
                 <CheckCircleIcon className="mx-auto mb-4 h-12 w-12 text-success" aria-hidden="true" />
-                <h3 className="mb-2 text-xl font-bold text-navy">
+                <h3 className="mb-2 text-xl font-bold text-ink">
                   Registration submitted!
                 </h3>
-                <p className="mb-6 text-sm text-slate">
+                <p className="mb-6 text-sm text-muted">
                   Your student application has been recorded in the Mirror Academy database. We will call you back soon to confirm batch timings.
                 </p>
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                   <button
                     type="button"
                     onClick={() => switchToLookupWithPhone(lastRegisteredPhone)}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-navy hover:bg-gold-hover transition-colors touch-action-manipulation"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-ink hover:bg-gold-2 transition-colors touch-action-manipulation"
                   >
                     <UserCheckIcon className="h-4 w-4" aria-hidden="true" />
                     Preview your response card
@@ -247,14 +277,22 @@ export default function EnquiryForm() {
                   <button
                     type="button"
                     onClick={() => setStatus('idle')}
-                    className="rounded-lg border border-navy/20 px-4 py-2.5 text-sm font-medium text-navy hover:bg-navy/5 touch-action-manipulation"
+                    className="rounded-lg border border-ink/20 px-4 py-2.5 text-sm font-medium text-ink hover:bg-ink/5 touch-action-manipulation"
                   >
                     Register another student
                   </button>
                 </div>
               </div>
             ) : (
-              <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-6">
+              <form
+                ref={formRef}
+                onSubmit={handleSubmit}
+                onChange={() => {
+                  dirtyRef.current = true;
+                }}
+                noValidate
+                className="space-y-6"
+              >
                 {status === 'error' && (
                   <div
                     className="flex items-start gap-3 rounded-lg border border-error/20 bg-error/5 p-4"
@@ -268,7 +306,7 @@ export default function EnquiryForm() {
 
                 {/* Batch Selection: 2 options (Free batch / Paid batch) */}
                 <div>
-                  <label className="mb-2 block text-sm font-semibold text-navy">
+                  <label className="mb-2 block text-sm font-semibold text-ink">
                     Select batch type <span className="text-error">*</span>
                   </label>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -278,16 +316,16 @@ export default function EnquiryForm() {
                       className={`relative flex flex-col items-start rounded-xl border p-4 text-left transition-all touch-action-manipulation ${
                         batchType === 'Free batch'
                           ? 'border-gold bg-gold/10 ring-2 ring-gold'
-                          : 'border-slate/20 bg-white hover:border-slate/40'
+                          : 'border-rule bg-white hover:border-slate/40'
                       }`}
                     >
                       <div className="mb-1 flex w-full items-center justify-between">
-                        <span className="font-bold text-navy">Free batch</span>
-                        <span className="rounded-full bg-navy/10 px-2 py-0.5 text-xs font-semibold text-navy">
+                        <span className="font-bold text-ink">Free batch</span>
+                        <span className="rounded-full bg-ink/10 px-2 py-0.5 text-xs font-semibold text-ink">
                           Orientation
                         </span>
                       </div>
-                      <p className="text-xs text-slate">
+                      <p className="text-xs text-muted">
                         Introductory lectures, syllabus overview &amp; guidance sessions.
                       </p>
                     </button>
@@ -298,19 +336,19 @@ export default function EnquiryForm() {
                       className={`relative flex flex-col items-start rounded-xl border p-4 text-left transition-all touch-action-manipulation ${
                         batchType === 'Paid batch'
                           ? 'border-gold bg-gold/10 ring-2 ring-gold'
-                          : 'border-slate/20 bg-white hover:border-slate/40'
+                          : 'border-rule bg-white hover:border-slate/40'
                       }`}
                     >
                       <div className="mb-1 flex w-full items-center justify-between">
-                        <span className="flex items-center gap-1.5 font-bold text-navy">
+                        <span className="flex items-center gap-1.5 font-bold text-ink">
                           <SparklesIcon className="h-4 w-4 text-gold" aria-hidden="true" />
                           Paid batch
                         </span>
-                        <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-bold text-navy">
+                        <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-bold text-ink">
                           Full Course
                         </span>
                       </div>
-                      <p className="text-xs text-slate">
+                      <p className="text-xs text-muted">
                         Complete exam curriculum, daily mock tests &amp; dedicated faculty.
                       </p>
                     </button>
@@ -330,7 +368,7 @@ export default function EnquiryForm() {
                     required
                     maxLength={100}
                     placeholder="e.g. Rahim Sheikh…"
-                    className="w-full rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate/50 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                    className="w-full rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
                     aria-invalid={!!fieldErrors.name}
                     aria-describedby={fieldErrors.name ? 'name-error' : undefined}
                   />
@@ -358,12 +396,12 @@ export default function EnquiryForm() {
                     onInput={(e) => {
                       e.currentTarget.value = e.currentTarget.value.replace(/\D/g, '').slice(0, 10);
                     }}
-                    className="w-full rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink tabular-nums placeholder:text-slate/50 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                    className="w-full rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink tabular-nums placeholder:text-muted/60 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
                     spellCheck={false}
                     aria-invalid={!!fieldErrors.phone}
                     aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
                   />
-                  <p className="mt-1 text-xs text-slate">
+                  <p className="mt-1 text-xs text-muted">
                     This number will also be used to check your response preview.
                   </p>
                   {fieldErrors.phone && (
@@ -386,7 +424,7 @@ export default function EnquiryForm() {
                           name="genderRadio"
                           checked={gender === g}
                           onChange={() => setGender(g)}
-                          className="h-4 w-4 accent-navy"
+                          className="h-4 w-4 accent-ink"
                         />
                         {g}
                       </label>
@@ -400,7 +438,7 @@ export default function EnquiryForm() {
                     <label htmlFor="student-address" className="text-sm font-medium text-ink">
                       Residential address <span className="text-error">*</span>
                     </label>
-                    <span className="text-xs text-slate">
+                    <span className="text-xs text-muted">
                       {addressText.length}/300
                     </span>
                   </div>
@@ -413,7 +451,7 @@ export default function EnquiryForm() {
                     onChange={(e) => setAddressText(e.target.value.slice(0, 300))}
                     required
                     placeholder="e.g. Village/Town, Majdia West, Gorabazar, Berhampore, Murshidabad…"
-                    className="w-full rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate/50 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                    className="w-full rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
                     aria-invalid={!!fieldErrors.address}
                     aria-describedby={fieldErrors.address ? 'address-error' : undefined}
                   />
@@ -433,8 +471,12 @@ export default function EnquiryForm() {
                     id="student-course"
                     name="courseSlug"
                     required
-                    defaultValue=""
-                    className="w-full rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                    value={selectedCourseSlug}
+                    onChange={(e) => {
+                      setSelectedCourseSlug(e.target.value);
+                      announceCourse(e.target.value);
+                    }}
+                    className="w-full rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
                     aria-invalid={!!fieldErrors.courseSlug}
                     aria-describedby={fieldErrors.courseSlug ? 'course-error' : undefined}
                   >
@@ -462,9 +504,9 @@ export default function EnquiryForm() {
                 <div>
                   <div className="mb-1.5 flex items-center justify-between">
                     <label htmlFor="student-message" className="text-sm font-medium text-ink">
-                      Questions or notes <span className="font-normal text-slate">(optional)</span>
+                      Questions or notes <span className="font-normal text-muted">(optional)</span>
                     </label>
-                    <span className="text-xs text-slate">
+                    <span className="text-xs text-muted">
                       {messageText.length}/400
                     </span>
                   </div>
@@ -476,7 +518,7 @@ export default function EnquiryForm() {
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value.slice(0, 400))}
                     placeholder="Any specific batch timing requests or questions (max 400 characters)…"
-                    className="w-full rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink placeholder:text-slate/50 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                    className="w-full rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink placeholder:text-muted/60 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
                     aria-invalid={!!fieldErrors.message}
                     aria-describedby={fieldErrors.message ? 'message-error' : undefined}
                   />
@@ -494,11 +536,11 @@ export default function EnquiryForm() {
                 <button
                   type="submit"
                   disabled={status === 'submitting'}
-                  className="w-full rounded-lg bg-gold px-6 py-3.5 text-sm font-bold text-navy transition-colors hover:bg-gold-hover disabled:cursor-not-allowed disabled:opacity-60 touch-action-manipulation"
+                  className="w-full rounded-lg bg-gold px-6 py-3.5 text-sm font-bold text-ink transition-colors hover:bg-gold-2 disabled:cursor-not-allowed disabled:opacity-60 touch-action-manipulation"
                 >
                   {status === 'submitting' ? (
                     <span className="inline-flex items-center gap-2">
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-navy/30 border-t-navy" aria-hidden="true" />
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-ink/30 border-t-ink" aria-hidden="true" />
                       Submitting registration…
                     </span>
                   ) : (
@@ -512,11 +554,11 @@ export default function EnquiryForm() {
 
         {/* Tab 2: View Response Preview */}
         {activeTab === 'lookup' && (
-          <div className="rounded-2xl border border-slate/15 bg-white p-6 shadow-sm sm:p-8">
-            <h3 className="mb-1 text-lg font-bold text-navy">
+          <div className="rounded-2xl border border-rule bg-white p-6 shadow-sm sm:p-8">
+            <h3 className="w-display text-xl font-bold text-ink">
               Check registration response
             </h3>
-            <p className="mb-6 text-sm text-slate">
+            <p className="mt-1 mb-6 text-sm text-muted">
               Enter the 10-digit contact number you used while registering.
             </p>
 
@@ -534,13 +576,13 @@ export default function EnquiryForm() {
                 }}
                 placeholder="Enter 10-digit contact number…"
                 maxLength={10}
-                className="flex-1 rounded-lg border border-slate/20 bg-white px-4 py-2.5 text-sm text-ink tabular-nums placeholder:text-slate/50 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
+                className="flex-1 rounded-lg border border-rule bg-white px-4 py-2.5 text-sm text-ink tabular-nums placeholder:text-muted/60 focus-visible:border-gold focus-visible:ring-1 focus-visible:ring-gold"
               />
               <button
                 type="button"
                 onClick={() => handleLookup()}
                 disabled={lookupLoading}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-navy px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-navy-light disabled:opacity-60 touch-action-manipulation"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-ink px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-ink-2 disabled:opacity-60 touch-action-manipulation"
               >
                 {lookupLoading ? (
                   <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true" />
@@ -565,44 +607,44 @@ export default function EnquiryForm() {
             {lookupResults && (
               <div className="space-y-6">
                 {lookupResults.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate/30 p-8 text-center">
-                    <p className="text-sm font-semibold text-navy">
+                  <div className="rounded-xl border border-dashed border-rule p-8 text-center">
+                    <p className="text-sm font-semibold text-ink">
                       No registration found for {lookupPhone ? `+91 ${lookupPhone}` : 'this number'}.
                     </p>
-                    <p className="mt-1 text-xs text-slate">
+                    <p className="mt-1 text-xs text-muted">
                       Please check the number or complete a new student registration below.
                     </p>
                     <button
                       type="button"
                       onClick={() => setActiveTab('register')}
-                      className="mt-4 inline-block rounded-lg bg-gold px-4 py-2 text-xs font-bold text-navy hover:bg-gold-hover touch-action-manipulation"
+                      className="mt-4 inline-block rounded-lg bg-gold px-4 py-2 text-xs font-bold text-ink hover:bg-gold-2 touch-action-manipulation"
                     >
                       Register as a student
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-xs font-semibold text-slate">
+                    <p className="text-xs font-semibold text-muted">
                       Found {lookupResults.length} registration record{lookupResults.length > 1 ? 's' : ''}:
                     </p>
 
                     {lookupResults.map((record) => (
                       <div
                         key={record.id}
-                        className="overflow-hidden rounded-xl border border-navy/15 bg-chalk/50 p-5 shadow-xs transition-all hover:border-gold"
+                        className="overflow-hidden rounded-xl border border-rule bg-sheet p-5 shadow-xs transition-all hover:border-gold"
                       >
                         {/* Record Card Header */}
-                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-slate/15 pb-3">
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-rule pb-3">
                           <div>
-                            <span className="text-xs text-slate">Student Registration</span>
-                            <h4 className="text-base font-bold text-navy">{record.name}</h4>
+                            <span className="text-xs text-muted">Student Registration</span>
+                            <h4 className="text-base font-bold text-ink break-words [overflow-wrap:anywhere]">{record.name}</h4>
                           </div>
                           <div className="flex items-center gap-2">
                             <span
                               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                                 record.batchType === 'Paid batch'
-                                  ? 'bg-gold text-navy'
-                                  : 'bg-navy/10 text-navy'
+                                  ? 'bg-gold text-ink'
+                                  : 'bg-ink/10 text-ink'
                               }`}
                             >
                               {record.batchType}
@@ -616,25 +658,25 @@ export default function EnquiryForm() {
                         {/* Record Details Grid */}
                         <dl className="grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 text-xs">
                           <div>
-                            <dt className="text-slate">Selected Course</dt>
-                            <dd className="font-semibold text-navy">
-                              {record.courseName} <span className="font-normal text-slate">({record.stream})</span>
+                            <dt className="text-muted">Selected Course</dt>
+                            <dd className="font-semibold text-ink">
+                              {record.courseName} <span className="font-normal text-muted">({record.stream})</span>
                             </dd>
                           </div>
 
                           <div>
-                            <dt className="text-slate">Contact Number</dt>
-                            <dd className="font-semibold text-navy tabular-nums">{record.phone}</dd>
+                            <dt className="text-muted">Contact Number</dt>
+                            <dd className="font-semibold text-ink tabular-nums">{record.phone}</dd>
                           </div>
 
                           <div>
-                            <dt className="text-slate">Gender</dt>
-                            <dd className="font-semibold text-navy">{record.gender}</dd>
+                            <dt className="text-muted">Gender</dt>
+                            <dd className="font-semibold text-ink">{record.gender}</dd>
                           </div>
 
                           <div>
-                            <dt className="text-slate">Registered Date</dt>
-                            <dd className="font-semibold text-navy">
+                            <dt className="text-muted">Registered Date</dt>
+                            <dd className="font-semibold text-ink">
                               {new Date(record.createdAt).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
@@ -644,20 +686,20 @@ export default function EnquiryForm() {
                           </div>
 
                           <div className="sm:col-span-2">
-                            <dt className="text-slate">Residential Address</dt>
-                            <dd className="font-medium text-navy break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{record.address}</dd>
+                            <dt className="text-muted">Residential Address</dt>
+                            <dd className="font-medium text-ink break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{record.address}</dd>
                           </div>
 
                           {record.message && (
                             <div className="sm:col-span-2">
-                              <dt className="text-slate">Remarks / Questions</dt>
-                              <dd className="font-normal text-slate break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{record.message}</dd>
+                              <dt className="text-muted">Remarks / Questions</dt>
+                              <dd className="font-normal text-muted break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{record.message}</dd>
                             </div>
                           )}
                         </dl>
 
-                        <div className="mt-4 border-t border-slate/10 pt-3 text-[11px] text-slate">
-                          Registration ID: <span className="font-mono text-slate/70">{record.id}</span>
+                        <div className="mt-4 border-t border-rule pt-3 text-[11px] text-muted">
+                          Registration ID: <span className="font-mono text-muted/70">{record.id}</span>
                         </div>
                       </div>
                     ))}

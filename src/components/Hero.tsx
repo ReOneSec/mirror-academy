@@ -1,85 +1,87 @@
-'use client';
-
-import Image from 'next/image';
-import { SITE } from '@/lib/constants';
-import { PhoneIcon, MapPinIcon } from '@/components/Icons';
+import Link from 'next/link';
+import { SITE, COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
+import Icon from '@/components/icons/Icon';
+import { STREAM_ICONS } from '@/components/streamIcons';
 
 export default function Hero() {
   return (
-    <section className="relative bg-navy text-white">
-      <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-24">
-        {/* Logo — the ONE bold moment with animation */}
-        <div className="hero-logo mb-6">
-          <Image
-            src="/brand/logo.jpg"
-            alt="Mirror Academy logo — navy circle with gold M over white open book"
-            width={160}
-            height={160}
-            className="rounded-full shadow-lg"
-            priority
-            fetchPriority="high"
-          />
+    <section id="top" aria-labelledby="hero-heading" className="on-ink bg-ink text-white">
+      <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:px-8 sm:pb-20 sm:pt-20 lg:pt-24">
+        {/* The tagline is the one bold move: set wide like the logo's MIRROR, with its reflection */}
+        <div className="text-[13vw] sm:text-[clamp(3.25rem,9.2vw,7.25rem)]">
+          <h1
+            id="hero-heading"
+            className="w-display font-extrabold uppercase leading-[0.92] tracking-[-0.01em]"
+          >
+            Reflect Your Strength!
+          </h1>
+          <div className="mirror-line mt-[0.14em] h-[3px] w-full bg-gold" aria-hidden="true" />
+          <div className="mirror-reflection-wrap mt-[0.06em]" aria-hidden="true">
+            <p className="mirror-reflection w-display font-extrabold uppercase leading-[0.92] tracking-[-0.01em]">
+              Reflect Your Strength!
+            </p>
+          </div>
         </div>
 
-        <h1 className="hero-text mb-2 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-          {SITE.name}
-        </h1>
+        <div className="mt-6 grid gap-12 lg:mt-4 lg:grid-cols-[1fr_22rem] lg:gap-20">
+          <div>
+            <p className="max-w-[34rem] text-lg leading-relaxed text-white/80 sm:text-[1.3125rem]">
+              Coaching for{' '}
+              <span className="font-semibold text-white">WBPSC, WBCS and related exams</span> in
+              Berhampore since {SITE.since}, with separate streams for Medical &amp; Engg., Force,
+              Teaching and Mock Interviews.
+            </p>
 
-        <p className="hero-text mb-4 text-lg font-medium text-gold sm:text-xl">
-          {SITE.tagline}
-        </p>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="#registration"
+                className="inline-flex items-center justify-center rounded-md bg-gold px-6 py-3.5 text-[1.0625rem] font-bold text-ink transition-colors hover:bg-gold-2"
+              >
+                Register as a student
+              </a>
+              <a
+                href={SITE.phoneTel}
+                className="inline-flex items-center justify-center gap-2.5 rounded-md border border-white/35 px-6 py-3.5 text-[1.0625rem] font-semibold transition-colors hover:border-white/70 hover:bg-ink-2"
+              >
+                <Icon name="phone" size={20} />
+                <span>
+                  Call <span className="tabular-nums">{SITE.phoneDisplay}</span>
+                </span>
+              </a>
+            </div>
 
-        <p className="hero-text mb-2 text-base text-white/80 sm:text-lg">
-          {SITE.focus} — Since {SITE.since}
-        </p>
+            <p className="mt-7 flex max-w-md items-start gap-2.5 text-[0.95rem] leading-snug text-white/70">
+              <Icon name="map" size={20} className="mt-px" />
+              <span>{SITE.address}</span>
+            </p>
+          </div>
 
-        <p className="hero-text mb-8 flex items-center gap-1.5 text-sm text-white/70">
-          <MapPinIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-          {SITE.address}
-        </p>
-
-        <div className="hero-text flex flex-col gap-3 sm:flex-row sm:gap-4">
-          <a
-            href="#registration"
-            className="inline-flex items-center justify-center rounded-lg bg-gold px-6 py-3 text-sm font-bold text-navy transition-colors hover:bg-gold-hover focus-visible:ring-2 focus-visible:ring-white touch-action-manipulation"
-          >
-            Register now
-          </a>
-          <a
-            href={SITE.phoneTel}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white/30 px-6 py-3 text-sm font-bold text-white transition-colors hover:border-white hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-gold touch-action-manipulation"
-            aria-label={`Call ${SITE.phone}`}
-          >
-            <PhoneIcon className="h-4 w-4" aria-hidden="true" />
-            Call {SITE.phone}
-          </a>
+          {/* Stream index: real counts, each row deep-links the course filter */}
+          <nav aria-labelledby="hero-streams" className="lg:pt-1">
+            <p id="hero-streams" className="text-[0.95rem] text-white/70">
+              <span className="font-semibold text-white">{ALL_COURSES.length} courses</span> in{' '}
+              {COURSE_STREAMS.length} streams
+            </p>
+            <ul className="mt-3 border-t border-white/15">
+              {COURSE_STREAMS.map((stream) => (
+                <li key={stream.slug} className="border-b border-white/15">
+                  <Link
+                    href={`/?stream=${stream.slug}#courses`}
+                    scroll={false}
+                    className="group flex items-center gap-3 py-3"
+                  >
+                    <Icon name={STREAM_ICONS[stream.slug] || 'target'} size={20} />
+                    <span className="min-w-0 flex-1 font-medium underline-offset-4 group-hover:underline group-hover:decoration-gold group-hover:decoration-2">
+                      {stream.stream}
+                    </span>
+                    <span className="tabular-nums text-white/60">{stream.courses.length}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
-
-      {/* Hero animation — one orchestrated moment, respects reduced motion */}
-      <style jsx>{`
-        @media (prefers-reduced-motion: no-preference) {
-          .hero-logo {
-            animation: heroFadeScale 500ms ease-out both;
-          }
-          .hero-text {
-            animation: heroFadeUp 400ms ease-out both;
-          }
-          .hero-text:nth-child(2) { animation-delay: 80ms; }
-          .hero-text:nth-child(3) { animation-delay: 160ms; }
-          .hero-text:nth-child(4) { animation-delay: 240ms; }
-          .hero-text:nth-child(5) { animation-delay: 320ms; }
-          .hero-text:nth-child(6) { animation-delay: 400ms; }
-        }
-        @keyframes heroFadeScale {
-          from { opacity: 0; transform: scale(0.95); }
-          to   { opacity: 1; transform: scale(1); }
-        }
-        @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </section>
   );
 }

@@ -93,5 +93,6 @@ export const ALL_COURSES = COURSE_STREAMS.flatMap((s) =>
 export const NAV_LINKS = [
   { label: 'Courses', href: '#courses' },
   { label: 'Why Mirror', href: '#why-mirror' },
+  { label: 'Admission', href: '#admission' },
   { label: 'Contact', href: '#contact' },
 ] as const;
