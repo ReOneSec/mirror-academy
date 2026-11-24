@@ -21,19 +21,19 @@ export default function Footer() {
         </nav>
       </div>
 
-      <div className="w-full border-t border-[var(--stroke-secondary)]/50 pt-5 text-center text-xs leading-relaxed text-[var(--text-secondary)]">
+      <div className="foot__disclaimer">
         <p>
           Disclaimer: Site Contents designed, developed, maintained and updated by{' '}
           <a
             href="https://epplicon.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-[#021b44] underline decoration-[#021b44]/30 underline-offset-4 transition-colors hover:text-[#0b2f6b] hover:decoration-[#0b2f6b] dark:text-slate-200 dark:decoration-slate-500 dark:hover:text-white"
+            className="foot__credit"
           >
             Epplicon Technologies
           </a>
         </p>
-        <p className="mt-1.5">
+        <p>
           Official Site of Mirror Academy &nbsp;|&nbsp; Copyright <DynamicYear />, All Rights Reserved.
         </p>
       </div>

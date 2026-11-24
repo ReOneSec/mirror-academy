@@ -440,6 +440,39 @@
   .section--tight { padding-top: clamp(28px, 4vw, 48px); }
   .narrow { max-width: 720px; }
   .stack { display: grid; gap: 16px; }
+
+  /* Footer disclaimer & credit: follows data-theme toggle + OS dark preference cleanly */
+  .foot__disclaimer {
+    width: 100%;
+    padding-top: 18px;
+    border-top: 1px solid var(--stroke-secondary);
+    text-align: center;
+    font: var(--type-caption);
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+  .foot__disclaimer p + p { margin-top: 6px; }
+  .foot__credit {
+    font-weight: var(--weight-bold);
+    color: #021b44;
+    text-decoration: underline;
+    text-decoration-color: rgb(2 27 68 / 0.3);
+    text-underline-offset: 4px;
+    transition: color var(--dur-quick) ease, text-decoration-color var(--dur-quick) ease;
+  }
+  .foot__credit:hover { color: #0b2f6b; text-decoration-color: currentColor; }
+  :root[data-theme="dark"] .foot__credit {
+    color: #f5f5f7;
+    text-decoration-color: rgb(245 245 247 / 0.35);
+  }
+  :root[data-theme="dark"] .foot__credit:hover { color: #ffc501; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .foot__credit {
+      color: #f5f5f7;
+      text-decoration-color: rgb(245 245 247 / 0.35);
+    }
+    :root:not([data-theme="light"]) .foot__credit:hover { color: #ffc501; }
+  }
 }
 
 ::selection { background: #ffc501; color: #021b44; }
