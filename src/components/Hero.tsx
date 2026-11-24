@@ -6,7 +6,6 @@ export default function Hero() {
     <>
       <section className="brandhero" aria-labelledby="hero-heading">
         <div className="brandhero__emblem" aria-hidden="true">
-          <span className="brandhero__halo" />
           <Image
             className="brandhero__logo"
             src="/brand/logo-round.webp"
