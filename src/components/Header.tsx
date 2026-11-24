@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SITE, NAV_LINKS } from '@/lib/constants';
+import ThemeToggle from './ThemeToggle';
 
 /**
  * The kit's floating glass pill: logo, section tabs (the one in view is marked), a call
@@ -29,20 +30,6 @@ export default function Header() {
     return () => io.disconnect();
   }, []);
 
-  function toggleTheme() {
-    const root = document.documentElement;
-    const dark =
-      root.dataset.theme === 'dark' ||
-      (!root.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const next = dark ? 'light' : 'dark';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('ma-theme', next);
-    } catch {
-      /* storage blocked: the choice lasts for this visit */
-    }
-  }
-
   return (
     <header className="nav glass">
       <a href="#top" className="nav__brand" aria-label={`${SITE.name}, back to top`}>
@@ -62,12 +49,7 @@ export default function Header() {
       <a href={SITE.phoneTel} className="nav__cta">
         Call {SITE.phoneDisplay}
       </a>
-      <button
-        type="button"
-        className="theme-btn"
-        onClick={toggleTheme}
-        aria-label="Switch between light and dark"
-      />
+      <ThemeToggle />
     </header>
   );
 }

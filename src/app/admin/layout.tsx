@@ -9,15 +9,11 @@ export const metadata: Metadata = {
   },
 };
 
+// The admin portal uses the same kit, theme and light/dark toggle as the public site.
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // The admin portal keeps its own light, utility-built styling whatever the site theme.
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900" style={{ colorScheme: 'light' }}>
-      {children}
-    </div>
-  );
+  return children;
 }

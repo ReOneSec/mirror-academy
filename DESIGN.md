@@ -19,7 +19,9 @@ the same kit. Change the kit in one place and keep both in step.
   steps, footer). Imported into Tailwind's `components` layer, so utilities still win.
 - `src/app/globals.css`: site components built on the kit's tokens (filter chips, tabs, course
   rows, form fields, batch choices, registration panel, map card).
-- The admin portal (`/admin`) keeps its own utility-built light styling and is not themed.
+- The admin portal (`/admin`) uses the same kit and theme toggle (`src/components/ThemeToggle.tsx`): a sign-in card,
+  a glass pill bar, stats, a filter panel, the registrations table (rows become cards on phones), and a detail sheet.
+  Its classes start with `adm-` in `globals.css`.
 
 ## Tokens
 

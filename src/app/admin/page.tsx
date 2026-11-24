@@ -7,19 +7,14 @@ import type { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { SITE, COURSE_STREAMS } from '@/lib/constants';
 import type { RegistrationRecord } from '@/types';
-import {
-  LockIcon,
-  LogOutIcon,
-  PhoneIcon,
-  SearchIcon,
-  RefreshIcon,
-  DownloadIcon,
-  AlertCircleIcon,
-  CheckCircleIcon,
-  SparklesIcon,
-  WhatsAppIcon,
-  MailIcon,
-} from '@/components/Icons';
+import ThemeToggle from '@/components/ThemeToggle';
+
+const STATUSES = [
+  { value: 'new', label: 'New' },
+  { value: 'contacted', label: 'Contacted' },
+  { value: 'admitted', label: 'Admitted' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
 
 export default function AdminPage() {
   const [authState, setAuthState] = useState<'checking' | 'logged_out' | 'logged_in'>('checking');
@@ -300,679 +295,480 @@ export default function AdminPage() {
     showToast('Exported CSV successfully.');
   }
 
+  const filtersActive =
+    batchFilter !== 'all' ||
+    streamFilter !== 'all' ||
+    statusFilter !== 'all' ||
+    genderFilter !== 'all' ||
+    Boolean(search);
+
+  function resetFilters() {
+    setSearch('');
+    setBatchFilter('all');
+    setStreamFilter('all');
+    setStatusFilter('all');
+    setGenderFilter('all');
+  }
+
   // 1. Loading screen
   if (authState === 'checking') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[#021b44]/20 border-t-[#021b44]" />
-          <p className="text-sm font-medium text-slate-600">Verifying Supabase Auth session…</p>
-        </div>
+      <div className="adm-center" role="status">
+        <span className="spinner" aria-hidden="true" />
+        <p className="muted">Checking your session…</p>
       </div>
     );
   }
 
-  // 2. Supabase Auth Login Screen
+  // 2. Sign-in
   if (authState === 'logged_out') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-[#021b44]/20 bg-[#021b44] p-2 shadow-sm">
-              <Image
-                src="/brand/logo.jpg"
-                alt="Mirror Academy logo"
-                width={64}
-                height={64}
-                className="rounded-full object-cover"
-                priority
-              />
-            </div>
-            <h1 className="text-2xl font-bold text-[#021b44]">{SITE.name}</h1>
-            <div className="mt-1 flex items-center justify-center gap-1.5">
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
-                Supabase Auth
-              </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#b45309]">
-                Admin Portal
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-slate-600">
-              Sign in with your institute admin credentials to manage student registrations.
-            </p>
+      <div className="adm-center">
+        <div className="adm-login">
+          <div className="adm-login__head">
+            <span className="adm-logo">
+              <Image src="/brand/logo.jpg" alt="Mirror Academy logo" width={56} height={56} priority />
+            </span>
+            <span className="chip chip--solid">Admin portal</span>
+            <h1>{SITE.name}</h1>
+            <p className="muted">Sign in with your institute admin account to manage student registrations.</p>
           </div>
 
           {loginError && (
-            <div
-              className="mb-5 flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700"
-              role="alert"
-            >
-              <AlertCircleIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <span>{loginError}</span>
-            </div>
+            <p className="notice notice--error" role="alert">
+              {loginError}
+            </p>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="form" noValidate>
             <div>
-              <label
-                htmlFor="admin-email"
-                className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700"
-              >
-                Admin Email
+              <label htmlFor="admin-email" className="field-label">
+                Admin email
               </label>
-              <div className="relative">
-                <input
-                  id="admin-email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="mirrorexams@gmail.com"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:outline-none focus:ring-2 focus:ring-[#021b44]/20"
-                />
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                  <MailIcon className="h-4 w-4" aria-hidden="true" />
-                </div>
-              </div>
+              <input
+                id="admin-email"
+                type="email"
+                autoComplete="email"
+                spellCheck={false}
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="mirrorexams@gmail.com"
+                className="field"
+              />
             </div>
 
             <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label
-                  htmlFor="admin-password"
-                  className="block text-xs font-semibold uppercase tracking-wider text-slate-700"
-                >
-                  Password
-                </label>
+              <div className="field-label">
+                <label htmlFor="admin-password">Password</label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-slate-500 hover:text-[#021b44]"
+                  className="adm-textbtn"
+                  aria-controls="admin-password"
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
-              <div className="relative">
-                <input
-                  id="admin-password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password…"
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:outline-none focus:ring-2 focus:ring-[#021b44]/20"
-                />
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                  <LockIcon className="h-4 w-4" aria-hidden="true" />
-                </div>
-              </div>
+              <input
+                id="admin-password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your password…"
+                className="field"
+              />
             </div>
 
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#021b44] py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b2f6b] disabled:opacity-60"
-            >
-              {loginLoading ? (
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              ) : (
-                'Sign In with Supabase'
-              )}
+            <button type="submit" disabled={loginLoading} className="btn btn--primary btn--lg btn--block">
+              {loginLoading ? <span className="spinner spinner--on" aria-label="Signing in" /> : 'Sign in'}
             </button>
           </form>
 
-          <div className="mt-6 border-t border-slate-100 pt-4 text-center">
-            <Link
-              href="/"
-              className="text-xs font-medium text-slate-500 hover:text-[#021b44] underline-offset-4 hover:underline"
-            >
-              &larr; Back to Mirror Academy website
+          <div className="adm-login__foot">
+            <Link href="/" className="link">
+              Back to the Mirror Academy website
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </div>
     );
   }
 
-  // 3. Admin Dashboard
+  // 3. Dashboard
   return (
-    <div className="min-h-screen bg-slate-50 pb-16">
-      {/* Toast notification */}
+    <div className="page">
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-lg bg-[#021b44] px-4 py-3 text-sm font-medium text-white shadow-lg animate-fade-in">
-          <CheckCircleIcon className="h-5 w-5 text-gold" aria-hidden="true" />
-          <span>{toastMessage}</span>
+        <div className="adm-toast" role="status" aria-live="polite">
+          {toastMessage}
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-[#0b2f6b] bg-[#021b44] text-white shadow-lg">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/brand/logo.jpg"
-              alt="Mirror Academy logo"
-              width={36}
-              height={36}
-              className="rounded-full ring-2 ring-gold/60"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold tracking-tight text-white">{SITE.name}</span>
-                <span className="rounded-md bg-gold px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#021b44]">
-                  Admin
-                </span>
-              </div>
-              <p className="text-[11px] font-medium text-white/70">Student Admissions &amp; Enquiries</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Authenticated user pill */}
-            <div className="hidden md:flex items-center gap-2 rounded-lg bg-white/10 border border-white/20 px-3 py-1.5 text-xs text-white">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span className="truncate max-w-[180px] font-semibold">{user?.email}</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={loadRegistrations}
-              disabled={dataLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/20 hover:border-white/40 disabled:opacity-50"
-              title="Refresh data"
-            >
-              <RefreshIcon
-                className={`h-3.5 w-3.5 ${dataLoading ? 'animate-spin' : ''}`}
-                aria-hidden="true"
-              />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-
-            <Link
-              href="/"
-              target="_blank"
-              className="inline-flex items-center gap-1 rounded-lg border border-white/25 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/15 hover:border-white/40 transition"
-            >
-              Public Site &rarr;
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700"
-              title="Sign out from Supabase"
-            >
-              <LogOutIcon className="h-3.5 w-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
-          </div>
-        </div>
+      <header className="nav glass adm-nav">
+        <Link href="/" className="nav__brand" aria-label={`${SITE.name} website`} target="_blank">
+          <Image src="/brand/logo.jpg" alt="" width={44} height={44} priority />
+        </Link>
+        <span className="adm-nav__title">Admin</span>
+        <span className="adm-nav__user" title={user?.email ?? undefined}>
+          {user?.email}
+        </span>
+        <button type="button" onClick={loadRegistrations} disabled={dataLoading} className="adm-nav__btn">
+          {dataLoading ? 'Refreshing…' : 'Refresh'}
+        </button>
+        <button type="button" onClick={handleLogout} className="nav__cta">
+          Sign out
+        </button>
+        <ThemeToggle />
       </header>
 
-      {/* Main Content Area */}
-      <main className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        {/* KPI Stats Grid */}
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Total Applications</p>
-            <p className="mt-1 text-2xl font-black text-[#021b44]">{stats.total}</p>
+      <main className="main">
+        <section className="adm-section adm-section--intro" aria-labelledby="adm-title">
+          <div className="head">
+            <p className="head__eyebrow">Admissions</p>
+            <h2 id="adm-title">Student registrations</h2>
+            <p className="head__sub">Call or WhatsApp new students, then move them along: New, Contacted, Admitted.</p>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-slate-500">Free Batch</p>
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
+          <div className="stats adm-stats">
+            <div className="stat">
+              <span className="stat__fig">{stats.total}</span>
+              <span className="stat__label">Applications</span>
             </div>
-            <p className="mt-1 text-2xl font-black text-blue-700">{stats.free}</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-medium text-slate-500">Paid Batch</p>
-              <SparklesIcon className="h-3.5 w-3.5 text-gold" aria-hidden="true" />
+            <div className="stat">
+              <span className="stat__fig">{stats.free}</span>
+              <span className="stat__label">Free batch</span>
             </div>
-            <p className="mt-1 text-2xl font-black text-amber-700">{stats.paid}</p>
+            <div className="stat">
+              <span className="stat__fig">{stats.paid}</span>
+              <span className="stat__label">Paid batch</span>
+            </div>
+            <div className="stat">
+              <span className="stat__fig adm-fig--new">{stats.pending}</span>
+              <span className="stat__label">Waiting for a call</span>
+            </div>
+            <div className="stat">
+              <span className="stat__fig">{stats.contacted}</span>
+              <span className="stat__label">Contacted</span>
+            </div>
+            <div className="stat">
+              <span className="stat__fig adm-fig--done">{stats.admitted}</span>
+              <span className="stat__label">Admitted</span>
+            </div>
           </div>
+        </section>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Pending Follow-up</p>
-            <p className="mt-1 text-2xl font-black text-orange-600">{stats.pending}</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Contacted</p>
-            <p className="mt-1 text-2xl font-black text-indigo-600">{stats.contacted}</p>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
-            <p className="text-xs font-medium text-slate-500">Admitted</p>
-            <p className="mt-1 text-2xl font-black text-emerald-600">{stats.admitted}</p>
-          </div>
-        </div>
-
-        {/* Search, Filter & Actions Toolbar */}
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            {/* Search Input */}
-            <div className="relative flex-1">
+        <section className="adm-section adm-records" aria-label="Registrations">
+          <div className="panel adm-tools">
+            <label className="adm-search">
+              <span className="sr-only">Search registrations</span>
               <input
-                type="text"
+                type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by student name, phone, course, address, or remarks…"
-                className="w-full rounded-lg border border-slate-300 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#021b44] focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#021b44]"
+                placeholder="Search name, phone, course, address or notes…"
+                className="field"
               />
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                <SearchIcon className="h-4 w-4" aria-hidden="true" />
-              </div>
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-xs text-slate-400 hover:text-slate-700"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Filter Dropdowns */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Batch Filter */}
+            </label>
+            <div className="adm-filters">
               <select
                 value={batchFilter}
                 onChange={(e) => setBatchFilter(e.target.value as typeof batchFilter)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
+                className="field adm-select"
                 aria-label="Filter by batch"
               >
-                <option value="all">All Batches</option>
+                <option value="all">All batches</option>
                 <option value="Free batch">Free batch</option>
                 <option value="Paid batch">Paid batch</option>
               </select>
-
-              {/* Stream Filter */}
               <select
                 value={streamFilter}
                 onChange={(e) => setStreamFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
+                className="field adm-select"
                 aria-label="Filter by stream"
               >
-                <option value="all">All Streams</option>
+                <option value="all">All streams</option>
                 {COURSE_STREAMS.map((s) => (
                   <option key={s.slug} value={s.stream}>
                     {s.stream}
                   </option>
                 ))}
               </select>
-
-              {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
+                className="field adm-select"
                 aria-label="Filter by status"
               >
-                <option value="all">All Statuses</option>
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="admitted">Admitted</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">All statuses</option>
+                {STATUSES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
               </select>
-
-              {/* Gender Filter */}
               <select
                 value={genderFilter}
                 onChange={(e) => setGenderFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:border-[#021b44] focus:outline-none"
+                className="field adm-select"
                 aria-label="Filter by gender"
               >
-                <option value="all">All Genders</option>
+                <option value="all">All genders</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
-
-              {/* Export CSV button */}
-              <button
-                type="button"
-                onClick={exportToCSV}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#021b44] px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0b2f6b]"
-              >
-                <DownloadIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Export CSV</span>
+              <button type="button" onClick={exportToCSV} className="btn btn--primary">
+                Export CSV
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Data Error Banner */}
-        {dataError && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <AlertCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span>{dataError}</span>
-          </div>
-        )}
-
-        {/* Results Count & Current Filter Info */}
-        <div className="mb-3 flex items-center justify-between text-xs text-slate-500">
-          <p>
-            Showing <strong className="text-slate-800">{filteredRegistrations.length}</strong> of{' '}
-            {registrations.length} applications
-          </p>
-          {(batchFilter !== 'all' ||
-            streamFilter !== 'all' ||
-            statusFilter !== 'all' ||
-            genderFilter !== 'all' ||
-            search) && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setBatchFilter('all');
-                setStreamFilter('all');
-                setStatusFilter('all');
-                setGenderFilter('all');
-              }}
-              className="font-semibold text-[#021b44] hover:underline"
-            >
-              Reset all filters
-            </button>
-          )}
-        </div>
-
-        {/* Registrations Table (Desktop) / Cards (Mobile) */}
-        {filteredRegistrations.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
-            <p className="text-base font-semibold text-slate-700">No applications match your filter.</p>
-            <p className="mt-1 text-xs text-slate-500">
-              Try adjusting your search terms or clearing active filters.
+          {dataError && (
+            <p className="notice notice--error" role="alert">
+              {dataError}
             </p>
+          )}
+
+          <div className="adm-count">
+            <p>
+              Showing <strong>{filteredRegistrations.length}</strong> of {registrations.length} applications
+            </p>
+            {filtersActive && (
+              <button type="button" onClick={resetFilters} className="adm-textbtn">
+                Reset filters
+              </button>
+            )}
           </div>
-        ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="border-b border-slate-200 bg-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-700">
-                  <tr>
-                    <th scope="col" className="px-4 py-3.5">
-                      Student
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Contact &amp; Connect
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Batch Type
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Course &amp; Stream
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Address
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Date
-                    </th>
-                    <th scope="col" className="px-4 py-3.5">
-                      Status
-                    </th>
-                    <th scope="col" className="px-4 py-3.5 text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredRegistrations.map((record) => {
-                    const waMessage = encodeURIComponent(
-                      `Hello ${record.name}, this is Mirror Academy Berhampore regarding your registration for ${record.courseName} (${record.batchType}).`
-                    );
-                    const waLink = `https://wa.me/91${record.phone}?text=${waMessage}`;
 
-                    return (
-                      <tr key={record.id} className="transition-colors hover:bg-slate-50/80">
-                        {/* Student Name & Gender */}
-                        <td className="px-4 py-3.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRecord(record)}
-                            className="text-left font-bold text-[#021b44] hover:text-[#0b2f6b] hover:underline focus:outline-none text-[13px]"
-                          >
-                            {record.name}
-                          </button>
-                          <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-slate-500">
-                            <span>{record.gender}</span>
-                            <span>•</span>
-                            <span className="font-mono text-[10px] text-slate-400">
-                              #{record.id.slice(0, 8)}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Phone with Call & WhatsApp buttons */}
-                        <td className="px-4 py-3.5">
-                          <div className="font-semibold text-slate-900 tabular-nums">
-                            {record.phone}
-                          </div>
-                          <div className="mt-1 flex items-center gap-2">
-                            <a
-                              href={`tel:${record.phone}`}
-                              className="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-[#021b44] hover:bg-[#021b44] hover:text-white transition"
-                              title="Call student"
-                            >
-                              <PhoneIcon className="h-3 w-3" aria-hidden="true" />
-                              Call
-                            </a>
-                            <a
-                              href={waLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 hover:bg-emerald-600 hover:text-white transition"
-                              title="Chat on WhatsApp"
-                            >
-                              <WhatsAppIcon className="h-3 w-3" aria-hidden="true" />
-                              WhatsApp
-                            </a>
-                          </div>
-                        </td>
-
-                        {/* Batch Type Badge */}
-                        <td className="px-4 py-3.5">
-                          {record.batchType === 'Paid batch' ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 border border-amber-300/60 px-2.5 py-0.5 font-bold text-amber-900">
-                              <SparklesIcon className="h-3 w-3 text-amber-600" aria-hidden="true" />
-                              Paid batch
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center rounded-full bg-blue-100 border border-blue-300/60 px-2.5 py-0.5 font-bold text-blue-900">
-                              Free batch
-                            </span>
-                          )}
-                        </td>
-
-                        {/* Course & Stream */}
-                        <td className="px-4 py-3.5">
-                          <div className="font-semibold text-slate-900">{record.courseName}</div>
-                          <div className="text-[11px] text-slate-500">{record.stream}</div>
-                        </td>
-
-                        {/* Address */}
-                        <td className="max-w-[200px] px-4 py-3.5">
-                          <p className="truncate text-slate-700" title={record.address}>
-                            {record.address}
-                          </p>
-                        </td>
-
-                        {/* Registration Date */}
-                        <td className="whitespace-nowrap px-4 py-3.5 text-slate-600">
-                          {new Date(record.createdAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </td>
-
-                        {/* Status Dropdown */}
-                        <td className="px-4 py-3.5">
-                          <select
-                            value={record.status}
-                            onChange={(e) => handleStatusChange(record.id, e.target.value)}
-                            className={`rounded-lg border px-2 py-1 text-[11px] font-bold transition focus:outline-none ${
-                              record.status === 'new'
-                                ? 'border-amber-300 bg-amber-50 text-amber-900'
-                                : record.status === 'contacted'
-                                ? 'border-indigo-300 bg-indigo-50 text-indigo-900'
-                                : record.status === 'admitted'
-                                ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
-                                : 'border-slate-300 bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            <option value="new">New</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="admitted">Admitted</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
-                        </td>
-
-                        {/* Actions (View detail & Delete) */}
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedRecord(record)}
-                            className="mr-2 font-bold text-[#021b44] hover:text-[#0b2f6b] hover:underline"
-                          >
-                            View
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(record.id, record.name)}
-                            className="font-medium text-red-600 hover:text-red-800 hover:underline"
-                            title="Delete registration"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {filteredRegistrations.length === 0 ? (
+            <div className="adm-empty">
+              <p className="adm-empty__title">
+                {registrations.length === 0 ? 'No registrations yet.' : 'No applications match these filters.'}
+              </p>
+              <p className="muted">
+                {registrations.length === 0
+                  ? 'New student registrations from the website show up here.'
+                  : 'Try other search words, or reset the filters.'}
+              </p>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="adm-card">
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Student</th>
+                      <th scope="col">Contact</th>
+                      <th scope="col">Batch</th>
+                      <th scope="col">Course</th>
+                      <th scope="col">Address</th>
+                      <th scope="col">Date</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRegistrations.map((record) => {
+                      const waMessage = encodeURIComponent(
+                        `Hello ${record.name}, this is Mirror Academy Berhampore regarding your registration for ${record.courseName} (${record.batchType}).`
+                      );
+                      const waLink = `https://wa.me/91${record.phone}?text=${waMessage}`;
 
-        {/* Modal: Student Detail & Notes */}
-        {selectedRecord && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-              <div className="mb-4 flex items-start justify-between border-b border-slate-100 pb-3">
-                <div className="pr-4">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    Application Details
-                  </span>
-                  <h3 className="text-xl font-bold text-[#021b44] break-words [overflow-wrap:anywhere]">{selectedRecord.name}</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecord(null)}
-                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                  aria-label="Close modal"
-                >
-                  &times;
-                </button>
+                      return (
+                        <tr key={record.id}>
+                          <th scope="row">
+                            <button type="button" onClick={() => setSelectedRecord(record)} className="adm-name">
+                              {record.name}
+                            </button>
+                            <small>
+                              {record.gender} · <span className="adm-id">#{record.id.slice(0, 8)}</span>
+                            </small>
+                          </th>
+                          <td data-label="Contact">
+                            <span className="adm-phone">{record.phone}</span>
+                            <span className="adm-actions">
+                              <a href={`tel:${record.phone}`} className="btn">
+                                Call
+                              </a>
+                              <a href={waLink} target="_blank" rel="noopener noreferrer" className="btn">
+                                WhatsApp
+                              </a>
+                            </span>
+                          </td>
+                          <td data-label="Batch">
+                            <span className={`chip${record.batchType === 'Paid batch' ? ' chip--solid' : ''}`}>
+                              {record.batchType}
+                            </span>
+                          </td>
+                          <td data-label="Course">
+                            {record.courseName}
+                            <small>{record.stream}</small>
+                          </td>
+                          <td data-label="Address" className="adm-address">
+                            <span title={record.address}>{record.address}</span>
+                          </td>
+                          <td data-label="Date" className="adm-nowrap">
+                            {new Date(record.createdAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </td>
+                          <td data-label="Status">
+                            <select
+                              value={record.status}
+                              onChange={(e) => handleStatusChange(record.id, e.target.value)}
+                              className="field adm-status"
+                              data-status={record.status}
+                              aria-label={`Status for ${record.name}`}
+                            >
+                              {STATUSES.map((s) => (
+                                <option key={s.value} value={s.value}>
+                                  {s.label}
+                                </option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="adm-row-actions">
+                            <button type="button" onClick={() => setSelectedRecord(record)} className="btn">
+                              View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(record.id, record.name)}
+                              className="adm-textbtn adm-textbtn--danger"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
+            </div>
+          )}
+        </section>
 
-              <dl className="grid grid-cols-2 gap-4 text-xs">
+        <footer className="foot">
+          <span>
+            <strong>{SITE.name}</strong> admin
+          </span>
+          <Link href="/" className="link" target="_blank">
+            Open the public website
+          </Link>
+        </footer>
+      </main>
+
+      {selectedRecord && (
+        <div
+          className="adm-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="adm-modal-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedRecord(null);
+          }}
+        >
+          <div className="adm-sheet">
+            <div className="adm-sheet__head">
+              <div>
+                <p className="head__eyebrow">Application</p>
+                <h3 id="adm-modal-title">{selectedRecord.name}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedRecord(null)}
+                className="adm-close"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="record">
+              <dl>
                 <div>
-                  <dt className="font-medium text-slate-400">Batch Type</dt>
-                  <dd className="mt-0.5 font-bold text-[#021b44]">{selectedRecord.batchType}</dd>
+                  <dt>Batch</dt>
+                  <dd>{selectedRecord.batchType}</dd>
                 </div>
-
                 <div>
-                  <dt className="font-medium text-slate-400">Gender</dt>
-                  <dd className="mt-0.5 font-bold text-[#021b44]">{selectedRecord.gender}</dd>
+                  <dt>Gender</dt>
+                  <dd>{selectedRecord.gender}</dd>
                 </div>
-
                 <div>
-                  <dt className="font-medium text-slate-400">Selected Course</dt>
-                  <dd className="mt-0.5 font-bold text-[#021b44]">
-                    {selectedRecord.courseName}{' '}
-                    <span className="font-normal text-slate-500">({selectedRecord.stream})</span>
+                  <dt>Course</dt>
+                  <dd>
+                    {selectedRecord.courseName} <span className="muted">({selectedRecord.stream})</span>
                   </dd>
                 </div>
-
                 <div>
-                  <dt className="font-medium text-slate-400">Contact Number</dt>
-                  <dd className="mt-0.5 font-bold text-[#021b44] tabular-nums">
-                    <a href={`tel:${selectedRecord.phone}`} className="hover:underline text-[#021b44]">
+                  <dt>Mobile</dt>
+                  <dd>
+                    <a href={`tel:${selectedRecord.phone}`} className="link">
                       {selectedRecord.phone}
                     </a>
                   </dd>
                 </div>
-
-                <div className="col-span-2">
-                  <dt className="font-medium text-slate-400">Residential Address</dt>
-                  <dd className="mt-0.5 rounded-lg bg-slate-50 p-2.5 font-medium text-slate-800 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
-                    {selectedRecord.address}
+                <div className="wide">
+                  <dt>Address</dt>
+                  <dd>{selectedRecord.address}</dd>
+                </div>
+                <div className="wide">
+                  <dt>Questions or notes</dt>
+                  <dd className="adm-notes">
+                    {selectedRecord.message || <span className="muted">No questions or notes.</span>}
                   </dd>
                 </div>
-
-                <div className="col-span-2">
-                  <dt className="font-medium text-slate-400">Student Remarks / Questions</dt>
-                  <dd className="mt-0.5 min-h-[60px] max-h-48 overflow-y-auto rounded-lg bg-slate-50 p-2.5 text-slate-800 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">
-                    {selectedRecord.message || (
-                      <span className="italic text-slate-400">No questions or notes provided.</span>
-                    )}
-                  </dd>
-                </div>
-
                 <div>
-                  <dt className="font-medium text-slate-400">Application Date</dt>
-                  <dd className="mt-0.5 text-slate-700">
-                    {new Date(selectedRecord.createdAt).toLocaleString('en-IN')}
-                  </dd>
+                  <dt>Registered</dt>
+                  <dd>{new Date(selectedRecord.createdAt).toLocaleString('en-IN')}</dd>
                 </div>
-
                 <div>
-                  <dt className="font-medium text-slate-400">Application Status</dt>
-                  <dd className="mt-1">
+                  <dt>Status</dt>
+                  <dd>
                     <select
                       value={selectedRecord.status}
                       onChange={(e) => handleStatusChange(selectedRecord.id, e.target.value)}
-                      className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold"
+                      className="field adm-status"
+                      data-status={selectedRecord.status}
+                      aria-label="Application status"
                     >
-                      <option value="new">New</option>
-                      <option value="contacted">Contacted</option>
-                      <option value="admitted">Admitted</option>
-                      <option value="cancelled">Cancelled</option>
+                      {STATUSES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
                     </select>
                   </dd>
                 </div>
               </dl>
+            </div>
 
-              <div className="mt-6 flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
-                <a
-                  href={`tel:${selectedRecord.phone}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#021b44] hover:bg-[#0b2f6b] px-4 py-2 text-xs font-bold text-white shadow-xs"
-                >
-                  <PhoneIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  Call {selectedRecord.phone}
-                </a>
-                <button
-                  type="button"
-                  onClick={() => setSelectedRecord(null)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Close
-                </button>
-              </div>
+            <div className="adm-sheet__foot">
+              <button type="button" onClick={() => setSelectedRecord(null)} className="btn">
+                Close
+              </button>
+              <a
+                href={`https://wa.me/91${selectedRecord.phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+              >
+                WhatsApp
+              </a>
+              <a href={`tel:${selectedRecord.phone}`} className="btn btn--primary">
+                Call {selectedRecord.phone}
+              </a>
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
