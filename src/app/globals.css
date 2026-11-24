@@ -69,117 +69,34 @@
     .nav__cta { display: none; }
   }
 
-  /* Hero: the brand up front. Big emblem with its reflection, the name as the headline, gold for the one action */
-  .brandhero {
-    --gold: #ffc501;
-    --navy: #021b44;
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
-    grid-template-areas: "copy emblem";
-    align-items: center;
-    gap: 24px clamp(24px, 4vw, 56px);
-    min-height: clamp(520px, 72vh, 680px);
-    padding: clamp(28px, 5vw, 72px);
-    border-radius: var(--r-xl);
-    color: var(--hero-text);
-    background:
-      radial-gradient(70% 80% at 10% 0%, rgb(38 72 140 / 0.55), transparent 70%),
-      linear-gradient(160deg, #0b2a5e 0%, #021b44 55%, #01102a 100%);
-    box-shadow: var(--shadow);
+  /* Hero: the kit hero on its deep navy surface, the brand (logo + name) as the headline */
+  .hero--site { background-image: url("/brand/hero-surface.webp"); background-size: cover; background-position: center; }
+  .hero__brand { display: flex; align-items: center; gap: clamp(16px, 2.4vw, 28px); }
+  .hero__logo {
+    flex: none;
+    width: clamp(112px, 12vw, 160px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px #fff, 0 0 0 6px #ffc501, 0 16px 40px rgb(0 0 0 / 0.35);
   }
-  .brandhero__copy { grid-area: copy; display: grid; gap: 18px; justify-items: start; min-width: 0; }
-  .brandhero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    border-radius: var(--r-pill);
-    background: rgb(255 255 255 / 0.08);
-    border: 1px solid var(--hero-glass-stroke);
-    font: var(--type-label);
-    color: var(--hero-text);
-  }
-  .brandhero__live { width: 8px; height: 8px; border-radius: 50%; background: var(--fill-system-green); box-shadow: 0 0 0 4px rgb(0 166 101 / 0.22); }
-  .brandhero__name {
+  .hero--site .hero__name {
     font-family: var(--sans);
     font-weight: 600;
-    font-size: clamp(52px, 8.4vw, 112px);
-    line-height: 0.92;
-    letter-spacing: -0.035em;
-    text-wrap: balance;
+    font-size: clamp(48px, 6.4vw, 88px) !important;
+    line-height: 0.92 !important;
+    letter-spacing: -0.03em;
+    color: var(--hero-text);
   }
-  .brandhero__name span { display: block; color: var(--gold); }
-  .brandhero__tagline {
-    font-weight: var(--weight-medium);
-    font-size: clamp(20px, 2.2vw, 28px);
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+  .hero--site .hero__name span { display: block; color: #ffc501; }
+  .hero--site .hero__tagline { font-weight: var(--weight-medium); font-size: clamp(24px, 2.6vw, 34px); line-height: 1.15; letter-spacing: -0.01em; color: var(--hero-text); }
+  .hero--site .callout .tabular-nums { white-space: nowrap; }
+  @media (max-width: 599px) {
+    .hero__brand { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .hero--site .callout .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .hero--site .callout .links .btn { justify-content: center; justify-self: stretch; }
+    .hero--site .callout .links .btn--primary { grid-column: 1 / -1; }
   }
-  .brandhero__sub { max-width: 40ch; font-size: clamp(15px, 1.3vw, 17px); line-height: 1.45; color: var(--hero-text-muted); }
-  /* The admissions card: the site's white callout, solid on the navy surface */
-  .brandhero__card {
-    max-width: 460px;
-    margin-top: 8px;
-    background: light-dark(#fff, #1d1d1f);
-    border-color: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.12));
-    box-shadow: 0 18px 48px rgb(1 16 42 / 0.45);
-  }
-  .brandhero__card .tabular-nums { white-space: nowrap; }
-  .brandhero__meta { font-size: var(--size-small); color: var(--hero-text-muted); }
-
-
-  .brandhero__emblem {
-    grid-area: emblem;
-    position: relative;
-    justify-self: center;
-    width: clamp(220px, 27vw, 360px);
-    aspect-ratio: 1;
-    margin-bottom: 30%; /* room for the reflection */
-  }
-  .brandhero__logo {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    box-shadow: 0 20px 50px rgb(0 0 0 / 0.35), 0 0 0 4px rgb(255 255 255 / 0.9), 0 0 0 9px var(--gold);
-    animation: emblem-in 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-  .brandhero__mirror {
-    position: absolute;
-    left: 0;
-    top: 100%;
-    width: 100%;
-    height: auto;
-    margin-top: 22px;
-    transform: scaleY(-1);
-    opacity: 0.2;
-    border-radius: 50%;
-    -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 30%);
-    mask-image: linear-gradient(to top, #000 0%, transparent 30%);
-    pointer-events: none;
-  }
-  @keyframes emblem-in { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: none; } }
-
-  @media (max-width: 899px) {
-    .brandhero {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-areas: "emblem" "copy";
-      min-height: 0;
-      padding: 32px 22px 30px;
-      background:
-        linear-gradient(170deg, #0b2a5e 0%, #021b44 55%, #01102a 100%);
-    }
-    .brandhero__emblem { width: min(190px, 52vw); margin: 14px 0 22%; }
-    .brandhero__copy { gap: 14px; }
-    .brandhero__card { max-width: none; width: 100%; }
-    .brandhero__card .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .brandhero__card .links .btn { justify-content: center; justify-self: stretch; }
-    .brandhero__card .links .btn--primary { grid-column: 1 / -1; min-height: 48px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .brandhero__logo { animation: none; } }
 
   /* The primary capsule: the one action that matters on a screen */
   .btn--primary {

@@ -69,8 +69,8 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Admission steps 2 and 3 wording, and the "Enquiry-led admission" point (marked TODO in code).
 - Cloudflare Turnstile is not wired up on the client yet.
 
-## Brand hero (2026-11-24)
-- The hero (`.brandhero` in globals.css, `src/components/Hero.tsx`) leads with the brand: "Mirror Academy" is the h1 (Academy in gold #FFC501), the round emblem `public/brand/logo-round.webp` sits right with a gold ring and a faint mirrored reflection. No glow (halo and gold radial light removed at the user's request, 2026-11-24). Deep navy gradient surface (#0b2a5e → #021b44 → #01102a).
-- Actions live in the white admissions callout (`.callout.brandhero__card`: Register, Call, WhatsApp), restored at the user's request. On phones the emblem sits on top, Register spans the card and Call and WhatsApp share a row.
-- Course stream chips filter client-side via history.replaceState (no server round trip).
-- Nav shows the round logo at 44px with a gold ring, plus the "Mirror Academy" wordmark from 1100px.
+## Hero (2026-11-24, final)
+- Back to the kit hero (`.hero.hero--site`, flat navy surface, glass "Admissions open" callout top-right), as the user asked.
+- Branding is bigger: round logo (`public/brand/logo-round.webp`, 112-160px, white + gold ring) beside the h1 "Mirror Academy" (Academy in gold #FFC501). The tagline is a large subheading. No glow.
+- On phones the logo and name stack, and the callout is full width (Register spans it; Call and WhatsApp share a row).
+- Course stream chips filter client-side via history.replaceState.
