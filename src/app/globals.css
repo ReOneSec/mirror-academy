@@ -1,254 +1,290 @@
 @import "tailwindcss";
+/* The design kit shared with the Mirror Academy Admissions Page (tokens, nav, hero, callout,
+   cards, steps, footer). It sits in the components layer so Tailwind utilities still win. */
+@import "./kit.css" layer(components);
 
 /*
- * Mirror Academy design tokens. See DESIGN.md for the reasoning.
- *
- *   ink    #021B44  the navy field of the logo: text on paper, dark grounds
- *   ink-2  #0B2F6B  one step up from ink: raised surfaces and hover on navy
- *   gold   #FFC501  the logo's M: filled bubbles, primary action on navy, the mirror line
- *   paper  #F5F7FB  cool exam-paper white (deliberately not cream)
- *   rule   #CBD4E4  the blue of a ruled answer sheet: hairlines and field borders
- *   muted  #465470  secondary text on paper (7.4:1 on paper)
+ * Tailwind theme. The public site is styled by kit.css and the site components below;
+ * these colours stay for the admin portal, which is built from utilities.
  */
 @theme inline {
   --color-ink: #021b44;
   --color-ink-2: #0b2f6b;
-  --color-ink-3: #143d82;
   --color-gold: #ffc501;
   --color-gold-2: #ffd43d;
-  --color-gold-soft: #ffe899;
-  --color-paper: #f5f7fb;
-  --color-sheet: #ffffff;
-  --color-rule: #cbd4e4;
-  --color-rule-strong: #9aa4b4;
-  --color-muted: #465470;
-  --color-white: #ffffff;
-
-  --color-navy: #021b44;
-  --color-navy-light: #0b2f6b;
-  --color-navy-dark: #011330;
-
   --color-success: #067647;
   --color-error: #b42318;
 
-  /* One family. The width axis does the work a second face would:
-     125 for display (like the logo's wide MIRROR), 100 for reading, 87 for dense labels. */
-  --font-sans: var(--font-anek), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-:root {
-  color-scheme: light;
-  /* Kubai icon inks on paper: navy primary, secondary = navy at 40% over white */
-  --ki-a: #021b44;
-  --ki-b: #9aa4b4;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-tap-highlight-color: rgb(2 27 68 / 0.12);
-  touch-action: manipulation;
-}
-
-@media (pointer: fine) {
-  html {
-    overscroll-behavior: none;
-  }
-}
-
-body {
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  font-variation-settings: "wdth" 100;
-  text-rendering: optimizeLegibility;
-}
-
-h1,
-h2,
-h3 {
-  text-wrap: balance;
-}
-
-p {
-  text-wrap: pretty;
-}
-
-[id] {
-  scroll-margin-top: 5rem;
-}
-
-::selection {
-  background: var(--color-gold);
-  color: var(--color-ink);
-}
-
-/* One focus indicator for everything: a 2px ring outside the element.
-   Navy on paper, gold on navy (see .on-ink). Fields override only its colour.
-   In the base layer so component rules (error fields) can recolour it. */
-@layer base {
-  :focus-visible {
-    outline: 2px solid var(--color-ink);
-    outline-offset: 2px;
-  }
-
-  .on-ink :focus-visible {
-    outline-color: var(--color-gold);
-  }
-}
-
-.on-ink {
-  --ki-a: #ffc501;
-  --ki-b: #ffe899;
-}
-
+/* ---------- Site components, built on the kit's tokens ---------- */
 @layer components {
-/* Width axis presets */
-.w-display {
-  font-variation-settings: "wdth" 125;
-}
-
-.w-narrow {
-  font-variation-settings: "wdth" 87;
-}
-
-/* Trim a label to its cap height so it centres on its letters inside pills and buttons */
-.trim-cap {
-  /* text-box is progressive enhancement for browsers supporting CSS text-box-trim */
-  text-box: trim-both cap alphabetic;
-}
-
-}
-
-/* ---------- Hero: the headline and its reflection ---------- */
-
-.mirror-reflection-wrap {
-  height: 0.58em;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
-  mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
-  user-select: none;
-  pointer-events: none;
-}
-
-.mirror-reflection {
-  transform: scaleY(-1);
-  transform-origin: center;
-  opacity: 0.2;
-}
-
-/* The single orchestrated moment on the page: the mirror line draws, then the
-   reflection rises into it once. Nothing else moves unless the visitor acts. */
-@keyframes reflect-in {
-  from {
-    opacity: 0;
-    transform: scaleY(-1) translateY(0.25em);
+  .skip-link {
+    position: fixed;
+    left: 16px;
+    top: -60px;
+    z-index: 100;
+    padding: 10px 16px;
+    border-radius: var(--r-pill);
+    background: var(--fill-primary);
+    color: var(--text-primary-on);
+    font: var(--type-label);
+    text-decoration: none;
   }
-  to {
-    opacity: 0.2;
-    transform: scaleY(-1) translateY(0);
+  .skip-link:focus { top: 16px; }
+
+  /* Nav: the kit's glass pill, with the logo at its start and the register capsule at its end */
+  .nav__brand {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--fill-primary-on);
   }
+  .nav__brand img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); }
+  .nav__cta {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: var(--r-pill);
+    background: var(--fill-primary-on);
+    color: var(--text-primary);
+    font: var(--type-label);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav__cta:hover { box-shadow: inset 0 0 0 100px var(--hover-wash); }
+  @media (max-width: 599px) {
+    .nav__brand, .nav__cta { min-height: var(--tap); }
+    .nav__brand { width: var(--tap); height: var(--tap); }
+    .nav__cta { display: none; }
+  }
+
+  /* Hero: the kit hero on its deep navy surface, with the logo tile over the copy */
+  .hero--site { background-image: url("/brand/hero-surface.webp"); background-size: cover; background-position: center; }
+  .hero__logo {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    border-radius: var(--r-s);
+    background: #f5f5f7;
+    border: 1px solid var(--hero-glass-stroke);
+  }
+
+  /* The primary capsule: the one action that matters on a screen */
+  .btn--primary {
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: var(--fill-primary);
+    color: var(--text-primary-on);
+    font: var(--type-body-strong);
+    cursor: pointer;
+    transition: box-shadow var(--dur-quick) ease, transform var(--dur-quick) ease;
+  }
+  .btn--primary:hover { box-shadow: inset 0 0 0 100px var(--hover-wash-primary-on); }
+  .btn--primary:active { transform: scale(0.97); }
+  .btn--primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn--primary[target="_blank"]::after { color: var(--text-secondary-on); }
+  .btn--block { width: 100%; }
+  .btn--lg { min-height: 48px; padding-inline: 22px; }
+  button.btn { cursor: pointer; }
+
+  /* Filter chips and tabs: one pill track, the active pill carries the strong fill */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--stroke-primary);
+    border-radius: var(--r-pill);
+    background: var(--fill-primary-on);
+    color: var(--text-primary);
+    font: var(--type-label);
+    cursor: pointer;
+  }
+  .chips button:hover { box-shadow: inset 0 0 0 100px var(--hover-wash); }
+  .chips button span { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .chips button[aria-pressed="true"] { background: var(--fill-primary); border-color: transparent; color: var(--text-primary-on); }
+  .chips button[aria-pressed="true"] span { color: var(--text-secondary-on); }
+  @media (pointer: coarse), (max-width: 599px) { .chips button { min-height: var(--tap); } }
+
+  .tabs {
+    display: flex;
+    padding: 4px;
+    gap: 4px;
+    border-radius: var(--r-pill);
+    background: var(--fill-tertiary);
+  }
+  .tabs button {
+    flex: 1;
+    min-height: 40px;
+    border: 0;
+    border-radius: var(--r-pill);
+    background: transparent;
+    color: var(--text-secondary);
+    font: var(--type-label);
+    cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--fill-primary); color: var(--text-primary-on); }
+  @media (pointer: coarse), (max-width: 599px) { .tabs button { min-height: var(--tap); } }
+
+  /* Course cards: each course is a row that starts a registration with it selected */
+  .cards--courses { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .cards--courses.cards:has(> :nth-child(4):last-child) { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  @media (max-width: 899px) { .cards--courses { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); } }
+  .card__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+  .card__head h3 { margin-bottom: 0; }
+  .card__count { font: var(--type-small); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .cards li.course { padding: 0; }
+  .course a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: var(--tap);
+    padding: 10px 0;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .course a::after {
+    content: "";
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--stroke-primary);
+    transition: background var(--dur-quick) ease, box-shadow var(--dur-quick) ease;
+  }
+  .course a:hover::after { box-shadow: inset 0 0 0 1.5px var(--text-secondary); }
+  .course a[data-marked="true"]::after {
+    background: var(--fill-system-green);
+    box-shadow: inset 0 0 0 4px var(--fill-tertiary);
+  }
+
+  /* Registration: one card that holds the form or the lookup */
+  .panel {
+    padding: clamp(20px, 3vw, 32px);
+    border-radius: var(--r-l);
+    background: var(--fill-tertiary);
+  }
+  .panel h3 { font: var(--type-heading); }
+  .form { display: grid; gap: 20px; }
+  .field-label { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font: var(--type-label); }
+  .field-label .sub { font: var(--type-small); }
+  .req { color: var(--fill-system-red); }
+  .field {
+    display: block;
+    width: 100%;
+    min-height: var(--tap);
+    padding: 10px 14px;
+    border-radius: var(--r-s);
+    border: 1px solid var(--stroke-primary);
+    background: var(--fill-primary-on);
+    color: var(--text-primary);
+    font: var(--type-body);
+    font-size: 16px; /* keeps iOS from zooming on focus */
+    transition: border-color var(--dur-quick) ease;
+  }
+  .field::placeholder { color: var(--text-secondary); opacity: 0.8; }
+  .field:hover { border-color: var(--text-tertiary); }
+  .field:focus-visible { outline: 2px solid var(--text-primary); outline-offset: -1px; border-color: transparent; }
+  .field[aria-invalid="true"] { border-color: var(--fill-system-red); }
+  .field[aria-invalid="true"]:focus-visible { outline-color: var(--fill-system-red); }
+  textarea.field { resize: vertical; }
+  .field-hint { margin-top: 6px; font: var(--type-small); color: var(--text-secondary); }
+  .field-error { margin-top: 6px; font: var(--type-small); color: var(--fill-system-red); }
+
+  .choice-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  .choice {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    border-radius: var(--r-m);
+    border: 1px solid var(--stroke-primary);
+    background: var(--fill-primary-on);
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+  }
+  .choice:hover { box-shadow: inset 0 0 0 100px var(--hover-wash); }
+  .choice[aria-pressed="true"] { border-color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--text-primary); }
+  .choice__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font: var(--type-body-strong); }
+  .choice p { font: var(--type-small); color: var(--text-secondary); }
+  .radios { display: flex; gap: 24px; }
+  .radios label { display: inline-flex; align-items: center; gap: 8px; min-height: var(--tap); font: var(--type-body); cursor: pointer; }
+  .radios input { width: 18px; height: 18px; accent-color: var(--text-primary); }
+
+  .notice {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: var(--r-m);
+    background: var(--fill-primary-on);
+    border: 1px solid var(--stroke-primary);
+    font: var(--type-small);
+  }
+  .notice--error { color: var(--fill-system-red); border-color: color-mix(in srgb, var(--fill-system-red) 30%, transparent); }
+
+  .record { padding: 18px 20px; border-radius: var(--r-m); background: var(--fill-primary-on); }
+  .record dl { display: grid; gap: 12px 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); margin: 0; }
+  .record dt { font: var(--type-caption); color: var(--text-secondary); margin-bottom: 2px; }
+  .record dd { margin: 0; font: var(--type-body-strong); overflow-wrap: anywhere; white-space: pre-wrap; }
+  .record .wide { grid-column: 1 / -1; }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Contact: the map sits in a card the same radius as the others */
+  .map {
+    overflow: hidden;
+    border-radius: var(--r-l);
+    background: var(--fill-tertiary);
+  }
+  .map__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 14px 20px; font: var(--type-label); }
+  .map iframe { display: block; width: 100%; height: clamp(300px, 42vw, 420px); border: 0; }
+  .big-link { font: var(--type-heading); font-variant-numeric: tabular-nums; }
+
+  /* In a callout every action is a capsule of one height */
+  .callout .links { align-items: center; }
+  .callout .links .btn:not(.btn--primary) { min-height: 44px; padding-inline: 16px; border-radius: var(--r-pill); font: var(--type-label); }
+
+  /* Registration: the form beside a short note on what happens next */
+  .reg {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 16px 40px;
+    align-items: start;
+  }
+  .reg > .callout { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 84px); max-width: none; }
+  .reg ol { margin: 0; padding-left: 18px; list-style: decimal; display: grid; gap: 6px; }
+  @media (max-width: 899px) { .reg { grid-template-columns: minmax(0, 1fr); } .reg > .callout { position: static; } }
+
+  .section--tight { padding-top: clamp(28px, 4vw, 48px); }
+  .narrow { max-width: 720px; }
+  .stack { display: grid; gap: 16px; }
 }
 
-@keyframes mirror-line {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .mirror-reflection {
-    animation: reflect-in 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 350ms both;
-  }
-  .mirror-line {
-    transform-origin: left;
-    animation: mirror-line 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
-}
+::selection { background: #ffc501; color: #021b44; }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-@layer components {
-/* ---------- Answer-sheet bubbles (course picker) ---------- */
-
-.bubble {
-  display: inline-block;
-  flex: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 9999px;
-  border: 1.5px solid var(--color-ink);
-  background: var(--color-sheet);
-  transition:
-    background-color 150ms ease-out,
-    box-shadow 150ms ease-out;
-}
-
-.course-option:hover .bubble {
-  background: var(--color-gold-soft);
-}
-
-.course-option[data-marked="true"] .bubble {
-  background: var(--color-ink);
-  box-shadow: inset 0 0 0 3px var(--color-sheet);
-}
-
-/* ---------- Form fields ---------- */
-
-.field {
-  display: block;
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid var(--color-rule-strong);
-  background-color: var(--color-sheet);
-  color: var(--color-ink);
-  padding: 0.75rem 0.875rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  transition: border-color 150ms ease-out;
-}
-
-.field::placeholder {
-  color: #6b7790;
-}
-
-.field:hover {
-  border-color: var(--color-muted);
-}
-
-/* Focus draws over the border, not around it: one 2px line, never a border plus a ring */
-.field:focus-visible {
-  border-color: var(--color-ink);
-  outline-offset: -1px;
-}
-
-.field[aria-invalid="true"] {
-  border-color: var(--color-error);
-}
-
-/* Error fields keep the same single ring, in the error colour */
-.field[aria-invalid="true"]:focus-visible {
-  outline-color: var(--color-error);
-}
-
-select.field {
-  /* Explicit colours for Windows high-contrast and dark-mode native popups */
-  background-color: var(--color-sheet);
-  color: var(--color-ink);
-}
-}
-
-@layer components {
-  /* Native selects ignore line-height; match the inputs' 50px box */
-  select.field {
-    height: 3.125rem;
-    padding-top: 0;
-    padding-bottom: 0;
-  }
+  .spinner { animation-duration: 2s; }
 }

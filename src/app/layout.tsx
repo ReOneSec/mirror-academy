@@ -1,20 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Anek_Latin } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-// One family with a width axis: wide for display, normal for reading, narrow for dense labels.
-// Anek is by Ek Type, an Indian foundry; Anek Bangla shares its design if a Bengali version follows.
-const anek = Anek_Latin({
-  variable: "--font-anek",
+// Geist for everything, Geist Mono for IDs and figures that must line up.
+// The same pair the Mirror Academy Admissions Page uses (see DESIGN.md).
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
   display: "swap",
-  axes: ["wdth"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Mirror Academy, Berhampore | Reflect Your Strength!",
   description:
-    "Mirror Academy, Berhampore: coaching for WBPSC, WBCS and related exams since 2018. Send an enquiry or call 9732424300.",
+    "Mirror Academy, Berhampore: coaching for WBPSC, WBCS and related exams since 2018. Register as a student or call 9732424300.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://mirroracademy.in"
   ),
@@ -28,14 +35,27 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#021b44",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f5f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#1d1d1f" },
+  ],
+  colorScheme: "light dark",
 };
+
+// Applies a theme the visitor picked with the nav's toggle before first paint.
+const THEME_SCRIPT = `try{var t=localStorage.getItem('ma-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${anek.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+    <html
+      lang="en"
+      className={`${geist.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }

@@ -1,44 +1,66 @@
 # Mirror Academy: design notes
 
-Notes for whoever touches the landing page next, so a later pass builds on these choices
-instead of drifting back to a template.
+Notes for whoever touches the site next, so a later pass builds on these choices instead of
+drifting back to a template.
 
 ## Subject
 
 A coaching institute in Berhampore preparing students for WBPSC/WBCS, police, medical and
-engineering entrance, and teaching exams. Most visitors are students on phones. The page has
-one job: get an enquiry or a call.
+engineering entrance, and teaching exams. Most visitors are students on phones. The site has one
+job: get a registration or a call.
+
+## One look, two places
+
+The public site shares its design with the **Mirror Academy Admissions Page** (the shareable
+one-pager). The owner liked that Page's theme, font, cards and overall feel, so the site now uses
+the same kit. Change the kit in one place and keep both in step.
+
+- `src/app/kit.css`: the shared kit (tokens, nav, hero, callout, stats, section heads, cards,
+  steps, footer). Imported into Tailwind's `components` layer, so utilities still win.
+- `src/app/globals.css`: site components built on the kit's tokens (filter chips, tabs, course
+  rows, form fields, batch choices, registration panel, map card).
+- The admin portal (`/admin`) keeps its own utility-built light styling and is not themed.
 
 ## Tokens
 
-| Name  | Hex       | Use |
-|-------|-----------|-----|
-| ink   | `#021B44` | Logo navy. Text on paper, the dark bands |
-| ink-2 | `#0B2F6B` | One step up on navy: hover and pressed states |
-| gold  | `#FFC501` | Logo gold. Primary action on navy, filled bubbles, the mirror line |
-| paper | `#F5F7FB` | Cool exam-paper white, deliberately not cream |
-| rule  | `#CBD4E4` | Answer-sheet blue for hairlines and field borders |
-| muted | `#465470` | Secondary text on paper |
+Neutral, Apple-like greys that switch with the visitor's light or dark setting (`light-dark()`),
+plus a toggle in the nav that remembers the choice (`localStorage` key `ma-theme`).
 
-Type: one family, Anek Latin (Ek Type, an Indian foundry; Anek Bangla matches it if a Bengali
-version follows). The width axis does the work of a second face: `wdth 125` for display, like
-the logo's wide MIRROR; `100` for reading.
+| Token | Light | Dark | Use |
+|-------|-------|------|-----|
+| `--fill-primary-on` | `#F5F5F7` | `#1D1D1F` | Page background |
+| `--fill-primary` | `#1D1D1F` | `#F5F5F7` | Primary capsule, active chip and tab |
+| `--fill-tertiary` | `#E8E8EA` | `#2A2A2D` | Cards and panels |
+| `--text-secondary` | `#636366` | `#A1A1A6` | Supporting text |
+| `--hero-surface` | `#161F39` | same | The hero's deep navy, always light text |
+| `--fill-system-green` | `#00A665` | same | Picked course, "application received" |
+
+Brand navy and gold live in the logo; the UI stays neutral so the logo carries the colour.
+Radii: 12 / 16 / 24 / 32px and pill. Breakpoints: 600, 761, 900px.
+
+## Type
+
+Geist for everything, Geist Mono for registration IDs. One size scale from the kit
+(caption 12, small 14, body 15, heading 20, title 26–32, display 34–48), every style at 130%
+line height. Medium (500) for headings, never heavier than 600.
+
+## Layout of the home page
+
+Glass pill nav (logo, section tabs with the one in view marked, call capsule, theme toggle) →
+navy hero with logo, eyebrow, tagline and an "Admissions open" callout → stats row → Courses
+(stream filter chips, one card per stream, each course a row that pre-fills registration) →
+Why us (three cards) → How admission works (numbered steps) → Register (tabs for register /
+check my registration, beside an "After you register" callout) → Contact (three cards, the
+Google Maps embed in a card, closing callout) → footer with section chips and the admin link.
 
 ## Principles
 
-- One bold move: the tagline set wide and heavy over a gold mirror line, with its reflection
-  underneath. Everything else stays quiet.
-- The subject's own vernacular: courses are picked on an answer sheet (a bubble per course),
-  and marking a bubble fills the enquiry form. Lists are ruled like a notice, not boxed in cards.
-- Structure means something: only the admission steps are numbered, because only they are a
-  sequence.
-- Motion: one page-load moment (the mirror line draws, the reflection rises). Nothing else
-  moves unless the visitor acts. Reduced motion turns it off.
-- Icons: Kubai Icons two-tone set (MIT), one family at even sizes, coloured from two CSS
-  variables (`--ki-a`, `--ki-b`) so the same set works on paper and on navy.
-- One focus ring everywhere (2px outline). Fields draw it over their border, so an invalid
-  field never shows a border plus a ring.
-- No gradient blobs, glass, glows, floating chips, all-caps eyebrows or arrows on buttons.
+- Content comes from `src/lib/constants.ts`; nothing is invented.
+- `src/app/api/enquiry/route.ts` is never changed by design work.
+- Only the admission steps are numbered, because only they are a sequence.
+- One primary capsule per screen; everything else is a quiet bordered button or a link.
+- Touch targets at least 44px on phones; inputs at 16px so iOS does not zoom.
+- No gradient blobs, glows or decorative motion. Reduced motion is respected.
 
 ## Pending owner input
 

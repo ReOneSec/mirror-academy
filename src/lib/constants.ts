@@ -11,6 +11,8 @@ export const SITE = {
   phoneDisplay: '973 242 4300',
   email: 'mirrorexams@gmail.com',
   emailMailto: 'mailto:mirrorexams@gmail.com',
+  whatsappUrl:
+    'https://wa.me/919732424300?text=Hi%20Mirror%20Academy%2C%20I%20want%20admission%20details.',
   address:
     'Near Jamindari Koshaikhana more, Majdia West, Gorabazar, Berhampore.',
   mapsUrl:
@@ -94,7 +96,8 @@ export const ALL_COURSES = COURSE_STREAMS.flatMap((s) =>
 
 export const NAV_LINKS = [
   { label: 'Courses', href: '#courses' },
-  { label: 'Why Mirror', href: '#why-mirror' },
+  { label: 'Why us', href: '#why-mirror' },
   { label: 'Admission', href: '#admission' },
+  { label: 'Register', href: '#registration' },
   { label: 'Contact', href: '#contact' },
 ] as const;

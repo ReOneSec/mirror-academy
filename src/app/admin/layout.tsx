@@ -14,5 +14,10 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="min-h-screen bg-slate-50 text-slate-900">{children}</div>;
+  // The admin portal keeps its own light, utility-built styling whatever the site theme.
+  return (
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900" style={{ colorScheme: 'light' }}>
+      {children}
+    </div>
+  );
 }
