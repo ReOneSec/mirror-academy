@@ -1,12 +1,6 @@
-import { Suspense } from 'react';
-import { connection } from 'next/server';
 import Link from 'next/link';
 import { SITE, NAV_LINKS } from '@/lib/constants';
-
-async function CurrentYear() {
-  await connection();
-  return <>{new Date().getFullYear()}</>;
-}
+import DynamicYear from '@/components/DynamicYear';
 
 export default function Footer() {
   return (
@@ -34,17 +28,13 @@ export default function Footer() {
             href="https://epplicon.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold text-[#b45309] hover:underline dark:text-amber-400"
+            className="font-semibold text-[#021b44] underline decoration-[#021b44]/30 underline-offset-4 transition-colors hover:text-[#0b2f6b] hover:decoration-[#0b2f6b] dark:text-slate-200 dark:decoration-slate-500 dark:hover:text-white"
           >
             Epplicon Technologies
           </a>
         </p>
-        <p className="mt-1">
-          Official Site of Mirror Academy &nbsp;|&nbsp; Copyright{' '}
-          <Suspense fallback={null}>
-            <CurrentYear />
-          </Suspense>
-          , All Rights Reserved.
+        <p className="mt-1.5">
+          Official Site of Mirror Academy &nbsp;|&nbsp; Copyright <DynamicYear />, All Rights Reserved.
         </p>
       </div>
     </footer>
