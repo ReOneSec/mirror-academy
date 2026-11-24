@@ -38,22 +38,24 @@ export default function Hero() {
             Coaching for WBPSC, WBCS and related exams in Berhampore, with streams for Medical
             &amp; Engg., Force, Teaching and Mock Interviews.
           </p>
-          <div className="brandhero__actions">
-            <a className="btn-gold" href="#registration">
-              Register as a student
-            </a>
-            <a className="btn-glass" href={SITE.phoneTel}>
-              Call<span className="brandhero__num tabular-nums">{SITE.phoneDisplay}</span>
-            </a>
-            <a
-              className="btn-glass"
-              href={SITE.whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              WhatsApp
-            </a>
-          </div>
+          <aside className="callout brandhero__card" aria-label="Admissions">
+            <p className="callout__head">Admissions open</p>
+            <p className="callout__lead">
+              <strong>Register online</strong> and we&rsquo;ll call you back, or call or WhatsApp{' '}
+              <span className="tabular-nums">{SITE.phoneDisplay}</span>.
+            </p>
+            <div className="links">
+              <a className="btn btn--primary" href="#registration">
+                Register as a student
+              </a>
+              <a className="btn" href={SITE.phoneTel}>
+                Call
+              </a>
+              <a className="btn" href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
+                WhatsApp
+              </a>
+            </div>
+          </aside>
           <p className="brandhero__meta">Gorabazar, Berhampore · Murshidabad</p>
         </div>
       </section>

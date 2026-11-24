@@ -129,28 +129,17 @@
     letter-spacing: -0.01em;
   }
   .brandhero__sub { max-width: 40ch; font-size: clamp(15px, 1.3vw, 17px); line-height: 1.45; color: var(--hero-text-muted); }
-  .brandhero__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  /* The admissions card: the site's white callout, solid on the navy surface */
+  .brandhero__card {
+    max-width: 460px;
+    margin-top: 8px;
+    background: light-dark(#fff, #1d1d1f);
+    border-color: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.12));
+    box-shadow: 0 18px 48px rgb(1 16 42 / 0.45);
+  }
+  .brandhero__card .tabular-nums { white-space: nowrap; }
   .brandhero__meta { font-size: var(--size-small); color: var(--hero-text-muted); }
 
-  .btn-gold, .btn-glass {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 48px;
-    padding: 0 22px;
-    border-radius: var(--r-pill);
-    font: var(--type-body-strong);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: transform var(--dur-quick) ease, box-shadow var(--dur-quick) ease, background-color var(--dur-quick) ease;
-  }
-  .btn-gold { background: var(--gold); color: var(--navy); box-shadow: 0 10px 30px rgb(255 197 1 / 0.28); }
-  .btn-gold:hover { box-shadow: 0 12px 36px rgb(255 197 1 / 0.4), inset 0 0 0 100px rgb(255 255 255 / 0.12); }
-  .btn-gold:active, .btn-glass:active { transform: scale(0.97); }
-  .btn-glass { background: rgb(255 255 255 / 0.1); color: var(--hero-text); border: 1px solid var(--hero-glass-stroke); }
-  .btn-glass:hover { background: rgb(255 255 255 / 0.18); }
-  .btn-glass[target="_blank"]::after { content: "↗"; font-size: 12px; color: var(--hero-text-muted); }
 
   .brandhero__emblem {
     grid-area: emblem;
@@ -202,11 +191,11 @@
         linear-gradient(170deg, #0b2a5e 0%, #021b44 55%, #01102a 100%);
     }
     .brandhero__emblem { width: min(190px, 52vw); margin: 14px 0 22%; }
-    .brandhero__num { display: none; }
     .brandhero__copy { gap: 14px; }
-    .brandhero__actions { width: 100%; }
-    .brandhero__actions .btn-gold { flex: 1 1 100%; }
-    .brandhero__actions .btn-glass { flex: 1 1 calc(50% - 5px); padding-inline: 12px; }
+    .brandhero__card { max-width: none; width: 100%; }
+    .brandhero__card .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .brandhero__card .links .btn { justify-content: center; justify-self: stretch; }
+    .brandhero__card .links .btn--primary { grid-column: 1 / -1; min-height: 48px; }
   }
   @media (prefers-reduced-motion: reduce) { .brandhero__logo { animation: none; } }
 

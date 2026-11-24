@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState, type MouseEvent } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
 import { COURSE_EVENT, chooseCourse } from '@/lib/courseSelection';
 
@@ -22,8 +22,9 @@ function CoursesFromUrl() {
 }
 
 function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<typeof useSearchParams> }) {
-  const router = useRouter();
   const marked = useMarkedCourse();
+  // history.replaceState updates useSearchParams on the client (Next 14.1+), so a filter switch
+  // re-renders instantly with no server round trip.
   const activeStream = searchParams.get('stream') ?? 'all';
 
   const filters = [
@@ -41,7 +42,7 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
     if (slug === 'all') params.delete('stream');
     else params.set('stream', slug);
     const qs = params.toString();
-    router.replace(qs ? `/?${qs}#courses` : '/#courses', { scroll: false });
+    window.history.replaceState(null, '', qs ? `/?${qs}#courses` : '/#courses');
   }
 
   function courseHref(slug: string) {

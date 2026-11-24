@@ -71,5 +71,6 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 
 ## Brand hero (2026-11-24)
 - The hero (`.brandhero` in globals.css, `src/components/Hero.tsx`) leads with the brand: "Mirror Academy" is the h1 (Academy in gold #FFC501), the round emblem `public/brand/logo-round.webp` sits right with a gold ring, halo and a faint mirrored reflection. Deep navy gradient surface (#0b2a5e → #021b44 → #01102a).
-- One gold primary action (`.btn-gold`, Register), glass secondaries (`.btn-glass`, Call and WhatsApp). On phones the emblem sits on top and Call drops its number.
+- Actions live in the white admissions callout (`.callout.brandhero__card`: Register, Call, WhatsApp), restored at the user's request. On phones the emblem sits on top, Register spans the card and Call and WhatsApp share a row.
+- Course stream chips filter client-side via history.replaceState (no server round trip).
 - Nav shows the round logo at 44px with a gold ring, plus the "Mirror Academy" wordmark from 1100px.
