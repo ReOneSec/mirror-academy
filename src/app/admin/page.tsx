@@ -409,7 +409,7 @@ export default function AdminPage() {
 
       <header className="nav glass adm-nav">
         <Link href="/" className="nav__brand" aria-label={`${SITE.name} website`} target="_blank">
-          <Image src="/brand/logo.jpg" alt="" width={44} height={44} priority />
+          <Image src="/brand/logo-round.webp" alt="" width={88} height={88} priority />
         </Link>
         <span className="adm-nav__title">Admin</span>
         <span className="adm-nav__user" title={user?.email ?? undefined}>

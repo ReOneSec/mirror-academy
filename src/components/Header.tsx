@@ -33,7 +33,10 @@ export default function Header() {
   return (
     <header className="nav glass">
       <a href="#top" className="nav__brand" aria-label={`${SITE.name}, back to top`}>
-        <Image src="/brand/logo.jpg" alt="" width={44} height={44} priority />
+        <Image src="/brand/logo-round.webp" alt="" width={88} height={88} priority />
+        <span className="nav__word" aria-hidden="true">
+          Mirror <b>Academy</b>
+        </span>
       </a>
       <nav className="seg" aria-label="Sections">
         {NAV_LINKS.map((link) => (

@@ -4,44 +4,58 @@ import { SITE, COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
 export default function Hero() {
   return (
     <>
-      <section className="hero hero--site" aria-labelledby="hero-heading">
-        <div className="hero__copy">
+      <section className="brandhero" aria-labelledby="hero-heading">
+        <div className="brandhero__emblem" aria-hidden="true">
+          <span className="brandhero__halo" />
           <Image
-            className="hero__logo"
-            src="/brand/logo.jpg"
-            alt="Mirror Academy logo"
-            width={72}
-            height={72}
+            className="brandhero__logo"
+            src="/brand/logo-round.webp"
+            alt=""
+            width={640}
+            height={640}
+            sizes="(min-width: 900px) 380px, 220px"
             priority
           />
-          <p className="hero__eyebrow">
-            {SITE.name} · Since {SITE.since}
+          <Image
+            className="brandhero__mirror"
+            src="/brand/logo-round.webp"
+            alt=""
+            width={640}
+            height={640}
+            sizes="(min-width: 900px) 380px, 220px"
+          />
+        </div>
+
+        <div className="brandhero__copy">
+          <p className="brandhero__eyebrow">
+            <span className="brandhero__live" /> Admissions open · Since {SITE.since}
           </p>
-          <h1 id="hero-heading">{SITE.tagline}</h1>
-          <p className="hero__sub">
+          <h1 id="hero-heading" className="brandhero__name">
+            Mirror <span>Academy</span>
+          </h1>
+          <p className="brandhero__tagline">{SITE.tagline}</p>
+          <p className="brandhero__sub">
             Coaching for WBPSC, WBCS and related exams in Berhampore, with streams for Medical
             &amp; Engg., Force, Teaching and Mock Interviews.
           </p>
-          <p className="hero__meta">Gorabazar, Berhampore · Murshidabad</p>
-        </div>
-        <aside className="callout" aria-label="Admissions">
-          <p className="callout__head">Admissions open</p>
-          <p className="callout__lead">
-            <strong>Register online</strong> and we&rsquo;ll call you back, or call or WhatsApp{' '}
-            <span className="tabular-nums">{SITE.phoneDisplay}</span>.
-          </p>
-          <div className="links">
-            <a className="btn btn--primary" href="#registration">
+          <div className="brandhero__actions">
+            <a className="btn-gold" href="#registration">
               Register as a student
             </a>
-            <a className="btn" href={SITE.phoneTel}>
-              Call
+            <a className="btn-glass" href={SITE.phoneTel}>
+              Call<span className="brandhero__num tabular-nums">{SITE.phoneDisplay}</span>
             </a>
-            <a className="btn" href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              className="btn-glass"
+              href={SITE.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               WhatsApp
             </a>
           </div>
-        </aside>
+          <p className="brandhero__meta">Gorabazar, Berhampore · Murshidabad</p>
+        </div>
       </section>
 
       <div className="stats" aria-label="At a glance">
