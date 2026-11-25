@@ -35,7 +35,7 @@ export default function AdminPage() {
 
   // Filters
   const [search, setSearch] = useState('');
-  const [batchFilter, setBatchFilter] = useState<'all' | 'Free batch' | 'Paid batch'>('all');
+  const [batchFilter, setBatchFilter] = useState<'all' | 'Free batch' | 'Paid batch' | 'Interview batch'>('all');
   const [streamFilter, setStreamFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [genderFilter, setGenderFilter] = useState('all');
@@ -237,10 +237,11 @@ export default function AdminPage() {
     const total = registrations.length;
     const free = registrations.filter((r) => r.batchType === 'Free batch').length;
     const paid = registrations.filter((r) => r.batchType === 'Paid batch').length;
+    const interview = registrations.filter((r) => r.batchType === 'Interview batch').length;
     const pending = registrations.filter((r) => r.status === 'new').length;
     const contacted = registrations.filter((r) => r.status === 'contacted').length;
     const admitted = registrations.filter((r) => r.status === 'admitted').length;
-    return { total, free, paid, pending, contacted, admitted };
+    return { total, free, paid, interview, pending, contacted, admitted };
   }, [registrations]);
 
   function exportToCSV() {
@@ -446,6 +447,10 @@ export default function AdminPage() {
               <span className="stat__label">Paid batch</span>
             </div>
             <div className="stat">
+              <span className="stat__fig">{stats.interview}</span>
+              <span className="stat__label">Interview batch</span>
+            </div>
+            <div className="stat">
               <span className="stat__fig adm-fig--new">{stats.pending}</span>
               <span className="stat__label">Waiting for a call</span>
             </div>
@@ -482,6 +487,7 @@ export default function AdminPage() {
                 <option value="all">All batches</option>
                 <option value="Free batch">Free batch</option>
                 <option value="Paid batch">Paid batch</option>
+                <option value="Interview batch">Interview batch</option>
               </select>
               <select
                 value={streamFilter}

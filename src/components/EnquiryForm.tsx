@@ -290,7 +290,7 @@ export default function EnquiryForm() {
                   </div>
                 )}
 
-                {/* Batch Selection: 2 options (Free batch / Paid batch) */}
+                {/* Batch Selection: 3 options (Free / Paid / Interview batch) */}
                 <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
                   <legend className="field-label">
                     <span>
@@ -319,6 +319,17 @@ export default function EnquiryForm() {
                         Paid batch <span className="pill">Full course</span>
                       </span>
                       <p>Complete exam curriculum, daily mock tests and dedicated faculty.</p>
+                    </button>
+                    <button
+                      type="button"
+                      className="choice"
+                      aria-pressed={batchType === 'Interview batch'}
+                      onClick={() => setBatchType('Interview batch')}
+                    >
+                      <span className="choice__top">
+                        Interview batch <span className="pill">Mock interview</span>
+                      </span>
+                      <p>Mock interview sessions for TET, SSC and police recruitment interviews.</p>
                     </button>
                   </div>
                 </fieldset>

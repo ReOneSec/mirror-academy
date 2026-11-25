@@ -1,4 +1,4 @@
-export type BatchType = 'Free batch' | 'Paid batch';
+export type BatchType = 'Free batch' | 'Paid batch' | 'Interview batch';
 export type GenderType = 'Male' | 'Female';
 
 export interface StudentRegistrationData {

@@ -3,7 +3,7 @@ const STEPS = [
   {
     eyebrow: 'Register',
     title: 'Register as a student',
-    body: 'Choose a Free batch or Paid batch, fill in your details and submit your registration.',
+    body: 'Choose a Free, Paid or Interview batch, fill in your details and submit your registration.',
   },
   {
     eyebrow: 'Call back',
