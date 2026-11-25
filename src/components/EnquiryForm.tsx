@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { SITE, COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
 import { COURSE_EVENT, announceCourse } from '@/lib/courseSelection';
 import { CheckCircleIcon, AlertCircleIcon } from '@/components/Icons';
+import Turnstile, { TURNSTILE_SITE_KEY } from '@/components/Turnstile';
+import { downloadSlip, type SlipData } from '@/lib/slip';
 import type {
   BatchType,
   GenderType,
@@ -29,6 +31,17 @@ export default function EnquiryForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [lastRegisteredPhone, setLastRegisteredPhone] = useState<string>('');
+  const [lastSlip, setLastSlip] = useState<SlipData | null>(null);
+  const [duplicate, setDuplicate] = useState(false);
+  const pendingRef = useRef<Record<string, unknown> | null>(null);
+
+  // Turnstile: each token works once, so the widget is remounted (new key) after every submit.
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileKey, setTurnstileKey] = useState(0);
+  function resetTurnstile() {
+    setTurnstileToken('');
+    setTurnstileKey((k) => k + 1);
+  }
 
   const formRef = useRef<HTMLFormElement>(null);
   const dirtyRef = useRef(false);
@@ -115,41 +128,59 @@ export default function EnquiryForm() {
       return;
     }
 
+    await submitRegistration({ name, phone, courseSlug, batchType, gender, address, message });
+  }
+
+  async function submitRegistration(payload: Record<string, unknown>, allowDuplicate = false) {
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setStatus('error');
+      setErrorMessage('Please wait for the security check to finish, then submit again.');
+      return;
+    }
+
     setStatus('submitting');
+    setDuplicate(false);
+    setErrorMessage('');
 
     try {
-      const turnstileToken =
-        (window as unknown as Record<string, unknown>).turnstileToken as string | undefined;
-
       const res = await fetch('/api/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          phone,
-          courseSlug,
-          batchType,
-          gender,
-          address,
-          message,
-          turnstileToken: turnstileToken ?? '',
-        }),
+        body: JSON.stringify({ ...payload, turnstileToken, allowDuplicate }),
       });
 
       const result: EnquiryResponse = await res.json();
+      resetTurnstile();
 
       if (result.success) {
+        const course = ALL_COURSES.find((c) => c.slug === payload.courseSlug);
+        setLastSlip({
+          id: result.id ?? '',
+          name: String(payload.name),
+          phone: String(payload.phone),
+          courseName: course?.name ?? String(payload.courseSlug),
+          stream: course?.stream ?? '',
+          batchType: String(payload.batchType),
+          createdAt: result.createdAt ?? new Date().toISOString(),
+        });
+        pendingRef.current = null;
         setStatus('success');
-        setLastRegisteredPhone(phone);
+        setLastRegisteredPhone(String(payload.phone));
         setAddressText('');
         setMessageText('');
         dirtyRef.current = false;
         formRef.current?.reset();
+      } else if (result.duplicate) {
+        pendingRef.current = payload;
+        setDuplicate(true);
+        setStatus('error');
+        setErrorMessage(result.message);
       } else {
         setStatus('error');
         setErrorMessage(result.message || 'Something went wrong. Please try again.');
       }
     } catch {
+      resetTurnstile();
       setStatus('error');
       setErrorMessage('Could not connect to the server. Check your connection and try again.');
     }
@@ -261,10 +292,19 @@ export default function EnquiryForm() {
                   Your registration is with Mirror Academy. We will call you back soon to confirm batch timings.
                 </p>
                 <div className="links">
+                  {lastSlip?.id && !lastSlip.id.startsWith('dev-') && (
+                    <button
+                      type="button"
+                      onClick={() => downloadSlip(lastSlip)}
+                      className="btn btn--primary"
+                    >
+                      Download registration slip
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => switchToLookupWithPhone(lastRegisteredPhone)}
-                    className="btn btn--primary"
+                    className="btn"
                   >
                     See your registration
                   </button>
@@ -283,10 +323,38 @@ export default function EnquiryForm() {
                 noValidate
                 className="form"
               >
-                {status === 'error' && (
+                {status === 'error' && !duplicate && (
                   <div className="notice notice--error" role="alert" aria-live="polite">
                     <AlertCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
                     <p>{errorMessage}</p>
+                  </div>
+                )}
+
+                {duplicate && (
+                  <div className="notice notice--warn stack" role="alert" aria-live="polite">
+                    <p>
+                      <strong>Already registered.</strong> {errorMessage}
+                    </p>
+                    <div className="links">
+                      <button
+                        type="button"
+                        className="btn btn--primary"
+                        onClick={() =>
+                          switchToLookupWithPhone(String(pendingRef.current?.phone ?? ''))
+                        }
+                      >
+                        Check my registration
+                      </button>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={() =>
+                          pendingRef.current && submitRegistration(pendingRef.current, true)
+                        }
+                      >
+                        Register again anyway
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -484,8 +552,8 @@ export default function EnquiryForm() {
                   {fieldError('message')}
                 </div>
 
-                {/* Security verification container */}
-                <div id="turnstile-container" aria-label="Security check" />
+                {/* Security check (Cloudflare Turnstile), shown when the site key is set */}
+                <Turnstile key={turnstileKey} onToken={setTurnstileToken} />
 
                 <button
                   type="submit"
@@ -623,9 +691,14 @@ export default function EnquiryForm() {
                           </div>
                         )}
                       </dl>
-                      <p className="fineprint" style={{ fontSize: 'var(--size-caption)' }}>
-                        Registration ID <span className="font-mono">{record.id}</span>
-                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="fineprint" style={{ fontSize: 'var(--size-caption)' }}>
+                          Registration ID <span className="font-mono">{record.id}</span>
+                        </p>
+                        <button type="button" className="btn" onClick={() => downloadSlip(record)}>
+                          Download slip
+                        </button>
+                      </div>
                     </article>
                   ))}
                 </div>

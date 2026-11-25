@@ -54,7 +54,9 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 # Site URL
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# Optional: Cloudflare Turnstile
+# Cloudflare Turnstile (bot protection). When the secret is set, every registration
+# must pass the check; set both in production.
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<your-turnstile-site-key>
 TURNSTILE_SECRET_KEY=<your-turnstile-secret>
 ```
 

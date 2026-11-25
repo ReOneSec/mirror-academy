@@ -24,6 +24,8 @@ export interface EnquiryResponse {
   message: string;
   id?: string;
   createdAt?: string;
+  /** True when this phone already has a live registration for the same course. */
+  duplicate?: boolean;
 }
 
 export interface RegistrationRecord {
@@ -39,6 +41,9 @@ export interface RegistrationRecord {
   message?: string | null;
   status: string;
   createdAt: string;
+  /** Admin only: the team's own notes and the next follow-up date (YYYY-MM-DD). */
+  adminNotes?: string | null;
+  followUpDate?: string | null;
 }
 
 export interface LookupResponse {
