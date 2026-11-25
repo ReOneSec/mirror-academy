@@ -3,8 +3,8 @@ import { SITE } from '@/lib/constants';
 // Every answer restates what the site already says; nothing new is promised here.
 const QUESTIONS = [
   {
-    q: 'What is the difference between the Free batch and the Paid batch?',
-    a: 'The Free batch is an orientation batch, so you can see how we teach before you commit. The Paid batch is the full course. Pick either one when you register.',
+    q: 'What is the difference between the Free, Paid and Interview batches?',
+    a: 'The Free batch is an orientation batch, so you can see how we teach before you commit. The Paid batch is the full course. The Interview batch is mock interview practice for TET, SSC and police interviews. Pick one when you register.',
   },
   {
     q: 'How do I register?',

@@ -52,7 +52,10 @@ export async function POST(request: NextRequest) {
   const name = (typeof body.name === 'string' ? body.name : '').trim();
   const phone = (typeof body.phone === 'string' ? body.phone : '').trim();
   const courseSlug = typeof body.courseSlug === 'string' ? body.courseSlug : '';
-  const batchType = body.batchType === 'Paid batch' ? 'Paid batch' : 'Free batch';
+  const batchType =
+    body.batchType === 'Paid batch' || body.batchType === 'Interview batch'
+      ? body.batchType
+      : 'Free batch';
   const gender = (typeof body.gender === 'string' ? body.gender : '').trim();
   const address = (typeof body.address === 'string' ? body.address : '').trim();
   const message = (typeof body.message === 'string' ? body.message : '').trim();
