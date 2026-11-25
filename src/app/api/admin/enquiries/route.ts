@@ -41,7 +41,9 @@ export async function GET(request: NextRequest) {
     const adminClient = createAdminClient();
     const { data, error } = await adminClient
       .from('enquiries')
-      .select('id, name, phone, course_slug, batch_type, gender, address, message, status, created_at')
+      .select(
+        'id, name, phone, course_slug, batch_type, gender, address, message, status, created_at, admin_notes, follow_up_date'
+      )
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -73,6 +75,8 @@ function formatRegistrations(rows: Array<{
   message: string | null;
   status: string | null;
   created_at: string;
+  admin_notes: string | null;
+  follow_up_date: string | null;
 }>) {
   const coursesMap = new Map(ALL_COURSES.map((c) => [c.slug, c]));
 
@@ -91,6 +95,8 @@ function formatRegistrations(rows: Array<{
       message: row.message,
       status: row.status ?? 'new',
       createdAt: row.created_at,
+      adminNotes: row.admin_notes,
+      followUpDate: row.follow_up_date,
     };
   });
 
@@ -109,7 +115,7 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  let body: { id?: string; status?: string };
+  let body: { id?: string; status?: string; adminNotes?: unknown; followUpDate?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -127,19 +133,53 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const validStatuses = ['new', 'contacted', 'admitted', 'cancelled'];
-  if (!status || !validStatuses.includes(status)) {
-    return NextResponse.json(
-      { success: false, message: `Status must be one of: ${validStatuses.join(', ')}` },
-      { status: 400 }
-    );
+  const update: { status?: string; admin_notes?: string | null; follow_up_date?: string | null } = {};
+
+  if (status !== undefined) {
+    const validStatuses = ['new', 'contacted', 'admitted', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json(
+        { success: false, message: `Status must be one of: ${validStatuses.join(', ')}` },
+        { status: 400 }
+      );
+    }
+    update.status = status;
+  }
+
+  if (body.adminNotes !== undefined) {
+    if (body.adminNotes !== null && typeof body.adminNotes !== 'string') {
+      return NextResponse.json({ success: false, message: 'Notes must be text.' }, { status: 400 });
+    }
+    const notes = (body.adminNotes ?? '').trim();
+    if (notes.length > 1000) {
+      return NextResponse.json(
+        { success: false, message: 'Notes cannot exceed 1000 characters.' },
+        { status: 400 }
+      );
+    }
+    update.admin_notes = notes || null;
+  }
+
+  if (body.followUpDate !== undefined) {
+    const d = body.followUpDate;
+    if (d !== null && d !== '' && (typeof d !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(d))) {
+      return NextResponse.json(
+        { success: false, message: 'Follow-up date must be YYYY-MM-DD.' },
+        { status: 400 }
+      );
+    }
+    update.follow_up_date = d ? (d as string) : null;
+  }
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ success: false, message: 'Nothing to update.' }, { status: 400 });
   }
 
   try {
     const adminClient = createAdminClient();
     const { error } = await adminClient
       .from('enquiries')
-      .update({ status })
+      .update(update)
       .eq('id', id);
 
     if (error) {
@@ -152,8 +192,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Status updated successfully.',
-      status,
+      message: 'Registration updated.',
     });
   } catch (err) {
     console.error('Admin PATCH error:', err);

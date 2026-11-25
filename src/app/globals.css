@@ -520,3 +520,20 @@
     body:has(.actionbar) { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   }
 }
+
+@layer components {
+  /* Duplicate registration warning */
+  .notice--warn { display: grid; border-color: var(--stroke-system-orange); }
+  .notice--warn strong { color: var(--fill-system-orange); font-weight: var(--weight-medium); }
+
+  /* Turnstile widget sits full width above the submit button */
+  .turnstile { min-height: 65px; }
+
+  /* Admin: follow-up editor in the detail sheet, follow-up hint in the table */
+  .adm-follow { display: grid; gap: 12px; padding-top: 16px; border-top: 1px solid var(--stroke-secondary); }
+  .adm-follow textarea { min-height: 96px; resize: vertical; }
+  .adm-follow__row { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+  .adm-follow__row > label { flex: 1 1 180px; }
+  .adm-due { display: block; margin-top: 4px; font: var(--type-caption); color: var(--text-secondary); }
+  .adm-due[data-due="true"] { color: var(--fill-system-orange); font-weight: var(--weight-medium); }
+}

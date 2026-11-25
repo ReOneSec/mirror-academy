@@ -81,3 +81,9 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Phones (≤760px) get a fixed glass action bar (`MobileActionBar.tsx`): Register, Call, WhatsApp.
 - SEO: EducationalOrganization JSON-LD on the home page, `sitemap.ts`, `robots.ts` (disallows /admin and /api), brand icon/favicon from the round logo, canonical and en_IN OG locale.
 - Removed the Next.js starter SVGs.
+
+## Follow-up, slip, duplicates, Turnstile (2026-11-26)
+- Admin detail sheet has Team notes + Follow up on date (`AdminFollowUp.tsx`, columns `admin_notes`, `follow_up_date`, migration 003). Table shows "Follow up <date>" (orange when due). Filters: Any day / Registered today / Follow-up due; sort Newest/Oldest. Stats add New today and Follow-ups due.
+- Duplicate check: same phone + course, not cancelled → 409 `duplicate: true`; the form offers Check my registration or Register again anyway (`allowDuplicate`).
+- Registration slip: PNG drawn on canvas (`src/lib/slip.ts`), from the success screen and each lookup result.
+- Turnstile: `Turnstile.tsx` renders when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set; the API refuses missing or failed tokens whenever `TURNSTILE_SECRET_KEY` is set, and fails closed if Cloudflare is unreachable.

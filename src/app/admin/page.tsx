@@ -8,6 +8,26 @@ import { createClient } from '@/lib/supabase/client';
 import { SITE, COURSE_STREAMS } from '@/lib/constants';
 import type { RegistrationRecord } from '@/types';
 import ThemeToggle from '@/components/ThemeToggle';
+import AdminFollowUp from '@/components/AdminFollowUp';
+
+/** Today's date on this device as YYYY-MM-DD (the institute's admins are in IST). */
+function todayKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function dayKey(iso: string): string {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function isOpen(status: string): boolean {
+  return status !== 'admitted' && status !== 'cancelled';
+}
+
+function formatDay(key: string): string {
+  return new Date(`${key}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
 
 const STATUSES = [
   { value: 'new', label: 'New' },
@@ -39,6 +59,8 @@ export default function AdminPage() {
   const [streamFilter, setStreamFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [genderFilter, setGenderFilter] = useState('all');
+  const [dayFilter, setDayFilter] = useState<'all' | 'today' | 'due'>('all');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Selected student detail modal
   const [selectedRecord, setSelectedRecord] = useState<RegistrationRecord | null>(null);
@@ -186,6 +208,29 @@ export default function AdminPage() {
     }
   }
 
+  async function handleFollowUpSave(id: string, adminNotes: string, followUpDate: string) {
+    try {
+      const res = await fetch('/api/admin/enquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, adminNotes, followUpDate: followUpDate || null }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        showToast(data.message || 'Failed to save notes.');
+        return false;
+      }
+      const patch = { adminNotes: adminNotes.trim() || null, followUpDate: followUpDate || null };
+      setRegistrations((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+      setSelectedRecord((prev) => (prev && prev.id === id ? { ...prev, ...patch } : prev));
+      showToast('Notes saved.');
+      return true;
+    } catch {
+      showToast('Network error while saving notes.');
+      return false;
+    }
+  }
+
   async function handleDelete(id: string, name: string) {
     if (!window.confirm(`Are you sure you want to delete the registration for "${name}"?`)) {
       return;
@@ -210,7 +255,11 @@ export default function AdminPage() {
 
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
-    return registrations.filter((r) => {
+    const today = todayKey();
+    const list = registrations.filter((r) => {
+      if (dayFilter === 'today' && dayKey(r.createdAt) !== today) return false;
+      if (dayFilter === 'due' && !(r.followUpDate && r.followUpDate <= today && isOpen(r.status)))
+        return false;
       if (batchFilter !== 'all' && r.batchType !== batchFilter) return false;
       if (streamFilter !== 'all' && r.stream !== streamFilter) return false;
       if (statusFilter !== 'all' && r.status !== statusFilter) return false;
@@ -223,14 +272,17 @@ export default function AdminPage() {
         const matchesCourse = r.courseName.toLowerCase().includes(q);
         const matchesAddress = r.address.toLowerCase().includes(q);
         const matchesMsg = r.message ? r.message.toLowerCase().includes(q) : false;
-        if (!matchesName && !matchesPhone && !matchesCourse && !matchesAddress && !matchesMsg) {
+        const matchesNotes = r.adminNotes ? r.adminNotes.toLowerCase().includes(q) : false;
+        if (!matchesName && !matchesPhone && !matchesCourse && !matchesAddress && !matchesMsg && !matchesNotes) {
           return false;
         }
       }
 
       return true;
     });
-  }, [registrations, batchFilter, streamFilter, statusFilter, genderFilter, search]);
+    const dir = sortOrder === 'newest' ? -1 : 1;
+    return list.sort((a, b) => dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
+  }, [registrations, batchFilter, streamFilter, statusFilter, genderFilter, search, dayFilter, sortOrder]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -241,7 +293,12 @@ export default function AdminPage() {
     const pending = registrations.filter((r) => r.status === 'new').length;
     const contacted = registrations.filter((r) => r.status === 'contacted').length;
     const admitted = registrations.filter((r) => r.status === 'admitted').length;
-    return { total, free, paid, interview, pending, contacted, admitted };
+    const today = todayKey();
+    const newToday = registrations.filter((r) => dayKey(r.createdAt) === today).length;
+    const due = registrations.filter(
+      (r) => r.followUpDate && r.followUpDate <= today && isOpen(r.status)
+    ).length;
+    return { total, free, paid, interview, pending, contacted, admitted, newToday, due };
   }, [registrations]);
 
   function exportToCSV() {
@@ -262,6 +319,8 @@ export default function AdminPage() {
       'Questions / Notes',
       'Status',
       'Registered Date',
+      'Team Notes',
+      'Follow-up Date',
     ];
 
     const escapeCsv = (val: string | null | undefined) => {
@@ -282,6 +341,8 @@ export default function AdminPage() {
       escapeCsv(r.message || ''),
       escapeCsv(r.status),
       escapeCsv(new Date(r.createdAt).toLocaleString('en-IN')),
+      escapeCsv(r.adminNotes || ''),
+      escapeCsv(r.followUpDate || ''),
     ]);
 
     const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
@@ -301,6 +362,7 @@ export default function AdminPage() {
     streamFilter !== 'all' ||
     statusFilter !== 'all' ||
     genderFilter !== 'all' ||
+    dayFilter !== 'all' ||
     Boolean(search);
 
   function resetFilters() {
@@ -309,6 +371,7 @@ export default function AdminPage() {
     setStreamFilter('all');
     setStatusFilter('all');
     setGenderFilter('all');
+    setDayFilter('all');
   }
 
   // 1. Loading screen
@@ -439,6 +502,14 @@ export default function AdminPage() {
               <span className="stat__label">Applications</span>
             </div>
             <div className="stat">
+              <span className="stat__fig">{stats.newToday}</span>
+              <span className="stat__label">New today</span>
+            </div>
+            <div className="stat">
+              <span className="stat__fig adm-fig--new">{stats.due}</span>
+              <span className="stat__label">Follow-ups due</span>
+            </div>
+            <div className="stat">
               <span className="stat__fig">{stats.free}</span>
               <span className="stat__label">Free batch</span>
             </div>
@@ -478,6 +549,25 @@ export default function AdminPage() {
               />
             </label>
             <div className="adm-filters">
+              <select
+                value={dayFilter}
+                onChange={(e) => setDayFilter(e.target.value as typeof dayFilter)}
+                className="field adm-select"
+                aria-label="Filter by day"
+              >
+                <option value="all">Any day</option>
+                <option value="today">Registered today</option>
+                <option value="due">Follow-up due</option>
+              </select>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+                className="field adm-select"
+                aria-label="Sort"
+              >
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
               <select
                 value={batchFilter}
                 onChange={(e) => setBatchFilter(e.target.value as typeof batchFilter)}
@@ -623,6 +713,14 @@ export default function AdminPage() {
                               month: 'short',
                               year: 'numeric',
                             })}
+                            {record.followUpDate && isOpen(record.status) && (
+                              <span
+                                className="adm-due"
+                                data-due={record.followUpDate <= todayKey()}
+                              >
+                                Follow up {formatDay(record.followUpDate)}
+                              </span>
+                            )}
                           </td>
                           <td data-label="Status">
                             <select
@@ -755,6 +853,8 @@ export default function AdminPage() {
                 </div>
               </dl>
             </div>
+
+            <AdminFollowUp key={selectedRecord.id} record={selectedRecord} onSave={handleFollowUpSave} />
 
             <div className="adm-sheet__foot">
               <button type="button" onClick={() => setSelectedRecord(null)} className="btn">

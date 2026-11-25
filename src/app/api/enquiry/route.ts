@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
   const address = (typeof body.address === 'string' ? body.address : '').trim();
   const message = (typeof body.message === 'string' ? body.message : '').trim();
   const turnstileToken = typeof body.turnstileToken === 'string' ? body.turnstileToken : '';
+  const allowDuplicate = body.allowDuplicate === true;
 
   // Validate required fields
   if (!name || name.length > 100) {
@@ -107,9 +108,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Turnstile verification if configured
+  // Turnstile: mandatory whenever TURNSTILE_SECRET_KEY is set. A missing token or a failed
+  // check is refused, and so is a check that cannot reach Cloudflare (fail closed).
   const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-  if (turnstileSecret && turnstileToken) {
+  if (turnstileSecret) {
+    if (!turnstileToken) {
+      return NextResponse.json<EnquiryResponse>(
+        { success: false, message: 'Please complete the security check and try again.' },
+        { status: 403 }
+      );
+    }
+    let verified = false;
     try {
       const verifyRes = await fetch(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
@@ -124,17 +133,18 @@ export async function POST(request: NextRequest) {
         }
       );
       const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
-        return NextResponse.json<EnquiryResponse>(
-          {
-            success: false,
-            message: 'Security verification failed. Please refresh and try again.',
-          },
-          { status: 403 }
-        );
-      }
+      verified = verifyData.success === true;
     } catch {
       console.error('Turnstile verification failed to connect');
+    }
+    if (!verified) {
+      return NextResponse.json<EnquiryResponse>(
+        {
+          success: false,
+          message: 'Security verification failed. Please refresh and try again.',
+        },
+        { status: 403 }
+      );
     }
   }
 
@@ -146,6 +156,28 @@ export async function POST(request: NextRequest) {
     try {
       const { createClient } = await import('@supabase/supabase-js');
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Same phone, same course, not cancelled: warn first, register only if the student insists.
+      if (!allowDuplicate) {
+        const { data: existing } = await supabase
+          .from('enquiries')
+          .select('id')
+          .eq('phone', phone)
+          .eq('course_slug', courseSlug)
+          .neq('status', 'cancelled')
+          .limit(1);
+        if (existing && existing.length > 0) {
+          return NextResponse.json<EnquiryResponse>(
+            {
+              success: false,
+              duplicate: true,
+              message:
+                'This mobile number is already registered for this course. You can check your registration, or register again anyway.',
+            },
+            { status: 409 }
+          );
+        }
+      }
 
       const { data, error } = await supabase
         .from('enquiries')
