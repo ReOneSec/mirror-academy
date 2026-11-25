@@ -10,7 +10,7 @@
 
 1. **Brand-Grounded Landing Page**
    - High-performance, mobile-first design built with Next.js 16 (App Router) and Tailwind CSS.
-   - 4 Examination Streams with 18 authentic courses (Public Services, Medical & Engg., Force, Teaching).
+   - 5 streams with 23 courses (Public Services, Medical & Engg., Force, Teaching, Interview), each with a one-line note on the exam.
    - Verbatim contact details: `Near Jamindari Koshaikhana more, Majdia West, Gorabazar, Berhampore`.
    - Clickable telephone link: `tel:9732424300`.
    - Official email: `mirrorexams@gmail.com`.
@@ -54,9 +54,8 @@ SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
 # Site URL
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# Admin Portal Configuration
-ADMIN_PASSWORD=mirroradmin2018
-ADMIN_SESSION_SECRET=mirror_academy_admin_secret_key_berhampore_2018
+# Optional: Cloudflare Turnstile
+TURNSTILE_SECRET_KEY=<your-turnstile-secret>
 ```
 
 ### Installation & Run
@@ -70,12 +69,11 @@ npm run dev
 Visit:
 - Public Website: [http://localhost:3000](http://localhost:3000)
 - Admin Portal: [http://localhost:3000/admin](http://localhost:3000/admin)
-  - **Email:** ``
-  - **Password:** ``
+  - Sign in with the Supabase Auth admin user you created in the Supabase dashboard.
 
 ---
 
 ## 🔒 Security Best Practices
 - The secret `SUPABASE_SERVICE_ROLE_KEY` is kept strictly server-side and never exposed to the client bundle.
-- The Admin Portal endpoints (`/api/admin/*`) require a cryptographically verified HMAC session token.
+- The Admin Portal endpoints (`/api/admin/*`) require a signed-in Supabase Auth user.
 - Character limits are strictly enforced on both the client and server (`name <= 100`, `address <= 300`, `message <= 400`, `phone = 10 digits`).

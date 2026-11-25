@@ -21,15 +21,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mirror Academy, Berhampore | Reflect Your Strength!",
   description:
-    "Mirror Academy, Berhampore: coaching for WBPSC, WBCS and related exams since 2018. Register as a student or call 9732424300.",
+    "Mirror Academy, Berhampore: coaching for WBCS and WBPSC exams, NEET, JENPAS, JEXPO, WB Police, Agniveer, NET, SET, TET and mock interviews since 2018. Register as a student or call 9732424300.",
+  alternates: { canonical: "/" },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://mirroracademy.in"
   ),
   openGraph: {
     title: "Mirror Academy, Berhampore | Reflect Your Strength!",
     description:
-      "Coaching for WBPSC, WBCS and related exams in Berhampore since 2018.",
+      "Coaching for WBPSC, WBCS, medical and engineering entrance, police and teaching exams in Berhampore since 2018.",
     type: "website",
+    locale: "en_IN",
+    siteName: "Mirror Academy",
     images: ["/brand/logo.jpg"],
   },
 };
