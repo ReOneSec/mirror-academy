@@ -91,7 +91,10 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
                     data-marked={marked === course.slug}
                     aria-label={`Register for ${course.name}`}
                   >
-                    <span translate="no">{course.name}</span>
+                    <span className="course__text">
+                      <span className="course__name" translate="no">{course.name}</span>
+                      {course.about && <span className="course__about">{course.about}</span>}
+                    </span>
                   </a>
                 </li>
               ))}

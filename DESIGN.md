@@ -74,3 +74,10 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Branding is bigger: round logo (`public/brand/logo-round.webp`, 112-160px, white + gold ring) beside the h1 "Mirror Academy" (Academy in gold #FFC501). The tagline is a large subheading. No glow.
 - On phones the logo and name stack, and the callout is full width (Register spans it; Call and WhatsApp share a row).
 - Course stream chips filter client-side via history.replaceState.
+
+## Part A upgrade (2026-11-25)
+- Course rows carry an optional `about` line (constants.ts) naming the exam and its conducting body; left blank where unsure (FOOD, mock interviews).
+- FAQ section (`Faq.tsx`) before Contact, native `<details>` in one card; answers only restate what the site already says. Added to nav.
+- Phones (≤760px) get a fixed glass action bar (`MobileActionBar.tsx`): Register, Call, WhatsApp.
+- SEO: EducationalOrganization JSON-LD on the home page, `sitemap.ts`, `robots.ts` (disallows /admin and /api), brand icon/favicon from the round logo, canonical and en_IN OG locale.
+- Removed the Next.js starter SVGs.

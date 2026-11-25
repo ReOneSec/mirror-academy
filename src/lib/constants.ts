@@ -25,6 +25,8 @@ export interface Course {
   name: string;
   slug: string;
   sortOrder: number;
+  /** One plain line on what the exam is, from the public notice of the body that runs it. */
+  about?: string;
 }
 
 export interface CourseStream {
@@ -38,42 +40,42 @@ export const COURSE_STREAMS: CourseStream[] = [
     stream: 'Public Services',
     slug: 'public-services',
     courses: [
-      { name: 'WBCS', slug: 'wbcs', sortOrder: 1 },
-      { name: 'MVI', slug: 'mvi', sortOrder: 2 },
-      { name: 'IDO', slug: 'ido', sortOrder: 3 },
+      { name: 'WBCS', slug: 'wbcs', sortOrder: 1, about: 'West Bengal Civil Service (Exe.) exam, WBPSC' },
+      { name: 'MVI', slug: 'mvi', sortOrder: 2, about: 'Motor Vehicle Inspector (Technical), WBPSC' },
+      { name: 'IDO', slug: 'ido', sortOrder: 3, about: 'Industrial Development Officer, WBPSC' },
       { name: 'FOOD', slug: 'food', sortOrder: 4 },
-      { name: 'FOOD SI', slug: 'food-si', sortOrder: 5 },
-      { name: 'SCHOOL SI', slug: 'school-si', sortOrder: 6 },
-      { name: 'Miscellaneous', slug: 'miscellaneous', sortOrder: 7 },
-      { name: 'Clerkship', slug: 'clerkship', sortOrder: 8 },
+      { name: 'FOOD SI', slug: 'food-si', sortOrder: 5, about: 'Sub-Inspector, Food & Supplies, WBPSC' },
+      { name: 'SCHOOL SI', slug: 'school-si', sortOrder: 6, about: 'Sub-Inspector of Schools, WBPSC' },
+      { name: 'Miscellaneous', slug: 'miscellaneous', sortOrder: 7, about: 'Miscellaneous Services Recruitment, WBPSC' },
+      { name: 'Clerkship', slug: 'clerkship', sortOrder: 8, about: 'Clerkship exam, WBPSC' },
     ],
   },
   {
     stream: 'Medical & Engg.',
     slug: 'medical-engg',
     courses: [
-      { name: 'NEET', slug: 'neet', sortOrder: 9 },
-      { name: 'JENPAS UG', slug: 'jenpas-ug', sortOrder: 10 },
-      { name: 'ANM-GNM', slug: 'anm-gnm', sortOrder: 11 },
-      { name: 'JEXPO', slug: 'jexpo', sortOrder: 12 },
+      { name: 'NEET', slug: 'neet', sortOrder: 9, about: 'National entrance for MBBS, BDS and allied courses, NTA' },
+      { name: 'JENPAS UG', slug: 'jenpas-ug', sortOrder: 10, about: 'Nursing, paramedical and allied health entrance, WBJEEB' },
+      { name: 'ANM-GNM', slug: 'anm-gnm', sortOrder: 11, about: 'ANM and GNM nursing diploma entrance, WBJEEB' },
+      { name: 'JEXPO', slug: 'jexpo', sortOrder: 12, about: 'Polytechnic diploma entrance, WBSCT&VE&SD' },
     ],
   },
   {
     stream: 'Force',
     slug: 'force',
     courses: [
-      { name: 'WB Police', slug: 'wb-police', sortOrder: 13 },
-      { name: 'KP', slug: 'kp', sortOrder: 14 },
-      { name: 'Agniveer', slug: 'agniveer', sortOrder: 15 },
+      { name: 'WB Police', slug: 'wb-police', sortOrder: 13, about: 'West Bengal Police recruitment, WBPRB' },
+      { name: 'KP', slug: 'kp', sortOrder: 14, about: 'Kolkata Police recruitment, WBPRB' },
+      { name: 'Agniveer', slug: 'agniveer', sortOrder: 15, about: 'Army, Navy and Air Force entry under the Agnipath scheme' },
     ],
   },
   {
     stream: 'Teaching',
     slug: 'teaching',
     courses: [
-      { name: 'NET', slug: 'net', sortOrder: 16 },
-      { name: 'SET', slug: 'set', sortOrder: 17 },
-      { name: 'TET', slug: 'tet', sortOrder: 18 },
+      { name: 'NET', slug: 'net', sortOrder: 16, about: 'UGC NET for Assistant Professor and JRF, NTA' },
+      { name: 'SET', slug: 'set', sortOrder: 17, about: 'West Bengal SET for Assistant Professor' },
+      { name: 'TET', slug: 'tet', sortOrder: 18, about: 'Teacher Eligibility Test for school teaching' },
     ],
   },
   {
@@ -99,5 +101,6 @@ export const NAV_LINKS = [
   { label: 'Why us', href: '#why-mirror' },
   { label: 'Admission', href: '#admission' },
   { label: 'Register', href: '#registration' },
+  { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ] as const;

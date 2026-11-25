@@ -480,3 +480,43 @@
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation-duration: 2s; }
 }
+
+@layer components {
+  /* Course rows: name, with a one-line note on what the exam is */
+  .course__text { display: grid; gap: 2px; min-width: 0; }
+  .course__name { font: var(--type-body-strong); }
+  .course__about { font: var(--type-small); color: var(--text-secondary); }
+
+  /* FAQ: native details, one card */
+  .faq { border-radius: var(--r-l); background: var(--fill-tertiary); padding: 4px clamp(20px, 3vw, 28px); }
+  .faq details { border-bottom: 1px solid var(--stroke-secondary); }
+  .faq details:last-child { border-bottom: 0; }
+  .faq summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    min-height: var(--tap); padding: 16px 0; cursor: pointer; list-style: none;
+    font: var(--type-body-strong);
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+"; flex: none; width: 24px; text-align: center;
+    font-size: 20px; color: var(--text-secondary);
+    transition: transform var(--dur-quick) ease;
+  }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq details p { padding: 0 0 18px; color: var(--text-secondary); max-width: 68ch; }
+
+  /* Phones: a glass bar with the three ways to act */
+  .actionbar { display: none; }
+  @media (max-width: 760px) {
+    .actionbar {
+      position: fixed; z-index: 30;
+      left: 12px; right: 12px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px;
+      padding: 8px; border-radius: var(--r-pill);
+    }
+    .actionbar .btn { justify-content: center; min-height: var(--tap); }
+    .actionbar .btn[target="_blank"]::after { content: none; }
+    body:has(.actionbar) { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+  }
+}
