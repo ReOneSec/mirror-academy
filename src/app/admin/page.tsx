@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, type FormEvent } from 'react';
+import { useState, useEffect, useMemo, useSyncExternalStore, type FormEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { User } from '@supabase/supabase-js';
@@ -36,7 +36,12 @@ const STATUSES = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
+/** The date is read on the device only (empty during prerender), so the page stays static. */
+const noSubscribe = () => () => {};
+const serverToday = () => '';
+
 export default function AdminPage() {
+  const today = useSyncExternalStore(noSubscribe, todayKey, serverToday);
   const [authState, setAuthState] = useState<'checking' | 'logged_out' | 'logged_in'>('checking');
   const [user, setUser] = useState<User | null>(null);
 
@@ -255,7 +260,6 @@ export default function AdminPage() {
 
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
-    const today = todayKey();
     const list = registrations.filter((r) => {
       if (dayFilter === 'today' && dayKey(r.createdAt) !== today) return false;
       if (dayFilter === 'due' && !(r.followUpDate && r.followUpDate <= today && isOpen(r.status)))
@@ -282,7 +286,7 @@ export default function AdminPage() {
     });
     const dir = sortOrder === 'newest' ? -1 : 1;
     return list.sort((a, b) => dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
-  }, [registrations, batchFilter, streamFilter, statusFilter, genderFilter, search, dayFilter, sortOrder]);
+  }, [registrations, batchFilter, streamFilter, statusFilter, genderFilter, search, dayFilter, sortOrder, today]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -293,13 +297,12 @@ export default function AdminPage() {
     const pending = registrations.filter((r) => r.status === 'new').length;
     const contacted = registrations.filter((r) => r.status === 'contacted').length;
     const admitted = registrations.filter((r) => r.status === 'admitted').length;
-    const today = todayKey();
     const newToday = registrations.filter((r) => dayKey(r.createdAt) === today).length;
     const due = registrations.filter(
       (r) => r.followUpDate && r.followUpDate <= today && isOpen(r.status)
     ).length;
     return { total, free, paid, interview, pending, contacted, admitted, newToday, due };
-  }, [registrations]);
+  }, [registrations, today]);
 
   function exportToCSV() {
     if (filteredRegistrations.length === 0) {
@@ -716,7 +719,7 @@ export default function AdminPage() {
                             {record.followUpDate && isOpen(record.status) && (
                               <span
                                 className="adm-due"
-                                data-due={record.followUpDate <= todayKey()}
+                                data-due={Boolean(today) && record.followUpDate <= today}
                               >
                                 Follow up {formatDay(record.followUpDate)}
                               </span>
