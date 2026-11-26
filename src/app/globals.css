@@ -379,13 +379,57 @@
   .adm-status[data-status="new"] { border-color: var(--fill-system-orange); color: var(--fill-system-orange); }
   .adm-status[data-status="admitted"] { border-color: var(--fill-system-green); color: var(--fill-system-green); }
   .adm-status[data-status="cancelled"] { color: var(--text-secondary); }
+  /* Phones: each registration is a tidy card on a two-column grid.
+     Name / Contact with Call + WhatsApp / Batch | Course / Date | Status / Address / View + Delete */
   @media (max-width: 599px) {
     .adm-card { padding: 4px 18px; }
-    .adm-address { max-width: none; flex-basis: 100%; }
-    .adm-row-actions { flex-basis: 100%; text-align: left; display: flex; align-items: center; gap: 20px; }
     .adm-card tbody tr:hover > * { background: none; }
-    .adm-row-actions .btn { margin: 0; }
-    .adm-status { min-height: var(--tap); font-size: 16px; }
+    .adm-card .table-wrap tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "name name"
+        "contact contact"
+        "batch course"
+        "date status"
+        "address address"
+        "actions actions";
+      gap: 16px 16px;
+      padding: 20px 0;
+    }
+    .adm-card .table-wrap tbody tr > th { grid-area: name; }
+    .adm-card .table-wrap tbody td[data-label="Contact"] { grid-area: contact; }
+    .adm-card .table-wrap tbody td[data-label="Batch"] { grid-area: batch; }
+    .adm-card .table-wrap tbody td[data-label="Course"] { grid-area: course; }
+    .adm-card .table-wrap tbody td[data-label="Date"] { grid-area: date; white-space: normal; }
+    .adm-card .table-wrap tbody td[data-label="Status"] { grid-area: status; }
+    .adm-card .table-wrap tbody td[data-label="Address"] { grid-area: address; }
+    .adm-card .table-wrap tbody td.adm-row-actions { grid-area: actions; }
+    .adm-card .table-wrap tbody td[data-label]::before { margin-bottom: 4px; }
+
+    .adm-card tbody th small { margin-top: 4px; }
+    .adm-card td[data-label="Batch"] .chip { padding-left: 0; background: none; }
+    .adm-phone { font-size: var(--size-body); }
+    .adm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .adm-actions .btn,
+    .adm-row-actions .btn,
+    .adm-row-actions .adm-textbtn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: var(--tap); margin: 0; padding: 0 16px;
+      border-radius: var(--r-pill);
+    }
+    .adm-address { max-width: none; }
+    .adm-row-actions {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding-top: 16px !important; border-top: 1px solid var(--stroke-secondary);
+      text-align: left;
+    }
+    .adm-row-actions .adm-textbtn {
+      text-decoration: none;
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fill-system-red) 35%, transparent);
+      font: var(--type-label);
+    }
+    .adm-status { width: 100%; min-height: var(--tap); font-size: 16px; }
   }
 
   .adm-empty { display: grid; gap: 6px; padding: 48px 24px; text-align: center; border-radius: var(--r-l); border: 1px dashed var(--stroke-primary); }
