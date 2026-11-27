@@ -3,26 +3,28 @@ import Link from 'next/link';
 import { connection } from 'next/server';
 import ArticleCards from '@/components/ArticleCards';
 import { listArticles } from '@/lib/articlesData';
+import { getDict, type Lang } from '@/lib/i18n';
 
-async function Latest() {
+async function Latest({ lang }: { lang: Lang }) {
   await connection();
   const articles = await listArticles(3);
-  return <ArticleCards articles={articles} />;
+  return <ArticleCards articles={articles} lang={lang} />;
 }
 
-export default function ArticlesSection() {
+export default function ArticlesSection({ lang = 'en' }: { lang?: Lang }) {
+  const t = getDict(lang).articles;
   return (
     <section id="articles" className="section" aria-labelledby="articles-heading">
       <div className="head">
-        <p className="head__eyebrow">Articles</p>
-        <h2 id="articles-heading">Exam patterns, syllabi and guides.</h2>
+        <p className="head__eyebrow">{t.eyebrow}</p>
+        <h2 id="articles-heading">{t.heading}</h2>
       </div>
-      <Suspense fallback={<p className="nb-empty">Loading articles…</p>}>
-        <Latest />
+      <Suspense fallback={<p className="nb-empty">{t.loading}</p>}>
+        <Latest lang={lang} />
       </Suspense>
       <p>
         <Link href="/articles" className="btn">
-          All articles
+          {t.all}
         </Link>
       </p>
     </section>

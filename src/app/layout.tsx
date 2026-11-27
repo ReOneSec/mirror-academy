@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 
 // Geist for everything, Geist Mono for IDs and figures that must line up.
@@ -16,6 +16,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400"],
   display: "swap",
+});
+
+// Bengali text (the /bn page, Bengali articles and notices). Geist has no Bengali letters,
+// so the browser takes those from this font and everything else from Geist.
+const bengali = Noto_Sans_Bengali({
+  variable: "--font-bengali",
+  subsets: ["bengali"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -52,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${geistMono.variable}`}
+      className={`${geist.variable} ${geistMono.variable} ${bengali.variable}`}
       suppressHydrationWarning
     >
       <head>

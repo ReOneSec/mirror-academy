@@ -102,3 +102,11 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Admin: Articles tab (`AdminArticles.tsx`): write, edit, hide/show, delete. Slug from the title's English words, else `article-xxxxxx`.
 - Seed/fallback: WBPSC Clerkship exam pattern and syllabus (`articlesFallback.ts`) until migration 005 runs.
 - Subpages use `SubpageHeader` and `Footer linkBase="/"`.
+
+## Site upgrades (2026-11-27)
+- Bengali: `/bn` renders `HomePage lang="bn"`; all homepage text lives in `src/lib/i18n.ts` (en + bn). Header pill has a বাংলা/English switch (`.nav__lang`). Noto Sans Bengali via next/font (`--font-bengali` in `--sans`). Course names, phone, email and address stay as in constants.ts. API error messages are still English. Subpages (/articles, /downloads) are English UI.
+- Exam calendar (`ExamCalendar.tsx`, `#calendar`, table `exam_events`): upcoming dates only, sorted by date, days-left chip, official link. Admin tab "Exam dates".
+- Downloads (`DownloadsSection.tsx`, `/downloads`, table `downloads`, public bucket `downloads` 25 MB): grouped by section. Admin uploads go browser → Supabase via a signed upload URL (`/api/admin/downloads/upload`), skipping Vercel's 4.5 MB body limit.
+- Notice expiry: `notices.expires_on` (last day to show, IST). Set when posting or from the list. Public board hides expired notices.
+- WhatsApp share (`ShareWhatsApp.tsx`) on every notice and article; reads the site address in the browser at tap time.
+- Migration 006 adds all of the above; code falls back to seed data until it runs.

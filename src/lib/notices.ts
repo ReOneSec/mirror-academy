@@ -7,6 +7,10 @@ export const NOTICE_TITLE_MAX = 150;
 export const NOTICE_BODY_MAX = 3000;
 
 export const NOTICE_COLUMNS =
+  'id, title, body, link_url, attachment_path, attachment_name, attachment_type, pinned, published, expires_on, created_at';
+
+/** Same list without expires_on, for databases where migration 006 hasn't run yet. */
+export const NOTICE_COLUMNS_V1 =
   'id, title, body, link_url, attachment_path, attachment_name, attachment_type, pinned, published, created_at';
 
 export interface NoticeRow {
@@ -19,6 +23,7 @@ export interface NoticeRow {
   attachment_type: string | null;
   pinned: boolean;
   published: boolean;
+  expires_on?: string | null;
   created_at: string;
 }
 
@@ -39,6 +44,7 @@ export function toNotice(row: NoticeRow): Notice {
     attachmentType: row.attachment_type,
     pinned: row.pinned,
     published: row.published,
+    expiresOn: row.expires_on ?? null,
     createdAt: row.created_at,
   };
 }
@@ -75,6 +81,12 @@ export const FALLBACK_NOTICES: Notice[] = [
     attachmentType: null,
     pinned: true,
     published: true,
+    expiresOn: '2026-12-27',
     createdAt: '2026-11-25T10:46:00+05:30',
   },
 ];
+
+/** True while the notice should show: no expiry, or today (IST) is on or before its last day. */
+export function isNoticeLive(n: Pick<Notice, 'expiresOn'>, today: string): boolean {
+  return !n.expiresOn || n.expiresOn >= today;
+}

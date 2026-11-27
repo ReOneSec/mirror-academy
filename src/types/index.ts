@@ -62,6 +62,8 @@ export interface Notice {
   attachmentType: string | null;
   pinned: boolean;
   published: boolean;
+  /** Last day to show (YYYY-MM-DD, IST); null shows it until removed. */
+  expiresOn: string | null;
   createdAt: string;
 }
 
@@ -75,4 +77,34 @@ export interface Article {
   published: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export type ExamEventKind = 'exam' | 'admit_card' | 'result' | 'application' | 'other';
+
+export interface ExamEvent {
+  id: string;
+  exam: string;
+  kind: ExamEventKind;
+  /** YYYY-MM-DD */
+  startsOn: string;
+  endsOn: string | null;
+  note: string | null;
+  linkUrl: string | null;
+  published: boolean;
+}
+
+export type DownloadCategory = 'syllabus' | 'previous_papers' | 'study_material' | 'notification';
+
+export interface DownloadItem {
+  id: string;
+  title: string;
+  category: DownloadCategory;
+  exam: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileType: string | null;
+  fileSize: number | null;
+  linkUrl: string | null;
+  published: boolean;
+  createdAt: string;
 }

@@ -6,6 +6,7 @@ import { connection } from 'next/server';
 import SubpageHeader from '@/components/SubpageHeader';
 import Footer from '@/components/Footer';
 import ArticleBody from '@/components/ArticleBody';
+import ShareWhatsApp from '@/components/ShareWhatsApp';
 import { getArticle } from '@/lib/articlesData';
 import { articleExcerpt, formatArticleDate } from '@/lib/articles';
 import { SITE } from '@/lib/constants';
@@ -49,6 +50,9 @@ async function ArticleView({ params }: { params: Params }) {
       <h1 id="art-title" className="art-h1">
         {article.title}
       </h1>
+      <div className="links">
+        <ShareWhatsApp text={article.title} path={`/articles/${article.slug}`} label="Share on WhatsApp" />
+      </div>
       <ArticleBody text={article.body} />
       <div className="links art-foot">
         <Link href="/#registration" className="btn btn--primary">
@@ -57,6 +61,7 @@ async function ArticleView({ params }: { params: Params }) {
         <a href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer" className="btn">
           Ask on WhatsApp
         </a>
+        <ShareWhatsApp text={article.title} path={`/articles/${article.slug}`} label="Share on WhatsApp" />
         <Link href="/articles" className="btn">
           More articles
         </Link>
