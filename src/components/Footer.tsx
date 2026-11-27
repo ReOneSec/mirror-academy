@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { SITE, NAV_LINKS } from '@/lib/constants';
 import DynamicYear from '@/components/DynamicYear';
 
-export default function Footer() {
+/** `linkBase="/"` on pages other than the homepage, so section links go back to it. */
+export default function Footer({ linkBase = '' }: { linkBase?: string }) {
   return (
     <footer className="foot flex-col gap-6 pt-6 pb-10">
       <div className="flex w-full flex-wrap items-center justify-between gap-4">
@@ -11,7 +12,7 @@ export default function Footer() {
         </p>
         <nav aria-label="Back to sections">
           {NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href}>
+            <a key={link.href} href={`${linkBase}${link.href}`}>
               {link.label}
             </a>
           ))}

@@ -64,3 +64,15 @@ export interface Notice {
   published: boolean;
   createdAt: string;
 }
+
+export interface Article {
+  id: string;
+  slug: string;
+  title: string;
+  category: string | null;
+  summary: string | null;
+  body: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

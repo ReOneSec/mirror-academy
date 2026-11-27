@@ -8,6 +8,7 @@ import EnquiryForm from '@/components/EnquiryForm';
 import Footer from '@/components/Footer';
 import Faq from '@/components/Faq';
 import NoticeBoard from '@/components/NoticeBoard';
+import ArticlesSection from '@/components/ArticlesSection';
 import MobileActionBar from '@/components/MobileActionBar';
 import { SITE, ALL_COURSES } from '@/lib/constants';
 
@@ -58,6 +59,7 @@ export default function Home() {
           <WhyMirror />
           <HowAdmission />
           <EnquiryForm />
+          <ArticlesSection />
           <Faq />
           <LocationContact />
         </main>
