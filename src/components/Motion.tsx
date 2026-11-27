@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 /** What fades up as it scrolls into view. Items inside one parent come in one after another. */
 const REVEAL =
-  '.section > .head, .cards > *, .nb-item, .cal-item, .dl-group, .art-cards > li, .faq > details, .step, .stat, .map, .section > .callout, .reg > *';
+  '.section > .head, .adm-section > .head, .adm-card, .adm-nform, .cards > *, .nb-item, .cal-item, .dl-group, .art-cards > li, .faq > details, .step, .stat, .map, .section > .callout, .reg > *';
 
 const BN = '০১২৩৪৫৬৭৮৯';
 
@@ -14,6 +14,35 @@ const BN = '০১২৩৪৫৬৭৮৯';
  * everything simply shows.
  */
 export default function Motion() {
+  // Scroll boxes: fade the bottom edge while there is more to scroll (works with reduced motion too).
+  useEffect(() => {
+    const mark = (box: HTMLElement) => {
+      const more = box.scrollHeight - box.clientHeight - box.scrollTop > 24;
+      box.toggleAttribute('data-more', more);
+    };
+    const boxes = new Set<HTMLElement>();
+    const ro = new ResizeObserver((entries) => entries.forEach((e) => mark(e.target as HTMLElement)));
+    const onScroll = (e: Event) => mark(e.currentTarget as HTMLElement);
+    function scan() {
+      document.querySelectorAll<HTMLElement>('[data-scrollbox]').forEach((box) => {
+        if (boxes.has(box)) return;
+        boxes.add(box);
+        box.addEventListener('scroll', onScroll, { passive: true });
+        ro.observe(box);
+        if (box.firstElementChild) ro.observe(box.firstElementChild);
+        mark(box);
+      });
+    }
+    scan();
+    const mo = new MutationObserver(scan);
+    mo.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      mo.disconnect();
+      ro.disconnect();
+      boxes.forEach((b) => b.removeEventListener('scroll', onScroll));
+    };
+  }, []);
+
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (!('IntersectionObserver' in window)) return;

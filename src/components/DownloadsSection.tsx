@@ -7,8 +7,12 @@ import { getDict, type Lang } from '@/lib/i18n';
 
 async function Latest({ lang }: { lang: Lang }) {
   await connection();
-  const items = await listDownloads(8);
-  return <DownloadList items={items} lang={lang} />;
+  const items = await listDownloads(30);
+  return (
+    <div className="scrollbox" data-scrollbox tabIndex={0} aria-label={getDict(lang).downloads.heading}>
+      <DownloadList items={items} lang={lang} />
+    </div>
+  );
 }
 
 export default function DownloadsSection({ lang = 'en' }: { lang?: Lang }) {

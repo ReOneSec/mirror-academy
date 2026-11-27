@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Motion from '@/components/Motion';
 
 export const metadata: Metadata = {
   title: 'Admin Portal | Mirror Academy Berhampore',
@@ -15,5 +16,10 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <Motion />
+      {children}
+    </>
+  );
 }

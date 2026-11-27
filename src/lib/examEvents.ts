@@ -3,7 +3,9 @@ import type { ExamEvent, ExamEventKind } from '@/types';
 export const EXAM_EVENT_KINDS: ExamEventKind[] = ['exam', 'admit_card', 'result', 'application', 'other'];
 export const EXAM_NAME_MAX = 120;
 export const EXAM_NOTE_MAX = 300;
-export const EXAM_EVENT_COLUMNS = 'id, exam, kind, starts_on, ends_on, note, link_url, published';
+export const EXAM_EVENT_COLUMNS: string = 'id, exam, kind, starts_on, ends_on, note, link_url, published, expires_on';
+/** Same list without expires_on, for databases where migration 007 hasn't run yet. */
+export const EXAM_EVENT_COLUMNS_V1: string = 'id, exam, kind, starts_on, ends_on, note, link_url, published';
 
 export interface ExamEventRow {
   id: string;
@@ -14,6 +16,7 @@ export interface ExamEventRow {
   note: string | null;
   link_url: string | null;
   published: boolean;
+  expires_on?: string | null;
 }
 
 export function toExamEvent(row: ExamEventRow): ExamEvent {
@@ -26,12 +29,13 @@ export function toExamEvent(row: ExamEventRow): ExamEvent {
     note: row.note,
     linkUrl: row.link_url,
     published: row.published,
+    expiresOn: row.expires_on ?? null,
   };
 }
 
-/** Still upcoming or happening on `today` (YYYY-MM-DD). */
-export const isUpcoming = (e: Pick<ExamEvent, 'startsOn' | 'endsOn'>, today: string) =>
-  (e.endsOn ?? e.startsOn) >= today;
+/** Shown on the site on `today`: until its remove date when one is set, else until the date has passed. */
+export const isUpcoming = (e: Pick<ExamEvent, 'startsOn' | 'endsOn' | 'expiresOn'>, today: string) =>
+  e.expiresOn ? e.expiresOn >= today : (e.endsOn ?? e.startsOn) >= today;
 
 const WBPSC_CLERK_PDF =
   'https://psc.wb.gov.in/Download?param1=25112026104610_AnnouncementClerk.pdf&param2=advertisement';

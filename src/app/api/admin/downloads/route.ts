@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getAuthenticatedUser } from '@/lib/adminAuth';
 import { cleanLink } from '@/lib/notices';
+import { isIsoDate } from '@/lib/dates';
 import {
   DOWNLOAD_BUCKET,
   DOWNLOAD_CATEGORIES,
   DOWNLOAD_COLUMNS,
+  DOWNLOAD_COLUMNS_V1,
   DOWNLOAD_EXAM_MAX,
   DOWNLOAD_FILE_TYPES,
   DOWNLOAD_MAX_BYTES,
@@ -18,6 +20,9 @@ function fail(message: string, status: number) {
   return NextResponse.json({ success: false, message }, { status });
 }
 const unauthorized = () => fail('Unauthorized. Please sign in.', 401);
+const NEEDS_007 = 'To use a remove date, run migration 007 in Supabase first.';
+const cols = (fields: Record<string, unknown>) => ('expires_on' in fields ? DOWNLOAD_COLUMNS : DOWNLOAD_COLUMNS_V1);
+const missingColumn = (fields: Record<string, unknown>, code?: string) => 'expires_on' in fields && code === '42703';
 
 async function readJson(request: NextRequest): Promise<Record<string, unknown> | null> {
   try {
@@ -51,21 +56,26 @@ function readFields(input: Record<string, unknown>, requireAll: boolean): string
     if (link === 'invalid') return 'The link must start with https:// or http://.';
     out.link_url = link;
   }
+  if ('expiresOn' in input) {
+    if (input.expiresOn === null || input.expiresOn === '') out.expires_on = null;
+    else if (!isIsoDate(input.expiresOn)) return 'Pick a valid remove date.';
+    else out.expires_on = input.expiresOn;
+  }
   if (typeof input.published === 'boolean') out.published = input.published;
   return out;
 }
 
 export async function GET(request: NextRequest) {
   if (!(await getAuthenticatedUser(request))) return unauthorized();
-  const { data, error } = await createAdminClient()
-    .from('downloads')
-    .select(DOWNLOAD_COLUMNS)
-    .order('created_at', { ascending: false });
+  const list = (columns: string) =>
+    createAdminClient().from('downloads').select(columns).order('created_at', { ascending: false });
+  let { data, error } = await list(DOWNLOAD_COLUMNS);
+  if (error) ({ data, error } = await list(DOWNLOAD_COLUMNS_V1)); // migration 007 not run yet
   if (error) {
     console.error('Downloads query error:', error);
     return fail('Failed to load downloads. Has migration 006 been run in Supabase?', 500);
   }
-  return NextResponse.json({ success: true, downloads: (data as DownloadRow[]).map(toDownload) });
+  return NextResponse.json({ success: true, downloads: (data as unknown as DownloadRow[]).map(toDownload) });
 }
 
 /** Step 2 of an upload (or a link-only entry): saves the details. `file` is what step 1 uploaded. */
@@ -97,13 +107,13 @@ export async function POST(request: NextRequest) {
   }
   if (!fields.file_path && !fields.link_url) return fail('Upload a file or add a link.', 400);
 
-  const { data, error } = await admin.from('downloads').insert(fields).select(DOWNLOAD_COLUMNS).single();
+  const { data, error } = await admin.from('downloads').insert(fields).select(cols(fields)).single();
   if (error || !data) {
     console.error('Download insert error:', error);
     if (typeof fields.file_path === 'string') await admin.storage.from(DOWNLOAD_BUCKET).remove([fields.file_path]);
-    return fail('Could not save. Has migration 006 been run in Supabase?', 500);
+    return fail(missingColumn(fields, error?.code) ? NEEDS_007 : 'Could not save. Has migration 006 been run in Supabase?', 500);
   }
-  return NextResponse.json({ success: true, download: toDownload(data as DownloadRow), message: 'Added to downloads.' });
+  return NextResponse.json({ success: true, download: toDownload(data as unknown as DownloadRow), message: 'Added to downloads.' });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -119,13 +129,13 @@ export async function PATCH(request: NextRequest) {
     .from('downloads')
     .update({ ...fields, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select(DOWNLOAD_COLUMNS)
+    .select(cols(fields))
     .single();
   if (error || !data) {
     console.error('Download update error:', error);
-    return fail('Could not update.', 500);
+    return fail(missingColumn(fields, error?.code) ? NEEDS_007 : 'Could not update.', 500);
   }
-  return NextResponse.json({ success: true, download: toDownload(data as DownloadRow), message: 'Updated.' });
+  return NextResponse.json({ success: true, download: toDownload(data as unknown as DownloadRow), message: 'Updated.' });
 }
 
 export async function DELETE(request: NextRequest) {

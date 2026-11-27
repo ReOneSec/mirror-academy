@@ -191,7 +191,7 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
           </label>
           <label>
             <span className="field-label">
-              Show until <span className="sub">Optional. The notice hides itself after this day.</span>
+              Remove from website after <span className="sub">Optional. The notice hides itself after this day.</span>
             </span>
             <input
               className="field"
@@ -249,9 +249,9 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
                 {!n.published && <span className="chip">Hidden</span>}
                 {n.expiresOn &&
                   (n.expiresOn < todayIST() ? (
-                    <span className="chip">Expired {formatDate('en', n.expiresOn)}</span>
+                    <span className="chip">Removed from site {formatDate('en', n.expiresOn)}</span>
                   ) : (
-                    <span className="chip">Until {formatDate('en', n.expiresOn)}</span>
+                    <span className="chip">On site until {formatDate('en', n.expiresOn)}</span>
                   ))}
               </div>
               <p className="nb-title">{n.title}</p>
@@ -288,7 +288,7 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
                   {n.published ? 'Hide' : 'Show'}
                 </button>
                 <label className="adm-expiry">
-                  <span>Show until</span>
+                  <span>Remove after</span>
                   <input
                     type="date"
                     className="field"

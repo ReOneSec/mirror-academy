@@ -11,7 +11,9 @@ import {
   DOWNLOAD_MAX_BYTES,
   DOWNLOAD_TITLE_MAX,
   formatSize,
+  isDownloadLive,
 } from '@/lib/downloads';
+import { todayIST } from '@/lib/dates';
 import { formatDate, getDict } from '@/lib/i18n';
 
 const CATEGORY_LABEL = getDict('en').downloads.categories;
@@ -25,6 +27,7 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
   const [category, setCategory] = useState<DownloadCategory>('syllabus');
   const [exam, setExam] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
+  const [expiresOn, setExpiresOn] = useState('');
   const [saving, setSaving] = useState<'' | 'uploading' | 'saving'>('');
   const [formError, setFormError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
@@ -91,7 +94,14 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
       const res = await fetch('/api/admin/downloads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, category, exam, linkUrl: uploaded ? '' : linkUrl, file: uploaded }),
+        body: JSON.stringify({
+          title,
+          category,
+          exam,
+          linkUrl: uploaded ? '' : linkUrl,
+          file: uploaded,
+          ...(expiresOn ? { expiresOn } : {}),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) return setFormError(data.message || 'Could not save.');
@@ -99,6 +109,7 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
       setTitle('');
       setExam('');
       setLinkUrl('');
+      setExpiresOn('');
       if (fileRef.current) fileRef.current.value = '';
       onToast('Added to downloads. It is live on the website.');
       load();
@@ -106,6 +117,22 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
       setFormError('Network error while uploading.');
     } finally {
       setSaving('');
+    }
+  }
+
+  async function setExpiry(d: DownloadItem, value: string) {
+    try {
+      const res = await fetch('/api/admin/downloads', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: d.id, expiresOn: value || null }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) return onToast(data.message || 'Could not update.');
+      onToast(value ? `Stays on the website until ${formatDate('en', value)}.` : 'Remove date cleared.');
+      load();
+    } catch {
+      onToast('Network error while updating.');
     }
   }
 
@@ -198,6 +225,18 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
               placeholder="https://"
             />
           </label>
+          <label>
+            <span className="field-label">
+              Remove from website after <span className="sub">Optional. Leave empty to keep it.</span>
+            </span>
+            <input
+              className="field"
+              type="date"
+              value={expiresOn}
+              min={todayIST()}
+              onChange={(e) => setExpiresOn(e.target.value)}
+            />
+          </label>
           {formError && (
             <p className="field-error" role="alert">
               {formError}
@@ -232,14 +271,22 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
           </div>
         )}
         <ul className="adm-nlist">
-          {items.map((d) => (
-            <li key={d.id} className="nb-item" data-hidden={!d.published || undefined}>
+          {items.map((d) => {
+            const expired = !isDownloadLive(d, todayIST());
+            return (
+            <li key={d.id} className="nb-item" data-hidden={!d.published || expired || undefined}>
               <div className="nb-meta">
                 <span className="chip">{CATEGORY_LABEL[d.category]}</span>
                 {d.exam && <span className="chip">{d.exam}</span>}
                 <time dateTime={d.createdAt}>{formatDate('en', d.createdAt)}</time>
                 {d.fileSize ? <span>{formatSize(d.fileSize)}</span> : null}
                 {!d.published && <span className="chip">Hidden</span>}
+                {d.expiresOn &&
+                  (expired ? (
+                    <span className="chip">Removed from site {formatDate('en', d.expiresOn)}</span>
+                  ) : (
+                    <span className="chip">On site until {formatDate('en', d.expiresOn)}</span>
+                  ))}
               </div>
               <p className="nb-title">{d.title}</p>
               <div className="adm-nactions">
@@ -254,12 +301,17 @@ export default function AdminDownloads({ onToast }: { onToast: (msg: string) => 
                 <button type="button" className="adm-textbtn" onClick={() => togglePublished(d)}>
                   {d.published ? 'Hide' : 'Show'}
                 </button>
+                <label className="adm-expiry">
+                  <span>Remove after</span>
+                  <input type="date" className="field" value={d.expiresOn ?? ''} onChange={(e) => setExpiry(d, e.target.value)} />
+                </label>
                 <button type="button" className="adm-textbtn adm-textbtn--danger" onClick={() => remove(d)}>
                   Delete
                 </button>
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </section>
     </>

@@ -16,7 +16,7 @@ import type { Notice } from '@/types';
 
 const NEW_FOR_MS = 7 * 24 * 60 * 60 * 1000;
 
-async function loadNotices(): Promise<Notice[] | null> {
+export async function loadNotices(): Promise<Notice[] | null> {
   const supabase = createPublicClient();
   if (!supabase) return null;
   try {
@@ -87,16 +87,18 @@ function clock() {
 async function NoticeList({ lang }: { lang: Lang }) {
   await connection();
   const { today, now } = clock();
-  const notices = ((await loadNotices()) ?? FALLBACK_NOTICES).filter((n) => isNoticeLive(n, today)).slice(0, 12);
+  const notices = ((await loadNotices()) ?? FALLBACK_NOTICES).filter((n) => isNoticeLive(n, today)).slice(0, 20);
   if (notices.length === 0) {
     return <p className="nb-empty">{getDict(lang).notices.empty}</p>;
   }
   return (
-    <ol className="nb-list">
-      {notices.map((n) => (
-        <NoticeItem key={n.id} notice={n} now={now} lang={lang} />
-      ))}
-    </ol>
+    <div className="scrollbox" data-scrollbox tabIndex={0} aria-label={getDict(lang).notices.heading}>
+      <ol className="nb-list">
+        {notices.map((n) => (
+          <NoticeItem key={n.id} notice={n} now={now} lang={lang} />
+        ))}
+      </ol>
+    </div>
   );
 }
 

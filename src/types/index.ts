@@ -91,6 +91,8 @@ export interface ExamEvent {
   note: string | null;
   linkUrl: string | null;
   published: boolean;
+  /** YYYY-MM-DD: hidden from the site after this day. Null = hidden once the date has passed. */
+  expiresOn?: string | null;
 }
 
 export type DownloadCategory = 'syllabus' | 'previous_papers' | 'study_material' | 'notification';
@@ -107,4 +109,6 @@ export interface DownloadItem {
   linkUrl: string | null;
   published: boolean;
   createdAt: string;
+  /** YYYY-MM-DD: hidden from the site after this day. Null = stays. */
+  expiresOn?: string | null;
 }
