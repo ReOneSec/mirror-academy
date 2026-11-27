@@ -116,3 +116,9 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Hero callout buttons: Register full width, Call and WhatsApp side by side. Stats: 3 batches.
 - Motion (`Motion.tsx`, no libraries): fade-up on scroll with stagger, stats count up, hero lines rise on load, button press, ↗ nudge, card lift on hover (computer), "New" glow, menu drop, success tick draws. All off with reduced motion; without JS everything shows.
 - Article renderer: 𒊹 (no font on phones) shows as ◉ and counts as a bullet.
+
+## Scroll boxes, updates popup, remove dates, admin look (2026-11-27)
+- Homepage Notices, Exam dates, Downloads and Articles scroll inside their section (`.scrollbox`, max about 560px, 62vh on phones); the bottom edge fades while there is more (`data-more`, set in Motion.tsx).
+- Updates popup (`UpdatesPopup` server + `UpdatesDialog` client, a native `<dialog>`): 0.9s after load, latest 3 live notices and next 3 exam dates; "Don't show again today" saves `ma-updates-hidden-on` in localStorage; skipped when the URL has a #section.
+- Remove dates: notices (`expires_on`, 006), exam dates and downloads (`expires_on`, migration 007). After the date the item is hidden from the site; admin keeps it, marked "Removed from site". Exam dates without a remove date hide once their date passes. Writes send expires_on only when set, so saving works before 007.
+- Admin: Motion mounted in admin layout (fade-up), toast/menu drop, list hover lift, sign-in on the hero's navy surface, gold logo ring.

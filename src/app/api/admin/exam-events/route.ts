@@ -5,6 +5,7 @@ import { cleanLink } from '@/lib/notices';
 import { isIsoDate } from '@/lib/dates';
 import {
   EXAM_EVENT_COLUMNS,
+  EXAM_EVENT_COLUMNS_V1,
   EXAM_EVENT_KINDS,
   EXAM_NAME_MAX,
   EXAM_NOTE_MAX,
@@ -17,6 +18,7 @@ function fail(message: string, status: number) {
 }
 const unauthorized = () => fail('Unauthorized. Please sign in.', 401);
 const NEEDS_006 = 'Could not save. Has migration 006 been run in Supabase?';
+const NEEDS_007 = 'To use a remove date, run migration 007 in Supabase first.';
 
 async function readJson(request: NextRequest): Promise<Record<string, unknown> | null> {
   try {
@@ -63,21 +65,30 @@ function readFields(input: Record<string, unknown>, requireAll: boolean): string
     if (link === 'invalid') return 'The link must start with https:// or http://.';
     out.link_url = link;
   }
+  if ('expiresOn' in input) {
+    if (input.expiresOn === null || input.expiresOn === '') out.expires_on = null;
+    else if (!isIsoDate(input.expiresOn)) return 'Pick a valid remove date.';
+    else out.expires_on = input.expiresOn;
+  }
   if (typeof input.published === 'boolean') out.published = input.published;
   return out;
 }
 
+/** Columns to read back: the new list when the write touched expires_on, else whatever works. */
+const cols = (fields: Record<string, unknown>) => ('expires_on' in fields ? EXAM_EVENT_COLUMNS : EXAM_EVENT_COLUMNS_V1);
+const missingColumn = (fields: Record<string, unknown>, code?: string) => 'expires_on' in fields && code === '42703';
+
 export async function GET(request: NextRequest) {
   if (!(await getAuthenticatedUser(request))) return unauthorized();
-  const { data, error } = await createAdminClient()
-    .from('exam_events')
-    .select(EXAM_EVENT_COLUMNS)
-    .order('starts_on', { ascending: false });
+  const list = (columns: string) =>
+    createAdminClient().from('exam_events').select(columns).order('starts_on', { ascending: false });
+  let { data, error } = await list(EXAM_EVENT_COLUMNS);
+  if (error) ({ data, error } = await list(EXAM_EVENT_COLUMNS_V1)); // migration 007 not run yet
   if (error) {
     console.error('Exam events query error:', error);
     return fail('Failed to load dates. Has migration 006 been run in Supabase?', 500);
   }
-  return NextResponse.json({ success: true, events: (data as ExamEventRow[]).map(toExamEvent) });
+  return NextResponse.json({ success: true, events: (data as unknown as ExamEventRow[]).map(toExamEvent) });
 }
 
 export async function POST(request: NextRequest) {
@@ -86,12 +97,12 @@ export async function POST(request: NextRequest) {
   if (!input) return fail('Invalid request.', 400);
   const fields = readFields(input, true);
   if (typeof fields === 'string') return fail(fields, 400);
-  const { data, error } = await createAdminClient().from('exam_events').insert(fields).select(EXAM_EVENT_COLUMNS).single();
+  const { data, error } = await createAdminClient().from('exam_events').insert(fields).select(cols(fields)).single();
   if (error || !data) {
     console.error('Exam event insert error:', error);
-    return fail(NEEDS_006, 500);
+    return fail(missingColumn(fields, error?.code) ? NEEDS_007 : NEEDS_006, 500);
   }
-  return NextResponse.json({ success: true, event: toExamEvent(data as ExamEventRow), message: 'Date added.' });
+  return NextResponse.json({ success: true, event: toExamEvent(data as unknown as ExamEventRow), message: 'Date added.' });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -107,13 +118,14 @@ export async function PATCH(request: NextRequest) {
     .from('exam_events')
     .update({ ...fields, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select(EXAM_EVENT_COLUMNS)
+    .select(cols(fields))
     .single();
   if (error || !data) {
     console.error('Exam event update error:', error);
+    if (missingColumn(fields, error?.code)) return fail(NEEDS_007, 500);
     return fail('Could not update the date. Check the end date is not before the start date.', 500);
   }
-  return NextResponse.json({ success: true, event: toExamEvent(data as ExamEventRow), message: 'Date updated.' });
+  return NextResponse.json({ success: true, event: toExamEvent(data as unknown as ExamEventRow), message: 'Date updated.' });
 }
 
 export async function DELETE(request: NextRequest) {

@@ -12,6 +12,7 @@ import ExamCalendar from '@/components/ExamCalendar';
 import DownloadsSection from '@/components/DownloadsSection';
 import ArticlesSection from '@/components/ArticlesSection';
 import MobileActionBar from '@/components/MobileActionBar';
+import UpdatesPopup from '@/components/UpdatesPopup';
 import { SITE, ALL_COURSES } from '@/lib/constants';
 import { SITE_URL } from '@/lib/siteUrl';
 import { getDict, type Lang } from '@/lib/i18n';
@@ -73,6 +74,7 @@ export default function HomePage({ lang }: { lang: Lang }) {
         <Footer lang={lang} />
       </div>
       <MobileActionBar lang={lang} />
+      <UpdatesPopup lang={lang} />
       {lang === 'en' && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }} />
       )}

@@ -8,7 +8,13 @@ export const DOWNLOAD_TITLE_MAX = 150;
 export const DOWNLOAD_EXAM_MAX = 80;
 
 export const DOWNLOAD_COLUMNS =
+  'id, title, category, exam, file_path, file_name, file_type, file_size, link_url, published, created_at, expires_on';
+/** Same list without expires_on, for databases where migration 007 hasn't run yet. */
+export const DOWNLOAD_COLUMNS_V1 =
   'id, title, category, exam, file_path, file_name, file_type, file_size, link_url, published, created_at';
+
+/** Shown on the site on `today` (YYYY-MM-DD). */
+export const isDownloadLive = (d: Pick<DownloadItem, 'expiresOn'>, today: string) => !d.expiresOn || d.expiresOn >= today;
 
 export interface DownloadRow {
   id: string;
@@ -22,6 +28,7 @@ export interface DownloadRow {
   link_url: string | null;
   published: boolean;
   created_at: string;
+  expires_on?: string | null;
 }
 
 export function downloadFileUrl(path: string): string {
@@ -43,6 +50,7 @@ export function toDownload(row: DownloadRow): DownloadItem {
     linkUrl: row.link_url,
     published: row.published,
     createdAt: row.created_at,
+    expiresOn: row.expires_on ?? null,
   };
 }
 

@@ -2,11 +2,11 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import type { ExamEvent, ExamEventKind } from '@/types';
-import { EXAM_EVENT_KINDS, EXAM_NAME_MAX, EXAM_NOTE_MAX } from '@/lib/examEvents';
+import { EXAM_EVENT_KINDS, EXAM_NAME_MAX, EXAM_NOTE_MAX, isUpcoming } from '@/lib/examEvents';
 import { formatDate, getDict } from '@/lib/i18n';
 
 const KIND_LABEL = getDict('en').calendar.kinds;
-const EMPTY = { exam: '', kind: 'exam' as ExamEventKind, startsOn: '', endsOn: '', note: '', linkUrl: '', published: true };
+const EMPTY = { exam: '', kind: 'exam' as ExamEventKind, startsOn: '', endsOn: '', note: '', linkUrl: '', published: true, expiresOn: '' };
 
 const todayIST = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(
@@ -67,6 +67,7 @@ export default function AdminCalendar({ onToast }: { onToast: (msg: string) => v
       note: e.note ?? '',
       linkUrl: e.linkUrl ?? '',
       published: e.published,
+      expiresOn: e.expiresOn ?? '',
     });
     setFormError('');
     document.getElementById('adm-cal-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -84,12 +85,16 @@ export default function AdminCalendar({ onToast }: { onToast: (msg: string) => v
     if (!form.exam.trim()) return setFormError('Add the exam name.');
     if (!form.startsOn) return setFormError('Pick the date.');
     if (form.endsOn && form.endsOn < form.startsOn) return setFormError('The end date must be on or after the start date.');
+    // Send the remove date only when it is set or being cleared, so saving works before migration 007.
+    const hadExpiry = !!events.find((x) => x.id === editingId)?.expiresOn;
+    const { expiresOn, ...rest } = form;
+    const payload = expiresOn || hadExpiry ? { ...rest, expiresOn: expiresOn || null } : rest;
     setSaving(true);
     try {
       const res = await fetch('/api/admin/exam-events', {
         method: editingId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
+        body: JSON.stringify(editingId ? { id: editingId, ...payload } : payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
@@ -185,6 +190,18 @@ export default function AdminCalendar({ onToast }: { onToast: (msg: string) => v
           </div>
           <label>
             <span className="field-label">
+              Remove from website after <span className="sub">Optional. Leave empty to remove it once the date has passed.</span>
+            </span>
+            <input
+              className="field"
+              type="date"
+              value={form.expiresOn}
+              min={form.startsOn || undefined}
+              onChange={(e) => set('expiresOn', e.target.value)}
+            />
+          </label>
+          <label>
+            <span className="field-label">
               Note <span className="sub">Optional</span>
             </span>
             <input
@@ -255,7 +272,7 @@ export default function AdminCalendar({ onToast }: { onToast: (msg: string) => v
         )}
         <ul className="adm-nlist">
           {events.map((ev) => {
-            const past = (ev.endsOn ?? ev.startsOn) < today;
+            const past = !isUpcoming(ev, today);
             return (
               <li key={ev.id} className="nb-item" data-hidden={!ev.published || past || undefined}>
                 <div className="nb-meta">
@@ -265,7 +282,13 @@ export default function AdminCalendar({ onToast }: { onToast: (msg: string) => v
                     {ev.endsOn && ev.endsOn !== ev.startsOn ? ` – ${formatDate('en', ev.endsOn)}` : ''}
                   </span>
                   {!ev.published && <span className="chip">Hidden</span>}
-                  {past && <span className="chip">Past</span>}
+                  {past ? (
+                    <span className="chip">Removed from site</span>
+                  ) : (
+                    <span className="chip">
+                      On site until {formatDate('en', ev.expiresOn ?? ev.endsOn ?? ev.startsOn)}
+                    </span>
+                  )}
                 </div>
                 <p className="nb-title">{ev.exam}</p>
                 {ev.note && <p className="nb-body">{ev.note}</p>}

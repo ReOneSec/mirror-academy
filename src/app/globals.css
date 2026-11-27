@@ -811,4 +811,109 @@
     .tick-draw path, .tick-draw polyline { animation: none; stroke-dashoffset: 0; }
     .nav__pill { transition: none; }
   }
+
+  /* ---------- Scroll boxes: long lists on the homepage scroll inside their section ---------- */
+  .scrollbox {
+    max-height: min(560px, 72vh);
+    overflow-y: auto;
+    padding: 4px 8px 4px 4px;
+    margin: -4px -8px -4px -4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--stroke-secondary) transparent;
+    border-radius: var(--r-m);
+  }
+  .scrollbox:focus-visible { outline: 2px solid var(--fill-primary); outline-offset: 2px; }
+  .scrollbox::-webkit-scrollbar { width: 6px; }
+  .scrollbox::-webkit-scrollbar-thumb { background: var(--stroke-secondary); border-radius: 6px; }
+  .scrollbox[data-more] {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 64px), transparent);
+  }
+  #downloads .scrollbox { max-height: min(520px, 70vh); }
+  #articles .scrollbox { max-height: min(600px, 75vh); }
+  @media (max-width: 599px) {
+    .scrollbox { max-height: 62vh; }
+    #downloads .scrollbox, #articles .scrollbox { max-height: 62vh; }
+  }
+
+  /* ---------- Updates popup (notices + exam dates on page load) ---------- */
+  .upd {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    width: min(520px, calc(100vw - 24px));
+    max-height: calc(100dvh - 48px);
+    padding: 0;
+    border: 0;
+    border-radius: 28px;
+    background: transparent;
+    color: var(--text-primary);
+    overflow: visible;
+  }
+  .upd::backdrop { background: rgb(2 27 68 / .55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .upd__card {
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+    max-height: calc(100dvh - 48px);
+    border-radius: 28px;
+    background: light-dark(#fff, #1d1d1f);
+    box-shadow: 0 24px 80px rgb(0 0 0 / .35);
+    overflow: hidden;
+  }
+  .upd__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 18px 18px 14px 22px;
+    background: #021b44; color: #fff;
+    border-bottom: 3px solid #ffc501;
+  }
+  .upd__head h2 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .upd__x {
+    flex: none; width: 40px; height: 40px; display: grid; place-items: center;
+    border: 0; border-radius: 50%; background: rgb(255 255 255 / .14); color: #fff;
+    font-size: 24px; line-height: 1; cursor: pointer;
+  }
+  .upd__body { display: grid; gap: 18px; padding: 18px 18px 6px; overflow-y: auto; }
+  .upd__label { margin: 0 0 8px 4px; font: var(--type-label); color: var(--text-secondary); text-transform: uppercase; letter-spacing: .04em; font-size: 12px; }
+  .upd__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .upd__item {
+    display: grid; gap: 4px; padding: 12px 14px; border-radius: 16px;
+    background: var(--fill-tertiary); color: var(--text-primary); text-decoration: none;
+  }
+  .upd__item:hover { box-shadow: inset 0 0 0 100px var(--hover-wash); }
+  .upd__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+  .upd__title { font-weight: 600; line-height: 1.35; }
+  .upd__foot { display: grid; gap: 12px; padding: 14px 18px 18px; border-top: 1px solid var(--stroke-secondary); }
+  .upd__check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); cursor: pointer; min-height: 32px; }
+  .upd__check input { width: 18px; height: 18px; accent-color: #021b44; }
+  .upd__actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .upd__actions .btn { justify-content: center; }
+  @keyframes upd-in { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+  @keyframes upd-fade { from { opacity: 0; } to { opacity: 1; } }
+  .upd[open] .upd__card { animation: upd-in .45s var(--ease-out); }
+  .upd[open]::backdrop { animation: upd-fade .3s ease-out; }
+  @media (max-width: 599px) {
+    .upd { width: calc(100vw - 16px); margin: auto auto 8px; }
+    .upd__card { border-radius: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .upd[open] .upd__card, .upd[open]::backdrop { animation: none; }
+  }
+
+  /* ---------- Admin: same motion as the site ---------- */
+  .adm-toast { animation: ma-drop .35s var(--ease-out); }
+  .adm-login > * { animation: ma-rise .8s var(--ease-out) both; }
+  .adm-tabs button { transition: background-color .35s var(--ease-out), color .35s, transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+  @media (hover: hover) {
+    .adm-nlist > li { transition: transform .5s var(--ease-out), box-shadow .5s var(--ease-out); }
+    .adm-nlist > li:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .adm-toast, .adm-login > * { animation: none; }
+  }
+
+  /* Admin sign-in sits on the same navy surface as the homepage hero */
+  .adm-center:has(> .adm-login) { background: #021b44 url("/brand/hero-surface.webp") center / cover no-repeat; }
+  .adm-center > .adm-login { background: light-dark(#fff, #1d1d1f); box-shadow: 0 24px 80px rgb(0 0 0 / .35); }
+  .adm-logo { border-radius: 50%; box-shadow: 0 0 0 3px #ffc501, var(--shadow); }
+  .adm-nav .nav__brand img { box-shadow: 0 0 0 2px #ffc501; }
 }

@@ -171,6 +171,15 @@ const en = {
     read: 'Read article →',
   },
   share: { whatsapp: 'Share on WhatsApp', short: 'Share' },
+  scroll: { more: 'Scroll for more' },
+  popup: {
+    title: 'Latest updates',
+    notices: 'Notices',
+    dates: 'Upcoming exam dates',
+    seeAll: 'See all updates',
+    close: 'Close',
+    hideToday: "Don't show again today",
+  },
   faq: {
     eyebrow: 'Questions',
     heading: 'What students usually ask first.',
@@ -464,6 +473,15 @@ const bn: Dict = {
     read: 'পড়ুন →',
   },
   share: { whatsapp: 'হোয়াটসঅ্যাপে শেয়ার করুন', short: 'শেয়ার' },
+  scroll: { more: 'আরও দেখতে স্ক্রল করুন' },
+  popup: {
+    title: 'সর্বশেষ খবর',
+    notices: 'নোটিস',
+    dates: 'আসন্ন পরীক্ষার তারিখ',
+    seeAll: 'সব খবর দেখুন',
+    close: 'বন্ধ করুন',
+    hideToday: 'আজ আর দেখাবেন না',
+  },
   faq: {
     eyebrow: 'প্রশ্নোত্তর',
     heading: 'ছাত্র-ছাত্রীরা সাধারণত প্রথমে যা জানতে চায়।',
