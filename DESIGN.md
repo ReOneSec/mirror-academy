@@ -94,3 +94,11 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Admin: Notices tab in /admin (`AdminNotices.tsx`): post title, text, optional link, optional PDF/JPG/PNG/WebP up to 4 MB; pin, hide/show, delete (deletes the file too).
 - If the table can't be read (migration not run yet), the board falls back to `FALLBACK_NOTICES` in `src/lib/notices.ts`. Migration 004 also seeds the first notice: WBPSC Clerkship Part-I, 26 and 27 Dec 2026, admit cards from 14 Dec, pinned.
 - Class prefix `nb-` (the older `.notice` class is the form alert box).
+
+## Articles (2026-11-27)
+- Long posts (exam patterns, syllabi, guides), often pasted from WhatsApp in Bengali. Table `articles` (migration 005), public read via RLS, writes via `/api/admin/articles`.
+- Homepage `ArticlesSection` (latest 3, nav "Articles"), `/articles` (all), `/articles/[slug]` (own page with metadata + Article JSON-LD, in sitemap). Data streamed in `<Suspense>` after `connection()`.
+- `ArticleBody.tsx` renders text without HTML: *bold*/**bold**, #/##/### headings, --- divider, - or • bullets, blank line = paragraph, URLs linked; stray * dropped.
+- Admin: Articles tab (`AdminArticles.tsx`): write, edit, hide/show, delete. Slug from the title's English words, else `article-xxxxxx`.
+- Seed/fallback: WBPSC Clerkship exam pattern and syllabus (`articlesFallback.ts`) until migration 005 runs.
+- Subpages use `SubpageHeader` and `Footer linkBase="/"`.

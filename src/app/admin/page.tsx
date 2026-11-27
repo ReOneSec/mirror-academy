@@ -10,6 +10,7 @@ import type { RegistrationRecord } from '@/types';
 import ThemeToggle from '@/components/ThemeToggle';
 import AdminFollowUp from '@/components/AdminFollowUp';
 import AdminNotices from '@/components/AdminNotices';
+import AdminArticles from '@/components/AdminArticles';
 
 /** Today's date on this device as YYYY-MM-DD (the institute's admins are in IST). */
 function todayKey(): string {
@@ -65,7 +66,7 @@ export default function AdminPage() {
   const [streamFilter, setStreamFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [genderFilter, setGenderFilter] = useState('all');
-  const [view, setView] = useState<'registrations' | 'notices'>('registrations');
+  const [view, setView] = useState<'registrations' | 'notices' | 'articles'>('registrations');
   const [dayFilter, setDayFilter] = useState<'all' | 'today' | 'due'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
@@ -501,10 +502,15 @@ export default function AdminPage() {
           <button type="button" role="tab" aria-selected={view === 'notices'} onClick={() => setView('notices')}>
             Notice board
           </button>
+          <button type="button" role="tab" aria-selected={view === 'articles'} onClick={() => setView('articles')}>
+            Articles
+          </button>
         </div>
 
         {view === 'notices' ? (
           <AdminNotices onToast={showToast} />
+        ) : view === 'articles' ? (
+          <AdminArticles onToast={showToast} />
         ) : (
           <>
         <section className="adm-section adm-section--intro" aria-labelledby="adm-title">

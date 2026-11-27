@@ -102,6 +102,7 @@ export const NAV_LINKS = [
   { label: 'Why us', href: '#why-mirror' },
   { label: 'Admission', href: '#admission' },
   { label: 'Register', href: '#registration' },
+  { label: 'Articles', href: '#articles' },
   { label: 'FAQ', href: '#faq' },
   { label: 'Contact', href: '#contact' },
 ] as const;
