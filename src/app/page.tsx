@@ -7,6 +7,7 @@ import LocationContact from '@/components/LocationContact';
 import EnquiryForm from '@/components/EnquiryForm';
 import Footer from '@/components/Footer';
 import Faq from '@/components/Faq';
+import NoticeBoard from '@/components/NoticeBoard';
 import MobileActionBar from '@/components/MobileActionBar';
 import { SITE, ALL_COURSES } from '@/lib/constants';
 
@@ -52,6 +53,7 @@ export default function Home() {
         <Header />
         <main id="main-content" className="main">
           <Hero />
+          <NoticeBoard />
           <CourseStreams />
           <WhyMirror />
           <HowAdmission />

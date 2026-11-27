@@ -51,3 +51,16 @@ export interface LookupResponse {
   message?: string;
   registrations?: RegistrationRecord[];
 }
+
+export interface Notice {
+  id: string;
+  title: string;
+  body: string | null;
+  linkUrl: string | null;
+  attachmentUrl: string | null;
+  attachmentName: string | null;
+  attachmentType: string | null;
+  pinned: boolean;
+  published: boolean;
+  createdAt: string;
+}
