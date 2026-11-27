@@ -51,7 +51,23 @@ export default function Turnstile({ onToken }: { onToken: (token: string) => voi
     if (!TURNSTILE_SITE_KEY) return;
     let id: string | undefined;
     let gone = false;
-    loadScript()
+    // Load Cloudflare's script only when the form is close to the screen, not on every page load.
+    const el = ref.current;
+    const wait = new Promise<void>((resolve) => {
+      if (!el || !('IntersectionObserver' in window)) return resolve();
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            resolve();
+          }
+        },
+        { rootMargin: '600px 0px' }
+      );
+      io.observe(el);
+    });
+    wait
+      .then(() => (gone ? undefined : loadScript()))
       .then(() => {
         if (gone || !ref.current || !window.turnstile) return;
         id = window.turnstile.render(ref.current, {

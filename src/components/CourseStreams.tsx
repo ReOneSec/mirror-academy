@@ -36,22 +36,26 @@ function Courses({
   const about = (slug: string, fallback?: string) => (lang === 'bn' ? t.about[slug] ?? fallback : fallback);
   // history.replaceState updates useSearchParams on the client (Next 14.1+), so a filter switch
   // re-renders instantly with no server round trip.
-  const activeStream = searchParams.get('stream') ?? 'all';
+  // One stream at a time: the one in the URL, else the stream of a course picked from a link,
+  // else the first stream.
+  const fromUrl = searchParams.get('stream');
+  const picked = searchParams.get('course');
+  const activeStream =
+    COURSE_STREAMS.find((s) => s.slug === fromUrl)?.slug ??
+    COURSE_STREAMS.find((s) => s.courses.some((c) => c.slug === picked))?.slug ??
+    COURSE_STREAMS[0].slug;
 
-  const filters = [
-    { label: t.allStreams, slug: 'all', count: ALL_COURSES.length },
-    ...COURSE_STREAMS.map((s) => ({ label: streamName(s.slug, s.stream), slug: s.slug, count: s.courses.length })),
-  ];
+  const filters = COURSE_STREAMS.map((s) => ({
+    label: streamName(s.slug, s.stream),
+    slug: s.slug,
+    count: s.courses.length,
+  }));
 
-  const streams =
-    activeStream === 'all'
-      ? COURSE_STREAMS
-      : COURSE_STREAMS.filter((s) => s.slug === activeStream);
+  const streams = COURSE_STREAMS.filter((s) => s.slug === activeStream);
 
   function selectStream(slug: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (slug === 'all') params.delete('stream');
-    else params.set('stream', slug);
+    params.set('stream', slug);
     const qs = params.toString();
     window.history.replaceState(null, '', qs ? `${base}?${qs}#courses` : `${base}#courses`);
   }
@@ -72,13 +76,16 @@ function Courses({
 
   return (
     <div className="stack">
-      <div className="chips" role="group" aria-label={t.filterAria}>
+      <div className="chips chips--streams" role="group" aria-label={t.filterAria}>
         {filters.map((f) => (
           <button
             key={f.slug}
             type="button"
             aria-pressed={f.slug === activeStream}
-            onClick={() => selectStream(f.slug)}
+            onClick={(e) => {
+              selectStream(f.slug);
+              e.currentTarget.scrollIntoView({ inline: 'nearest', block: 'nearest', behavior: 'smooth' });
+            }}
           >
             {f.label}
             <span>{num(lang, f.count)}</span>
@@ -86,7 +93,7 @@ function Courses({
         ))}
       </div>
 
-      <div className="cards cards--courses" aria-live="polite">
+      <div className="cards cards--courses cards--one-stream" aria-live="polite">
         {streams.map((stream) => (
           <div key={stream.slug}>
             <div className="card__head">

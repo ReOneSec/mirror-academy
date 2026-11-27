@@ -25,7 +25,8 @@ const SCHEMA = {
   slogan: SITE.tagline,
   foundingDate: String(SITE.since),
   url: SITE_URL,
-  logo: '/brand/logo.jpg',
+  logo: `${SITE_URL}/brand/logo.jpg`,
+  image: `${SITE_URL}/brand/logo.jpg`,
   telephone: `+91${SITE.phone}`,
   email: SITE.email,
   hasMap: SITE.mapsUrl,
@@ -49,6 +50,21 @@ const SCHEMA = {
   },
 };
 
+/** FAQ answers, marked up so Google can show them under the result. */
+function faqSchema(lang: Lang) {
+  const items = getDict(lang).faq.items(SITE.phoneDisplay, SITE.email, SITE.address);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: lang === 'bn' ? 'bn' : 'en',
+    mainEntity: items.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  };
+}
+
 /** The one-page site, in English (/) or Bengali (/bn). */
 export default function HomePage({ lang }: { lang: Lang }) {
   return (
@@ -60,8 +76,10 @@ export default function HomePage({ lang }: { lang: Lang }) {
         <Header lang={lang} />
         <main id="main-content" className="main">
           <Hero lang={lang} />
-          <NoticeBoard lang={lang} />
-          <ExamCalendar lang={lang} />
+          <div className="duo">
+            <NoticeBoard lang={lang} />
+            <ExamCalendar lang={lang} />
+          </div>
           <CourseStreams lang={lang} />
           <WhyMirror lang={lang} />
           <HowAdmission lang={lang} />
@@ -78,6 +96,7 @@ export default function HomePage({ lang }: { lang: Lang }) {
       {lang === 'en' && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }} />
       )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema(lang)) }} />
     </div>
   );
 }

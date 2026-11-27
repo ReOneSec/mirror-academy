@@ -49,6 +49,7 @@ const en = {
   whatsapp: 'WhatsApp',
   hero: {
     eyebrow: (since: string) => `Admissions open · Since ${since}`,
+    what: 'WBCS, WBPSC, Police and NEET coaching in Berhampore',
     sub: 'Coaching for WBPSC, WBCS and related exams in Berhampore, with streams for Medical & Engg., Force, Teaching and Mock Interviews.',
     meta: 'Gorabazar, Berhampore · Murshidabad',
     calloutHead: 'Admissions open',
@@ -208,6 +209,7 @@ const en = {
     ],
   },
   contact: {
+    showMap: 'Show map',
     eyebrow: 'Contact',
     heading: 'Call, write or drop by in Gorabazar.',
     phone: 'Phone',
@@ -333,6 +335,7 @@ const bn: Dict = {
   whatsapp: 'হোয়াটসঅ্যাপ',
   hero: {
     eyebrow: (since: string) => `ভর্তি চলছে · ${since} সাল থেকে`,
+    what: 'বহরমপুরে WBCS, WBPSC, পুলিশ ও NEET কোচিং',
     sub: 'বহরমপুরে WBPSC, WBCS ও সংশ্লিষ্ট পরীক্ষার কোচিং। সঙ্গে মেডিক্যাল ও ইঞ্জিনিয়ারিং, ফোর্স, শিক্ষকতা এবং মক ইন্টারভিউয়ের বিভাগ।',
     meta: 'গোরাবাজার, বহরমপুর · মুর্শিদাবাদ',
     calloutHead: 'ভর্তি চলছে',
@@ -510,6 +513,7 @@ const bn: Dict = {
     ],
   },
   contact: {
+    showMap: 'ম্যাপ দেখুন',
     eyebrow: 'যোগাযোগ',
     heading: 'ফোন করুন, লিখুন বা গোরাবাজারে চলে আসুন।',
     phone: 'ফোন',

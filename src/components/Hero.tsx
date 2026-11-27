@@ -16,7 +16,7 @@ export default function Hero({ lang = 'en' }: { lang?: Lang }) {
               alt=""
               width={320}
               height={320}
-              sizes="160px"
+              sizes="(max-width: 599px) 112px, 160px"
               priority
             />
             <h1 id="hero-heading" className="hero__name" translate="no">
@@ -25,6 +25,7 @@ export default function Hero({ lang = 'en' }: { lang?: Lang }) {
           </div>
           <p className="hero__eyebrow">{h.eyebrow(num(lang, SITE.since))}</p>
           <p className="hero__tagline">{SITE.tagline}</p>
+          <p className="hero__what">{h.what}</p>
           <p className="hero__sub">{h.sub}</p>
           <p className="hero__meta">{h.meta}</p>
         </div>

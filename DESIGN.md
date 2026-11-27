@@ -122,3 +122,10 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Updates popup (`UpdatesPopup` server + `UpdatesDialog` client, a native `<dialog>`): 0.9s after load, latest 3 live notices and next 3 exam dates; "Don't show again today" saves `ma-updates-hidden-on` in localStorage; skipped when the URL has a #section.
 - Remove dates: notices (`expires_on`, 006), exam dates and downloads (`expires_on`, migration 007). After the date the item is hidden from the site; admin keeps it, marked "Removed from site". Exam dates without a remove date hide once their date passes. Writes send expires_on only when set, so saving works before 007.
 - Admin: Motion mounted in admin layout (fade-up), toast/menu drop, list hover lift, sign-in on the hero's navy surface, gold logo ring.
+
+## Landing polish (2026-11-28)
+- Courses: one stream at a time (no "All"); the stream comes from ?stream=, else the picked ?course=, else the first stream. Tabs scroll sideways on phones; a single stream's courses sit in a 2–3 column grid on wider screens.
+- Notices and exam dates sit side by side from 1000px (`.duo`).
+- Hero: gold line under the slogan, "WBCS, WBPSC, Police and NEET coaching in Berhampore" (and Bengali).
+- Speed: the Google Map loads only on tap (`MapEmbed`); Turnstile's script loads only when the form is within 600px of the screen; hero logo sizes 112px on phones.
+- Search: FAQPage JSON-LD on / and /bn; organisation logo and image as absolute URLs.

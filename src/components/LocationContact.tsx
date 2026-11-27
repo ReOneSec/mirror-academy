@@ -1,4 +1,5 @@
 import { SITE } from '@/lib/constants';
+import MapEmbed from '@/components/MapEmbed';
 import { getDict, type Lang } from '@/lib/i18n';
 
 export default function LocationContact({ lang = 'en' }: { lang?: Lang }) {
@@ -57,13 +58,7 @@ export default function LocationContact({ lang = 'en' }: { lang?: Lang }) {
             {c.openMaps}<span className="sr-only">{c.newTab}</span>
           </a>
         </div>
-        <iframe
-          src={SITE.mapsEmbedUrl}
-          title={c.mapTitle}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
+        <MapEmbed src={SITE.mapsEmbedUrl} title={c.mapTitle} address={SITE.address} label={c.showMap} />
       </div>
 
       <aside className="callout" aria-label={c.calloutHead}>
