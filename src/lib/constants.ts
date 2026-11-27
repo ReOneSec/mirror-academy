@@ -96,13 +96,4 @@ export const ALL_COURSES = COURSE_STREAMS.flatMap((s) =>
   s.courses.map((c) => ({ ...c, stream: s.stream }))
 );
 
-export const NAV_LINKS = [
-  { label: 'Notices', href: '#notices' },
-  { label: 'Courses', href: '#courses' },
-  { label: 'Why us', href: '#why-mirror' },
-  { label: 'Admission', href: '#admission' },
-  { label: 'Register', href: '#registration' },
-  { label: 'Articles', href: '#articles' },
-  { label: 'FAQ', href: '#faq' },
-  { label: 'Contact', href: '#contact' },
-] as const;
+// Section links live in src/lib/i18n.ts (navLinks), in English and Bengali.

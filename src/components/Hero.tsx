@@ -1,7 +1,10 @@
 import Image from 'next/image';
 import { SITE, COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
+import { getDict, num, type Lang } from '@/lib/i18n';
 
-export default function Hero() {
+export default function Hero({ lang = 'en' }: { lang?: Lang }) {
+  const h = getDict(lang).hero;
+  const d = getDict(lang);
   return (
     <>
       <section className="hero hero--site" aria-labelledby="hero-heading">
@@ -16,54 +19,52 @@ export default function Hero() {
               sizes="160px"
               priority
             />
-            <h1 id="hero-heading" className="hero__name">
+            <h1 id="hero-heading" className="hero__name" translate="no">
               Mirror <span>Academy</span>
             </h1>
           </div>
-          <p className="hero__eyebrow">Admissions open · Since {SITE.since}</p>
+          <p className="hero__eyebrow">{h.eyebrow(num(lang, SITE.since))}</p>
           <p className="hero__tagline">{SITE.tagline}</p>
-          <p className="hero__sub">
-            Coaching for WBPSC, WBCS and related exams in Berhampore, with streams for Medical
-            &amp; Engg., Force, Teaching and Mock Interviews.
-          </p>
-          <p className="hero__meta">Gorabazar, Berhampore · Murshidabad</p>
+          <p className="hero__sub">{h.sub}</p>
+          <p className="hero__meta">{h.meta}</p>
         </div>
-        <aside className="callout" aria-label="Admissions">
-          <p className="callout__head">Admissions open</p>
+        <aside className="callout" aria-label={h.calloutHead}>
+          <p className="callout__head">{h.calloutHead}</p>
           <p className="callout__lead">
-            <strong>Register online</strong> and we&rsquo;ll call you back, or call or WhatsApp{' '}
-            <span className="tabular-nums">{SITE.phoneDisplay}</span>.
+            <strong>{h.calloutLeadStrong}</strong>
+            {h.calloutLeadRest}
+            <span className="tabular-nums">{SITE.phoneDisplay}</span>{lang === 'bn' ? '।' : '.'}
           </p>
           <div className="links">
             <a className="btn btn--primary" href="#registration">
-              Register as a student
+              {h.register}
             </a>
             <a className="btn" href={SITE.phoneTel}>
-              Call
+              {d.call}
             </a>
             <a className="btn" href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
-              WhatsApp
+              {d.whatsapp}
             </a>
           </div>
         </aside>
       </section>
 
-      <div className="stats" aria-label="At a glance">
+      <div className="stats" aria-label={h.statsAria}>
         <div className="stat">
-          <p className="stat__fig">{ALL_COURSES.length}</p>
-          <p className="stat__label">Courses</p>
+          <p className="stat__fig">{num(lang, ALL_COURSES.length)}</p>
+          <p className="stat__label">{h.statCourses}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">{COURSE_STREAMS.length}</p>
-          <p className="stat__label">Streams</p>
+          <p className="stat__fig">{num(lang, COURSE_STREAMS.length)}</p>
+          <p className="stat__label">{h.statStreams}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">{SITE.since}</p>
-          <p className="stat__label">Teaching since</p>
+          <p className="stat__fig">{num(lang, SITE.since)}</p>
+          <p className="stat__label">{h.statSince}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">2</p>
-          <p className="stat__label">Batches: Free and Paid</p>
+          <p className="stat__fig">{num(lang, 2)}</p>
+          <p className="stat__label">{h.statBatches}</p>
         </div>
       </div>
     </>

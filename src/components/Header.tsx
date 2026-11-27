@@ -2,18 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { SITE, NAV_LINKS } from '@/lib/constants';
+import { SITE } from '@/lib/constants';
+import { getDict, navLinks, type Lang } from '@/lib/i18n';
 import ThemeToggle from './ThemeToggle';
 
 /**
  * The kit's floating glass pill: logo, section tabs (the one in view is marked), a call
  * capsule on wider screens and the light/dark toggle. On a phone the tabs scroll sideways.
  */
-export default function Header() {
+export default function Header({ lang = 'en' }: { lang?: Lang }) {
   const [current, setCurrent] = useState<string>('');
+  const links = navLinks(lang);
+  const d = getDict(lang);
 
   useEffect(() => {
-    const ids = NAV_LINKS.map((l) => l.href.slice(1));
+    const ids = navLinks('en').map((l) => l.href.slice(1));
     const sections = ids
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => !!el);
@@ -38,8 +41,8 @@ export default function Header() {
           Mirror <b>Academy</b>
         </span>
       </a>
-      <nav className="seg" aria-label="Sections">
-        {NAV_LINKS.map((link) => (
+      <nav className="seg" aria-label={d.navAria}>
+        {links.map((link) => (
           <a
             key={link.href}
             href={link.href}
@@ -50,7 +53,16 @@ export default function Header() {
         ))}
       </nav>
       <a href={SITE.phoneTel} className="nav__cta">
-        Call {SITE.phoneDisplay}
+        {d.call} {SITE.phoneDisplay}
+      </a>
+      <a
+        href={lang === 'en' ? '/bn' : '/'}
+        className="nav__lang"
+        hrefLang={lang === 'en' ? 'bn' : 'en'}
+        lang={lang === 'en' ? 'bn' : 'en'}
+        aria-label={d.langSwitch.aria}
+      >
+        {d.langSwitch.label}
       </a>
       <ThemeToggle />
     </header>

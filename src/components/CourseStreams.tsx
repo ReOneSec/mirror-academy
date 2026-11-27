@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, type MouseEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { COURSE_STREAMS, ALL_COURSES } from '@/lib/constants';
 import { COURSE_EVENT, chooseCourse } from '@/lib/courseSelection';
+import { getDict, homePath, num, type Lang } from '@/lib/i18n';
 
 function useMarkedCourse() {
   const [marked, setMarked] = useState<string | null>(null);
@@ -16,20 +17,30 @@ function useMarkedCourse() {
 }
 
 /** Reads the URL, so it suspends during prerender; the fallback renders the same cards unfiltered. */
-function CoursesFromUrl() {
+function CoursesFromUrl({ lang }: { lang: Lang }) {
   const searchParams = useSearchParams();
-  return <Courses searchParams={searchParams} />;
+  return <Courses searchParams={searchParams} lang={lang} />;
 }
 
-function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<typeof useSearchParams> }) {
+function Courses({
+  searchParams,
+  lang,
+}: {
+  searchParams: URLSearchParams | ReturnType<typeof useSearchParams>;
+  lang: Lang;
+}) {
   const marked = useMarkedCourse();
+  const t = getDict(lang).courses;
+  const base = homePath(lang);
+  const streamName = (slug: string, fallback: string) => t.streams[slug] ?? fallback;
+  const about = (slug: string, fallback?: string) => (lang === 'bn' ? t.about[slug] ?? fallback : fallback);
   // history.replaceState updates useSearchParams on the client (Next 14.1+), so a filter switch
   // re-renders instantly with no server round trip.
   const activeStream = searchParams.get('stream') ?? 'all';
 
   const filters = [
-    { label: 'All streams', slug: 'all', count: ALL_COURSES.length },
-    ...COURSE_STREAMS.map((s) => ({ label: s.stream, slug: s.slug, count: s.courses.length })),
+    { label: t.allStreams, slug: 'all', count: ALL_COURSES.length },
+    ...COURSE_STREAMS.map((s) => ({ label: streamName(s.slug, s.stream), slug: s.slug, count: s.courses.length })),
   ];
 
   const streams =
@@ -42,13 +53,13 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
     if (slug === 'all') params.delete('stream');
     else params.set('stream', slug);
     const qs = params.toString();
-    window.history.replaceState(null, '', qs ? `/?${qs}#courses` : '/#courses');
+    window.history.replaceState(null, '', qs ? `${base}?${qs}#courses` : `${base}#courses`);
   }
 
   function courseHref(slug: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set('course', slug);
-    return `/?${params.toString()}#registration`;
+    return `${base}?${params.toString()}#registration`;
   }
 
   function onPick(e: MouseEvent<HTMLAnchorElement>, slug: string) {
@@ -61,7 +72,7 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
 
   return (
     <div className="stack">
-      <div className="chips" role="group" aria-label="Show courses by stream">
+      <div className="chips" role="group" aria-label={t.filterAria}>
         {filters.map((f) => (
           <button
             key={f.slug}
@@ -70,7 +81,7 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
             onClick={() => selectStream(f.slug)}
           >
             {f.label}
-            <span>{f.count}</span>
+            <span>{num(lang, f.count)}</span>
           </button>
         ))}
       </div>
@@ -79,8 +90,8 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
         {streams.map((stream) => (
           <div key={stream.slug}>
             <div className="card__head">
-              <h3 id={`stream-${stream.slug}`}>{stream.stream}</h3>
-              <span className="card__count">{stream.courses.length}</span>
+              <h3 id={`stream-${stream.slug}`}>{streamName(stream.slug, stream.stream)}</h3>
+              <span className="card__count">{num(lang, stream.courses.length)}</span>
             </div>
             <ul aria-labelledby={`stream-${stream.slug}`}>
               {stream.courses.map((course) => (
@@ -89,11 +100,13 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
                     href={courseHref(course.slug)}
                     onClick={(e) => onPick(e, course.slug)}
                     data-marked={marked === course.slug}
-                    aria-label={`Register for ${course.name}`}
+                    aria-label={t.registerFor(course.name)}
                   >
                     <span className="course__text">
                       <span className="course__name" translate="no">{course.name}</span>
-                      {course.about && <span className="course__about">{course.about}</span>}
+                      {about(course.slug, course.about) && (
+                        <span className="course__about">{about(course.slug, course.about)}</span>
+                      )}
                     </span>
                   </a>
                 </li>
@@ -106,19 +119,19 @@ function Courses({ searchParams }: { searchParams: URLSearchParams | ReturnType<
   );
 }
 
-export default function CourseStreams() {
+export default function CourseStreams({ lang = 'en' }: { lang?: Lang }) {
+  const t = getDict(lang).courses;
   return (
     <section id="courses" className="section" aria-labelledby="courses-heading">
       <div className="head">
-        <p className="head__eyebrow">Courses</p>
+        <p className="head__eyebrow">{t.eyebrow}</p>
         <h2 id="courses-heading">
-          {ALL_COURSES.length} courses in {COURSE_STREAMS.length} streams, from public services to
-          mock interviews.
+          {t.heading(num(lang, ALL_COURSES.length), num(lang, COURSE_STREAMS.length))}
         </h2>
-        <p className="head__sub">Tap a course to start your registration with it selected.</p>
+        <p className="head__sub">{t.sub}</p>
       </div>
-      <Suspense fallback={<Courses searchParams={new URLSearchParams()} />}>
-        <CoursesFromUrl />
+      <Suspense fallback={<Courses searchParams={new URLSearchParams()} lang={lang} />}>
+        <CoursesFromUrl lang={lang} />
       </Suspense>
     </section>
   );

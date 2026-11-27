@@ -3,6 +3,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Notice } from '@/types';
 import { NOTICE_BODY_MAX, NOTICE_MAX_BYTES, NOTICE_TITLE_MAX, formatNoticeDate } from '@/lib/notices';
+import { formatDate } from '@/lib/i18n';
+
+/** Today in India as YYYY-MM-DD (admin page runs in the browser). */
+const todayIST = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+    new Date()
+  );
 
 const ACCEPT = 'application/pdf,image/jpeg,image/png,image/webp';
 
@@ -15,6 +22,7 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
   const [body, setBody] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [pinned, setPinned] = useState(false);
+  const [expiresOn, setExpiresOn] = useState('');
   const [formError, setFormError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +75,7 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
     form.set('body', body.trim());
     form.set('linkUrl', linkUrl.trim());
     form.set('pinned', String(pinned));
+    if (expiresOn) form.set('expiresOn', expiresOn);
     if (file) form.set('file', file);
 
     setSaving(true);
@@ -81,6 +90,7 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
       setBody('');
       setLinkUrl('');
       setPinned(false);
+      setExpiresOn('');
       if (fileRef.current) fileRef.current.value = '';
       onToast('Notice posted. It is live on the website.');
       load();
@@ -91,7 +101,11 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
     }
   }
 
-  async function update(id: string, patch: { pinned?: boolean; published?: boolean }, msg: string) {
+  async function update(
+    id: string,
+    patch: { pinned?: boolean; published?: boolean; expiresOn?: string | null },
+    msg: string
+  ) {
     try {
       const res = await fetch('/api/admin/notices', {
         method: 'PATCH',
@@ -175,6 +189,18 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
             </span>
             <input ref={fileRef} className="field" type="file" accept={ACCEPT} />
           </label>
+          <label>
+            <span className="field-label">
+              Show until <span className="sub">Optional. The notice hides itself after this day.</span>
+            </span>
+            <input
+              className="field"
+              type="date"
+              value={expiresOn}
+              min={todayIST()}
+              onChange={(e) => setExpiresOn(e.target.value)}
+            />
+          </label>
           <div className="adm-nform__row">
             <label className="adm-check">
               <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
@@ -221,6 +247,12 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
                 <time dateTime={n.createdAt}>{formatNoticeDate(n.createdAt)}</time>
                 {n.pinned && <span className="chip chip--solid">Pinned</span>}
                 {!n.published && <span className="chip">Hidden</span>}
+                {n.expiresOn &&
+                  (n.expiresOn < todayIST() ? (
+                    <span className="chip">Expired {formatDate('en', n.expiresOn)}</span>
+                  ) : (
+                    <span className="chip">Until {formatDate('en', n.expiresOn)}</span>
+                  ))}
               </div>
               <p className="nb-title">{n.title}</p>
               {n.body && <p className="nb-body">{n.body}</p>}
@@ -255,6 +287,21 @@ export default function AdminNotices({ onToast }: { onToast: (msg: string) => vo
                 >
                   {n.published ? 'Hide' : 'Show'}
                 </button>
+                <label className="adm-expiry">
+                  <span>Show until</span>
+                  <input
+                    type="date"
+                    className="field"
+                    value={n.expiresOn ?? ''}
+                    onChange={(e) =>
+                      update(
+                        n.id,
+                        { expiresOn: e.target.value || null },
+                        e.target.value ? `Shows until ${formatDate('en', e.target.value)}.` : 'End date removed.'
+                      )
+                    }
+                  />
+                </label>
                 <button type="button" className="adm-textbtn adm-textbtn--danger" onClick={() => remove(n)}>
                   Delete
                 </button>

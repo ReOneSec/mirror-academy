@@ -6,6 +6,7 @@ import { COURSE_EVENT, announceCourse } from '@/lib/courseSelection';
 import { CheckCircleIcon, AlertCircleIcon } from '@/components/Icons';
 import Turnstile, { TURNSTILE_SITE_KEY } from '@/components/Turnstile';
 import { downloadSlip, type SlipData } from '@/lib/slip';
+import { formatDate, getDict, type Lang } from '@/lib/i18n';
 import type {
   BatchType,
   GenderType,
@@ -18,7 +19,9 @@ function validatePhone(phone: string): boolean {
   return /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ''));
 }
 
-export default function EnquiryForm() {
+export default function EnquiryForm({ lang = 'en' }: { lang?: Lang }) {
+  const t = getDict(lang).form;
+  const streamName = (slug: string, fallback: string) => getDict(lang).courses.streams[slug] ?? fallback;
   const [activeTab, setActiveTab] = useState<'register' | 'lookup'>('register');
   const [batchType, setBatchType] = useState<BatchType>('Free batch');
   const [gender, setGender] = useState<GenderType>('Male');
@@ -95,29 +98,29 @@ export default function EnquiryForm() {
     // Validation
     const errors: Record<string, string> = {};
     if (!name) {
-      errors.name = 'Please enter student name.';
+      errors.name = t.errors.name;
     } else if (name.length > 100) {
-      errors.name = 'Student name cannot exceed 100 characters.';
+      errors.name = t.errors.nameLong;
     }
 
     if (!phone) {
-      errors.phone = 'Please enter contact number.';
+      errors.phone = t.errors.phone;
     } else if (!validatePhone(phone)) {
-      errors.phone = 'Enter a 10-digit Indian mobile number starting with 6, 7, 8, or 9.';
+      errors.phone = t.errors.phoneBad;
     }
 
     if (!address) {
-      errors.address = 'Please enter your residential address.';
+      errors.address = t.errors.address;
     } else if (address.length > 300) {
-      errors.address = 'Residential address cannot exceed 300 characters.';
+      errors.address = t.errors.addressLong;
     }
 
     if (message.length > 400) {
-      errors.message = 'Questions or notes cannot exceed 400 characters.';
+      errors.message = t.errors.notesLong;
     }
 
     if (!courseSlug) {
-      errors.courseSlug = 'Please select a course.';
+      errors.courseSlug = t.errors.course;
     }
 
     if (Object.keys(errors).length > 0) {
@@ -134,7 +137,7 @@ export default function EnquiryForm() {
   async function submitRegistration(payload: Record<string, unknown>, allowDuplicate = false) {
     if (TURNSTILE_SITE_KEY && !turnstileToken) {
       setStatus('error');
-      setErrorMessage('Please wait for the security check to finish, then submit again.');
+      setErrorMessage(t.errors.turnstile);
       return;
     }
 
@@ -177,12 +180,12 @@ export default function EnquiryForm() {
         setErrorMessage(result.message);
       } else {
         setStatus('error');
-        setErrorMessage(result.message || 'Something went wrong. Please try again.');
+        setErrorMessage(result.message || t.errors.generic);
       }
     } catch {
       resetTurnstile();
       setStatus('error');
-      setErrorMessage('Could not connect to the server. Check your connection and try again.');
+      setErrorMessage(t.errors.network);
     }
   }
 
@@ -193,12 +196,12 @@ export default function EnquiryForm() {
     setLookupResults(null);
 
     if (!phoneToQuery) {
-      setLookupError('Please enter your 10-digit contact number.');
+      setLookupError(t.errors.lookupEmpty);
       return;
     }
 
     if (!validatePhone(phoneToQuery)) {
-      setLookupError('Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.');
+      setLookupError(t.errors.lookupBad);
       return;
     }
 
@@ -211,10 +214,10 @@ export default function EnquiryForm() {
       if (data.success) {
         setLookupResults(data.registrations ?? []);
       } else {
-        setLookupError(data.message || 'Could not find records for this number.');
+        setLookupError(data.message || t.errors.lookupNone);
       }
     } catch {
-      setLookupError('Network error while checking response. Please try again.');
+      setLookupError(t.errors.lookupNetwork);
     } finally {
       setLookupLoading(false);
     }
@@ -245,23 +248,21 @@ export default function EnquiryForm() {
   return (
     <section id="registration" className="section" aria-labelledby="registration-heading">
       <div className="head">
-        <p className="head__eyebrow">Register</p>
-        <h2 id="registration-heading">Register as a student.</h2>
-        <p className="head__sub">
-          Pick a batch, fill in your details, or check a registration you already sent.
-        </p>
+        <p className="head__eyebrow">{t.eyebrow}</p>
+        <h2 id="registration-heading">{t.heading}</h2>
+        <p className="head__sub">{t.sub}</p>
       </div>
 
       <div className="reg">
       <div className="stack">
-        <div className="tabs" role="tablist" aria-label="Register or check your registration">
+        <div className="tabs" role="tablist" aria-label={t.tabsAria}>
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === 'register'}
             onClick={() => setActiveTab('register')}
           >
-            Register
+            {t.tabRegister}
           </button>
           <button
             type="button"
@@ -275,7 +276,7 @@ export default function EnquiryForm() {
               }
             }}
           >
-            Check my registration
+            {t.tabLookup}
           </button>
         </div>
 
@@ -287,9 +288,9 @@ export default function EnquiryForm() {
                 <span style={{ color: 'var(--fill-system-green)' }}>
                   <CheckCircleIcon className="h-10 w-10" aria-hidden="true" />
                 </span>
-                <h3>Registration submitted</h3>
+                <h3>{t.successTitle}</h3>
                 <p className="sub">
-                  Your registration is with Mirror Academy. We will call you back soon to confirm batch timings.
+                  {t.successBody}
                 </p>
                 <div className="links">
                   {lastSlip?.id && !lastSlip.id.startsWith('dev-') && (
@@ -298,7 +299,7 @@ export default function EnquiryForm() {
                       onClick={() => downloadSlip(lastSlip)}
                       className="btn btn--primary"
                     >
-                      Download registration slip
+                      {t.downloadSlip}
                     </button>
                   )}
                   <button
@@ -306,10 +307,10 @@ export default function EnquiryForm() {
                     onClick={() => switchToLookupWithPhone(lastRegisteredPhone)}
                     className="btn"
                   >
-                    See your registration
+                    {t.seeRegistration}
                   </button>
                   <button type="button" onClick={() => setStatus('idle')} className="btn">
-                    Register another student
+                    {t.registerAnother}
                   </button>
                 </div>
               </div>
@@ -333,7 +334,7 @@ export default function EnquiryForm() {
                 {duplicate && (
                   <div className="notice notice--warn stack" role="alert" aria-live="polite">
                     <p>
-                      <strong>Already registered.</strong> {errorMessage}
+                      <strong>{t.alreadyRegistered}</strong> {errorMessage}
                     </p>
                     <div className="links">
                       <button
@@ -343,7 +344,7 @@ export default function EnquiryForm() {
                           switchToLookupWithPhone(String(pendingRef.current?.phone ?? ''))
                         }
                       >
-                        Check my registration
+                        {t.tabLookup}
                       </button>
                       <button
                         type="button"
@@ -352,7 +353,7 @@ export default function EnquiryForm() {
                           pendingRef.current && submitRegistration(pendingRef.current, true)
                         }
                       >
-                        Register again anyway
+                        {t.registerAgain}
                       </button>
                     </div>
                   </div>
@@ -362,7 +363,7 @@ export default function EnquiryForm() {
                 <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
                   <legend className="field-label">
                     <span>
-                      Batch <span className="req">*</span>
+                      {t.batch} <span className="req">*</span>
                     </span>
                   </legend>
                   <div className="choice-grid">
@@ -373,9 +374,9 @@ export default function EnquiryForm() {
                       onClick={() => setBatchType('Free batch')}
                     >
                       <span className="choice__top">
-                        Free batch <span className="pill">Orientation</span>
+                        {t.batches['Free batch'].name} <span className="pill">{t.batches['Free batch'].pill}</span>
                       </span>
-                      <p>Introductory lectures, syllabus overview and guidance sessions.</p>
+                      <p>{t.batches['Free batch'].body}</p>
                     </button>
                     <button
                       type="button"
@@ -384,9 +385,9 @@ export default function EnquiryForm() {
                       onClick={() => setBatchType('Paid batch')}
                     >
                       <span className="choice__top">
-                        Paid batch <span className="pill">Full course</span>
+                        {t.batches['Paid batch'].name} <span className="pill">{t.batches['Paid batch'].pill}</span>
                       </span>
-                      <p>Complete exam curriculum, daily mock tests and dedicated faculty.</p>
+                      <p>{t.batches['Paid batch'].body}</p>
                     </button>
                     <button
                       type="button"
@@ -395,9 +396,10 @@ export default function EnquiryForm() {
                       onClick={() => setBatchType('Interview batch')}
                     >
                       <span className="choice__top">
-                        Interview batch <span className="pill">Mock interview</span>
+                        {t.batches['Interview batch'].name}{' '}
+                        <span className="pill">{t.batches['Interview batch'].pill}</span>
                       </span>
-                      <p>Mock interview sessions for TET, SSC and police recruitment interviews.</p>
+                      <p>{t.batches['Interview batch'].body}</p>
                     </button>
                   </div>
                 </fieldset>
@@ -406,7 +408,7 @@ export default function EnquiryForm() {
                 <div>
                   <label htmlFor="student-name" className="field-label">
                     <span>
-                      Student name <span className="req">*</span>
+                      {t.name} <span className="req">*</span>
                     </span>
                   </label>
                   <input
@@ -416,7 +418,7 @@ export default function EnquiryForm() {
                     autoComplete="name"
                     required
                     maxLength={100}
-                    placeholder="e.g. Rahim Sheikh…"
+                    placeholder={t.namePh}
                     className="field"
                     {...fieldProps('name')}
                   />
@@ -427,7 +429,7 @@ export default function EnquiryForm() {
                 <div>
                   <label htmlFor="student-phone" className="field-label">
                     <span>
-                      Mobile number <span className="req">*</span>
+                      {t.phone} <span className="req">*</span>
                     </span>
                   </label>
                   <input
@@ -437,7 +439,7 @@ export default function EnquiryForm() {
                     inputMode="numeric"
                     autoComplete="tel"
                     required
-                    placeholder="e.g. 9876543210…"
+                    placeholder={t.phonePh}
                     maxLength={10}
                     onInput={(e) => {
                       e.currentTarget.value = e.currentTarget.value.replace(/\D/g, '').slice(0, 10);
@@ -446,7 +448,7 @@ export default function EnquiryForm() {
                     spellCheck={false}
                     {...fieldProps('phone')}
                   />
-                  <p className="field-hint">You&rsquo;ll use this number to check your registration later.</p>
+                  <p className="field-hint">{t.phoneHint}</p>
                   {fieldError('phone')}
                 </div>
 
@@ -454,7 +456,7 @@ export default function EnquiryForm() {
                 <fieldset style={{ border: 0, margin: 0, padding: 0 }}>
                   <legend className="field-label">
                     <span>
-                      Gender <span className="req">*</span>
+                      {t.gender} <span className="req">*</span>
                     </span>
                   </legend>
                   <div className="radios">
@@ -466,7 +468,7 @@ export default function EnquiryForm() {
                           checked={gender === g}
                           onChange={() => setGender(g)}
                         />
-                        {g}
+                        {t.genders[g] ?? g}
                       </label>
                     ))}
                   </div>
@@ -476,7 +478,7 @@ export default function EnquiryForm() {
                 <div>
                   <label htmlFor="student-address" className="field-label">
                     <span>
-                      Residential address <span className="req">*</span>
+                      {t.address} <span className="req">*</span>
                     </span>
                     <span className="sub tabular-nums">{addressText.length}/300</span>
                   </label>
@@ -488,7 +490,7 @@ export default function EnquiryForm() {
                     value={addressText}
                     onChange={(e) => setAddressText(e.target.value.slice(0, 300))}
                     required
-                    placeholder="e.g. Village/Town, Majdia West, Gorabazar, Berhampore, Murshidabad…"
+                    placeholder={t.addressPh}
                     className="field"
                     {...fieldProps('address')}
                   />
@@ -499,7 +501,7 @@ export default function EnquiryForm() {
                 <div>
                   <label htmlFor="student-course" className="field-label">
                     <span>
-                      Course <span className="req">*</span>
+                      {t.course} <span className="req">*</span>
                     </span>
                   </label>
                   <select
@@ -515,13 +517,13 @@ export default function EnquiryForm() {
                     {...fieldProps('courseSlug')}
                   >
                     <option value="" disabled>
-                      Select a course…
+                      {t.coursePh}
                     </option>
                     {COURSE_STREAMS.map((stream) => (
-                      <optgroup key={stream.slug} label={stream.stream}>
+                      <optgroup key={stream.slug} label={streamName(stream.slug, stream.stream)}>
                         {stream.courses.map((course) => (
                           <option key={course.slug} value={course.slug}>
-                            {course.name} ({stream.stream})
+                            {course.name} ({streamName(stream.slug, stream.stream)})
                           </option>
                         ))}
                       </optgroup>
@@ -534,7 +536,7 @@ export default function EnquiryForm() {
                 <div>
                   <label htmlFor="student-message" className="field-label">
                     <span>
-                      Questions or notes <span className="sub">(optional)</span>
+                      {t.notes} <span className="sub">{t.optional}</span>
                     </span>
                     <span className="sub tabular-nums">{messageText.length}/400</span>
                   </label>
@@ -545,7 +547,7 @@ export default function EnquiryForm() {
                     maxLength={400}
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value.slice(0, 400))}
-                    placeholder="Any batch timing requests or questions…"
+                    placeholder={t.notesPh}
                     className="field"
                     {...fieldProps('message')}
                   />
@@ -563,10 +565,10 @@ export default function EnquiryForm() {
                   {status === 'submitting' ? (
                     <>
                       <span className="spinner" aria-hidden="true" />
-                      Submitting registration…
+                      {t.submitting}
                     </>
                   ) : (
-                    `Complete registration (${batchType})`
+                    t.submit(t.batches[batchType]?.name ?? batchType)
                   )}
                 </button>
               </form>
@@ -578,15 +580,15 @@ export default function EnquiryForm() {
         {activeTab === 'lookup' && (
           <div className="panel stack" role="tabpanel">
             <div>
-              <h3>Check your registration</h3>
+              <h3>{t.lookupTitle}</h3>
               <p className="sub" style={{ marginTop: 4 }}>
-                Enter the 10-digit mobile number you registered with.
+                {t.lookupSub}
               </p>
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <label htmlFor="lookup-phone" className="sr-only">
-                Mobile number
+                {t.phone}
               </label>
               <input
                 id="lookup-phone"
@@ -600,7 +602,7 @@ export default function EnquiryForm() {
                     handleLookup();
                   }
                 }}
-                placeholder="10-digit mobile number…"
+                placeholder={t.lookupPh}
                 maxLength={10}
                 className="field tabular-nums sm:flex-1"
               />
@@ -611,7 +613,7 @@ export default function EnquiryForm() {
                 className="btn btn--primary btn--lg"
               >
                 {lookupLoading && <span className="spinner" aria-hidden="true" />}
-                Find registration
+                {t.find}
               </button>
             </div>
 
@@ -625,78 +627,72 @@ export default function EnquiryForm() {
             {lookupResults &&
               (lookupResults.length === 0 ? (
                 <div className="aside" style={{ maxWidth: 'none' }}>
-                  <h3>No registration found for {lookupPhone ? `+91 ${lookupPhone}` : 'this number'}.</h3>
-                  <p className="sub">Check the number, or register as a new student.</p>
+                  <h3>{t.noneFound(lookupPhone ? `+91 ${lookupPhone}` : t.thisNumber)}</h3>
+                  <p className="sub">{t.noneSub}</p>
                   <button
                     type="button"
                     onClick={() => setActiveTab('register')}
                     className="btn btn--primary"
                     style={{ marginTop: 12 }}
                   >
-                    Register as a student
+                    {getDict(lang).hero.register}
                   </button>
                 </div>
               ) : (
                 <div className="stack">
                   <p className="sub">
-                    {lookupResults.length} registration{lookupResults.length > 1 ? 's' : ''} found
+                    {t.found(lookupResults.length)}
                   </p>
                   {lookupResults.map((record) => (
                     <article key={record.id} className="record stack">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div>
                           <p className="sub" style={{ font: 'var(--type-caption)' }}>
-                            Student registration
+                            {t.record}
                           </p>
                           <h4 style={{ font: 'var(--type-heading)', overflowWrap: 'anywhere' }}>{record.name}</h4>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <span className="chip">{record.batchType}</span>
-                          <span className="chip chip--solid">Application received</span>
+                          <span className="chip">{t.batches[record.batchType]?.name ?? record.batchType}</span>
+                          <span className="chip chip--solid">{t.received}</span>
                         </div>
                       </div>
                       <dl>
                         <div>
-                          <dt>Course</dt>
+                          <dt>{t.course}</dt>
                           <dd>
                             {record.courseName} <span className="sub">({record.stream})</span>
                           </dd>
                         </div>
                         <div>
-                          <dt>Mobile number</dt>
+                          <dt>{t.phone}</dt>
                           <dd className="tabular-nums">{record.phone}</dd>
                         </div>
                         <div>
-                          <dt>Gender</dt>
-                          <dd>{record.gender}</dd>
+                          <dt>{t.gender}</dt>
+                          <dd>{t.genders[record.gender] ?? record.gender}</dd>
                         </div>
                         <div>
-                          <dt>Registered</dt>
-                          <dd>
-                            {new Date(record.createdAt).toLocaleDateString('en-IN', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
-                          </dd>
+                          <dt>{t.registered}</dt>
+                          <dd>{formatDate(lang, record.createdAt)}</dd>
                         </div>
                         <div className="wide">
-                          <dt>Residential address</dt>
+                          <dt>{t.address}</dt>
                           <dd>{record.address}</dd>
                         </div>
                         {record.message && (
                           <div className="wide">
-                            <dt>Questions or notes</dt>
+                            <dt>{t.notes}</dt>
                             <dd style={{ fontWeight: 400 }}>{record.message}</dd>
                           </div>
                         )}
                       </dl>
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="fineprint" style={{ fontSize: 'var(--size-caption)' }}>
-                          Registration ID <span className="font-mono">{record.id}</span>
+                          {t.regId} <span className="font-mono">{record.id}</span>
                         </p>
                         <button type="button" className="btn" onClick={() => downloadSlip(record)}>
-                          Download slip
+                          {t.downloadShort}
                         </button>
                       </div>
                     </article>
@@ -706,23 +702,23 @@ export default function EnquiryForm() {
           </div>
         )}
       </div>
-      <aside className="callout" aria-label="After you register">
-        <p className="callout__head">After you register</p>
+      <aside className="callout" aria-label={t.afterHead}>
+        <p className="callout__head">{t.afterHead}</p>
         <ol>
-          <li>We call you back about the course and batch timing.</li>
-          <li>You visit the campus in Gorabazar and meet the faculty.</li>
-          <li>You complete your enrolment.</li>
+          {t.after.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
         </ol>
         <p className="fineprint">
-          Prefer to talk first? Call{' '}
+          {t.preferTalk}
           <a className="link" href={SITE.phoneTel}>
             {SITE.phoneDisplay}
-          </a>{' '}
-          or{' '}
-          <a className="link" href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
-            WhatsApp us
           </a>
-          .
+          {t.or}
+          <a className="link" href={SITE.whatsappUrl} target="_blank" rel="noopener noreferrer">
+            {t.whatsappUs}
+          </a>
+          {lang === 'bn' ? '।' : '.'}
         </p>
       </aside>
       </div>

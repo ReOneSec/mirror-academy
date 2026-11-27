@@ -1,28 +1,16 @@
-const REASONS = [
-  {
-    title: 'Exam-focused coaching',
-    body: 'Structured preparation for WBPSC, WBCS, police, medical, engineering and teaching exams.',
-  },
-  {
-    title: 'Located in Berhampore',
-    body: 'Local coaching in Gorabazar, with no long commute for students in Murshidabad.',
-  },
-  {
-    // TODO: confirm admission flow wording with owner
-    title: 'Enquiry-led admission',
-    body: 'Send an enquiry, get a call back, then visit us. No pressure.',
-  },
-];
+import { getDict, type Lang } from '@/lib/i18n';
 
-export default function WhyMirror() {
+// TODO: confirm the "Enquiry-led admission" wording with the owner (text lives in src/lib/i18n.ts).
+export default function WhyMirror({ lang = 'en' }: { lang?: Lang }) {
+  const w = getDict(lang).why;
   return (
     <section id="why-mirror" className="section" aria-labelledby="why-heading">
       <div className="head">
-        <p className="head__eyebrow">Why Mirror Academy</p>
-        <h2 id="why-heading">Focused coaching, close to home.</h2>
+        <p className="head__eyebrow">{w.eyebrow}</p>
+        <h2 id="why-heading">{w.heading}</h2>
       </div>
       <div className="cards">
-        {REASONS.map(({ title, body }) => (
+        {w.reasons.map(({ title, body }) => (
           <div key={title}>
             <h3>{title}</h3>
             <p>{body}</p>

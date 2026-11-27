@@ -16,6 +16,7 @@ export default function SubpageHeader() {
       <nav className="seg" aria-label="Pages">
         <Link href="/">Home</Link>
         <Link href="/articles">Articles</Link>
+        <Link href="/downloads">Downloads</Link>
         <Link href="/#registration">Register</Link>
       </nav>
       <a href={SITE.phoneTel} className="nav__cta">

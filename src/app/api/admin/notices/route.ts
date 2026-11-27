@@ -5,6 +5,7 @@ import {
   NOTICE_BUCKET,
   NOTICE_BODY_MAX,
   NOTICE_COLUMNS,
+  NOTICE_COLUMNS_V1,
   NOTICE_FILE_TYPES,
   NOTICE_MAX_BYTES,
   NOTICE_TITLE_MAX,
@@ -12,6 +13,9 @@ import {
   toNotice,
   type NoticeRow,
 } from '@/lib/notices';
+import { isIsoDate } from '@/lib/dates';
+
+const NEEDS_006 = 'Run migration 006 in Supabase to use end dates.';
 
 function fail(message: string, status: number) {
   return NextResponse.json({ success: false, message }, { status });
@@ -22,16 +26,16 @@ const unauthorized = () => fail('Unauthorized. Please sign in.', 401);
 export async function GET(request: NextRequest) {
   if (!(await getAuthenticatedUser(request))) return unauthorized();
   try {
-    const { data, error } = await createAdminClient()
-      .from('notices')
-      .select(NOTICE_COLUMNS)
-      .order('pinned', { ascending: false })
-      .order('created_at', { ascending: false });
+    const admin = createAdminClient();
+    const query = (columns: string) =>
+      admin.from('notices').select(columns).order('pinned', { ascending: false }).order('created_at', { ascending: false });
+    let { data, error } = await query(NOTICE_COLUMNS);
+    if (error) ({ data, error } = await query(NOTICE_COLUMNS_V1)); // migration 006 not run yet
     if (error) {
       console.error('Notices query error:', error);
       return fail('Failed to load notices. Has migration 004 been run?', 500);
     }
-    return NextResponse.json({ success: true, notices: (data as NoticeRow[]).map(toNotice) });
+    return NextResponse.json({ success: true, notices: (data as unknown as NoticeRow[]).map(toNotice) });
   } catch (err) {
     console.error('Notices GET error:', err);
     return fail('Internal server error.', 500);
@@ -55,11 +59,13 @@ export async function POST(request: NextRequest) {
   const pinned = form.get('pinned') === 'true';
   const published = form.get('published') !== 'false';
   const file = form.get('file');
+  const expiresRaw = String(form.get('expiresOn') ?? '').trim();
 
   if (!title) return fail('Add a title.', 400);
   if (title.length > NOTICE_TITLE_MAX) return fail(`Keep the title under ${NOTICE_TITLE_MAX} characters.`, 400);
   if (body.length > NOTICE_BODY_MAX) return fail(`Keep the notice under ${NOTICE_BODY_MAX} characters.`, 400);
   if (link === 'invalid') return fail('The link must start with https:// or http://.', 400);
+  if (expiresRaw && !isIsoDate(expiresRaw)) return fail('Pick a valid end date.', 400);
 
   const admin = createAdminClient();
   let attachment: { path: string; name: string; type: string } | null = null;
@@ -98,16 +104,17 @@ export async function POST(request: NextRequest) {
       attachment_type: attachment?.type ?? null,
       pinned,
       published,
+      ...(expiresRaw ? { expires_on: expiresRaw } : {}),
     })
-    .select(NOTICE_COLUMNS)
+    .select(expiresRaw ? NOTICE_COLUMNS : NOTICE_COLUMNS_V1)
     .single();
 
   if (error || !data) {
     console.error('Notice insert error:', error);
     if (attachment) await admin.storage.from(NOTICE_BUCKET).remove([attachment.path]);
-    return fail('Could not save the notice.', 500);
+    return fail(expiresRaw && error?.code === '42703' ? NEEDS_006 : 'Could not save the notice.', 500);
   }
-  return NextResponse.json({ success: true, notice: toNotice(data as NoticeRow), message: 'Notice posted.' });
+  return NextResponse.json({ success: true, notice: toNotice(data as unknown as NoticeRow), message: 'Notice posted.' });
 }
 
 /** Edit: JSON with id and any of title, body, linkUrl, pinned, published. */
@@ -141,6 +148,11 @@ export async function PATCH(request: NextRequest) {
   }
   if (typeof input.pinned === 'boolean') update.pinned = input.pinned;
   if (typeof input.published === 'boolean') update.published = input.published;
+  if ('expiresOn' in input) {
+    if (input.expiresOn === null || input.expiresOn === '') update.expires_on = null;
+    else if (isIsoDate(input.expiresOn)) update.expires_on = input.expiresOn;
+    else return fail('Pick a valid end date.', 400);
+  }
   if (Object.keys(update).length === 0) return fail('Nothing to update.', 400);
   update.updated_at = new Date().toISOString();
 
@@ -148,13 +160,13 @@ export async function PATCH(request: NextRequest) {
     .from('notices')
     .update(update)
     .eq('id', id)
-    .select(NOTICE_COLUMNS)
+    .select('expires_on' in update ? NOTICE_COLUMNS : NOTICE_COLUMNS_V1)
     .single();
   if (error || !data) {
     console.error('Notice update error:', error);
-    return fail('Could not update the notice.', 500);
+    return fail('expires_on' in update && error?.code === '42703' ? NEEDS_006 : 'Could not update the notice.', 500);
   }
-  return NextResponse.json({ success: true, notice: toNotice(data as NoticeRow), message: 'Notice updated.' });
+  return NextResponse.json({ success: true, notice: toNotice(data as unknown as NoticeRow), message: 'Notice updated.' });
 }
 
 export async function DELETE(request: NextRequest) {
