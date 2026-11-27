@@ -73,7 +73,7 @@ function NoticeItem({ notice, now, lang }: { notice: Notice; now: number; lang: 
             {t.notices.openLink}
           </a>
         )}
-        <ShareWhatsApp text={shareText} path={`${homePath(lang)}#notices`} label={t.share.whatsapp} />
+        <ShareWhatsApp text={shareText} path={`${homePath(lang)}#notices`} label={t.share.short} />
       </div>
     </li>
   );

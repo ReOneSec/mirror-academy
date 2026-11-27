@@ -51,19 +51,27 @@ export default function Hero({ lang = 'en' }: { lang?: Lang }) {
 
       <div className="stats" aria-label={h.statsAria}>
         <div className="stat">
-          <p className="stat__fig">{num(lang, ALL_COURSES.length)}</p>
+          <p className="stat__fig" data-count={ALL_COURSES.length} data-lang={lang}>
+            {num(lang, ALL_COURSES.length)}
+          </p>
           <p className="stat__label">{h.statCourses}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">{num(lang, COURSE_STREAMS.length)}</p>
+          <p className="stat__fig" data-count={COURSE_STREAMS.length} data-lang={lang}>
+            {num(lang, COURSE_STREAMS.length)}
+          </p>
           <p className="stat__label">{h.statStreams}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">{num(lang, SITE.since)}</p>
+          <p className="stat__fig" data-count={SITE.since} data-lang={lang}>
+            {num(lang, SITE.since)}
+          </p>
           <p className="stat__label">{h.statSince}</p>
         </div>
         <div className="stat">
-          <p className="stat__fig">{num(lang, 2)}</p>
+          <p className="stat__fig" data-count={3} data-lang={lang}>
+            {num(lang, 3)}
+          </p>
           <p className="stat__label">{h.statBatches}</p>
         </div>
       </div>

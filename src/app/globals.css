@@ -49,7 +49,8 @@
   .nav__brand img { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 0 0 2px #ffc501; }
   .nav__word { display: none; font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
   .nav__word b { font-weight: 600; color: light-dark(#ffc501, #8a6a00); }
-  @media (min-width: 1100px) { .nav__word { display: inline; } }
+  @media (min-width: 1360px) { .nav__word { display: inline; } }
+  @media (min-width: 600px) and (max-width: 1179px) { .nav__word { display: inline; } }
   .nav__cta {
     flex: none;
     display: inline-flex;
@@ -634,14 +635,64 @@
   .adm-article-body { min-height: 320px; font-size: 16px; line-height: 1.6; }
   @media (max-width: 599px) { .adm-tabs button { padding-inline: 8px; } }
 
-  /* Language switch in the header pill */
+  /* Header: language switch, menu button and the menu sheet */
+  .nav__spacer { flex: 1 1 0; min-width: 0; }
   .nav__lang {
     flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px;
-    border-radius: var(--r-pill); font: var(--type-label); color: inherit; text-decoration: none;
-    box-shadow: inset 0 0 0 1px var(--stroke-primary-on);
+    border-radius: var(--r-pill); font: var(--type-label); text-decoration: none;
+    color: var(--text-primary-on); background: var(--hover-wash-primary-on);
   }
-  @media (max-width: 599px) { .nav__lang { min-height: var(--tap); padding: 0 10px; } }
-  .nav__lang:hover { box-shadow: inset 0 0 0 100px var(--hover-wash); }
+  .nav__lang:hover { box-shadow: inset 0 0 0 100px var(--hover-wash-primary-on); }
+  .nav__menu-btn {
+    flex: none; display: none; place-items: center; width: 40px; height: 40px; border: 0;
+    border-radius: 50%; background: var(--fill-primary-on); color: var(--text-primary); cursor: pointer;
+  }
+  .nav__burger, .nav__burger::before, .nav__burger::after {
+    display: block; width: 16px; height: 2px; border-radius: 2px; background: currentColor;
+    transition: transform .3s var(--ease, ease), opacity .2s;
+  }
+  .nav__burger { position: relative; }
+  .nav__burger::before, .nav__burger::after { content: ""; position: absolute; left: 0; }
+  .nav__burger::before { top: -5px; }
+  .nav__burger::after { top: 5px; }
+  .nav[data-open] .nav__burger { background: transparent; }
+  .nav[data-open] .nav__burger::before { transform: translateY(5px) rotate(45deg); }
+  .nav[data-open] .nav__burger::after { transform: translateY(-5px) rotate(-45deg); }
+  .nav__sheet {
+    position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 30;
+    display: grid; gap: 16px; padding: 16px; border-radius: 24px;
+    background: light-dark(#fff, #1d1d1f); color: var(--text-primary); box-shadow: var(--shadow);
+    max-height: calc(100dvh - 110px); overflow-y: auto;
+  }
+  .nav__sheet[hidden] { display: none; }
+  .nav__sheet-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .nav__sheet-links a {
+    display: flex; align-items: center; min-height: var(--tap, 44px); padding: 0 14px; border-radius: 14px;
+    background: var(--fill-tertiary); color: var(--text-primary); font: var(--type-label); text-decoration: none;
+  }
+  .nav__sheet-links a[aria-current="true"] { background: var(--fill-primary); color: var(--text-primary-on); }
+  .nav__sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .nav__sheet-actions .btn { justify-content: center; }
+  .nav__sheet-actions .btn--primary { grid-column: 1 / -1; }
+  /* Wide screens: tabs in the bar, no menu button. Narrower: menu button instead of tabs. */
+  @media (max-width: 1179px) {
+    .nav { width: 100%; }
+    .nav__tabs { display: none; }
+    .nav__menu-btn { display: grid; }
+  }
+  @media (min-width: 1180px) { .nav__sheet { display: none !important; } }
+  @media (max-width: 599px) {
+    .nav__lang { min-height: 40px; padding: 0 12px; }
+    .nav__brand img { width: 40px; height: 40px; }
+  }
+
+  /* Hero callout: Register full width, Call and WhatsApp side by side */
+  .hero .callout .links { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .hero .callout .links .btn { justify-content: center; justify-self: stretch; width: 100%; }
+  .hero .callout .links .btn--primary { grid-column: 1 / -1; }
+
+  /* Footer: the admin link is a quiet text link, not a pill */
+  .foot nav a.foot__admin { background: none; padding: 6px 4px; color: var(--text-secondary); text-decoration: underline; text-underline-offset: 3px; }
 
   /* Bengali pages: a little more line height for Bengali letters */
   .lang-bn :where(p, li, h2, h3, summary, label, .btn) { line-height: 1.55; }
@@ -698,4 +749,66 @@
   .adm-expiry { display: inline-flex; align-items: center; gap: 8px; font: var(--type-caption); color: var(--text-secondary); }
   .adm-expiry .field { min-height: 36px; padding: 4px 8px; width: auto; }
   @media (max-width: 599px) { .adm-tabs { overflow-x: auto; } .adm-tabs button { flex: none; } }
+
+  /* ---------- Motion (light, CSS only; see Motion.tsx). Off for reduced motion. ---------- */
+  .nav__tabs { position: relative; }
+  .nav__pill {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 0; opacity: 0;
+    border-radius: var(--r-pill); background: var(--fill-primary-on);
+    transition: transform .5s var(--ease-out), width .5s var(--ease-out), opacity .3s;
+  }
+  .nav__tabs a { position: relative; z-index: 1; transition: color .3s; }
+  .nav__tabs a[aria-current="true"] { background: transparent; }
+
+  /* Hero: the name and lines rise in on first load */
+  @keyframes ma-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  .hero__brand, .hero__eyebrow, .hero__tagline, .hero__sub, .hero__meta, .hero--site > .callout {
+    animation: ma-rise .9s var(--ease-out) both;
+  }
+  .hero__eyebrow { animation-delay: .08s; }
+  .hero__tagline { animation-delay: .14s; }
+  .hero__sub { animation-delay: .2s; }
+  .hero__meta { animation-delay: .26s; }
+  .hero--site > .callout { animation-delay: .32s; }
+
+  /* Scroll reveal: fade up, items in one group one after another */
+  .motion-ok .rv { opacity: 0; transform: translateY(18px); }
+  .motion-ok .rv.is-in {
+    opacity: 1; transform: none;
+    transition: opacity .7s var(--ease-out), transform .7s var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  /* Buttons: a small press on tap, the ↗ arrow nudges on hover */
+  .btn, .chips button, .tabs button, .choice, .nav__lang, .nav__menu-btn, .theme-btn {
+    transition: transform .4s cubic-bezier(.34, 1.56, .64, 1), box-shadow .3s, background-color .3s;
+  }
+  .btn:active, .chips button:active, .tabs button:active, .choice:active,
+  .nav__lang:active, .nav__menu-btn:active, .theme-btn:active { transform: scale(.95); transition-duration: .1s; }
+  .btn[target="_blank"]::after { display: inline-block; transition: transform .4s var(--ease-out); }
+  @media (hover: hover) { .btn[target="_blank"]:hover::after { transform: translate(2px, -2px); } }
+
+  /* Course cards lift a little on hover (computer) */
+  @media (hover: hover) {
+    .cards > div, .art-card, .cal-item, .dl-item { transition: transform .5s var(--ease-out), box-shadow .5s var(--ease-out); }
+    .cards--courses > div:hover, .art-card:hover, .cal-item:hover, .dl-item:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+  }
+
+  /* "New" notices and the menu sheet */
+  @keyframes ma-glow { 0%, 100% { box-shadow: 0 0 0 0 rgb(255 77 0 / .35); } 50% { box-shadow: 0 0 0 6px rgb(255 77 0 / 0); } }
+  .nb-new { animation: ma-glow 2.4s ease-in-out infinite; }
+  @keyframes ma-drop { from { opacity: 0; transform: translateY(-8px) scale(.98); } to { opacity: 1; transform: none; } }
+  .nav__sheet:not([hidden]) { animation: ma-drop .35s var(--ease-out); transform-origin: top center; }
+
+  /* Registration success: the tick draws itself */
+  .tick-draw path, .tick-draw polyline { stroke-dasharray: 64; stroke-dashoffset: 64; animation: ma-draw .9s var(--ease-out) .15s forwards; }
+  .tick-draw polyline { animation-delay: .5s; }
+  @keyframes ma-draw { to { stroke-dashoffset: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__brand, .hero__eyebrow, .hero__tagline, .hero__sub, .hero__meta, .hero--site > .callout,
+    .nb-new, .nav__sheet:not([hidden]) { animation: none; }
+    .tick-draw path, .tick-draw polyline { animation: none; stroke-dashoffset: 0; }
+    .nav__pill { transition: none; }
+  }
 }

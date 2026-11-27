@@ -42,6 +42,9 @@ const en = {
     contact: 'Contact',
   },
   navAria: 'Sections',
+  menu: 'Menu',
+  close: 'Close',
+  home: 'Home',
   call: 'Call',
   whatsapp: 'WhatsApp',
   hero: {
@@ -56,7 +59,7 @@ const en = {
     statCourses: 'Courses',
     statStreams: 'Streams',
     statSince: 'Teaching since',
-    statBatches: 'Batches: Free and Paid',
+    statBatches: 'Batches: Free, Paid and Interview',
   },
   notices: {
     eyebrow: 'Notice board',
@@ -167,7 +170,7 @@ const en = {
     all: 'All articles',
     read: 'Read article →',
   },
-  share: { whatsapp: 'Share on WhatsApp' },
+  share: { whatsapp: 'Share on WhatsApp', short: 'Share' },
   faq: {
     eyebrow: 'Questions',
     heading: 'What students usually ask first.',
@@ -314,6 +317,9 @@ const bn: Dict = {
     contact: 'যোগাযোগ',
   },
   navAria: 'বিভাগ',
+  menu: 'মেনু',
+  close: 'বন্ধ করুন',
+  home: 'হোম',
   call: 'কল করুন',
   whatsapp: 'হোয়াটসঅ্যাপ',
   hero: {
@@ -328,7 +334,7 @@ const bn: Dict = {
     statCourses: 'কোর্স',
     statStreams: 'বিভাগ',
     statSince: 'সাল থেকে পড়ানো',
-    statBatches: 'ব্যাচ: ফ্রি ও পেইড',
+    statBatches: 'ব্যাচ: ফ্রি, পেইড ও ইন্টারভিউ',
   },
   notices: {
     eyebrow: 'নোটিস বোর্ড',
@@ -457,7 +463,7 @@ const bn: Dict = {
     all: 'সব আর্টিকেল',
     read: 'পড়ুন →',
   },
-  share: { whatsapp: 'হোয়াটসঅ্যাপে শেয়ার করুন' },
+  share: { whatsapp: 'হোয়াটসঅ্যাপে শেয়ার করুন', short: 'শেয়ার' },
   faq: {
     eyebrow: 'প্রশ্নোত্তর',
     heading: 'ছাত্র-ছাত্রীরা সাধারণত প্রথমে যা জানতে চায়।',
@@ -591,6 +597,9 @@ const DICTS: Record<Lang, Dict> = { en, bn };
 export function getDict(lang: Lang): Dict {
   return DICTS[lang];
 }
+
+/** The sections shown in the desktop header bar; the rest are in the menu. */
+export const PRIMARY_SECTIONS = ['#notices', '#calendar', '#courses', '#admission', '#downloads', '#articles', '#contact'];
 
 /** Section links for the header and footer, in page order. */
 export function navLinks(lang: Lang) {

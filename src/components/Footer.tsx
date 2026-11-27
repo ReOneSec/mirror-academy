@@ -18,7 +18,7 @@ export default function Footer({ linkBase = '', lang = 'en' }: { linkBase?: stri
               {link.label}
             </a>
           ))}
-          <Link href="/admin" className="link text-xs">
+          <Link href="/admin" className="foot__admin" prefetch={false}>
             {d.footer.admin}
           </Link>
         </nav>

@@ -5,7 +5,7 @@ import { Fragment, type ReactNode } from 'react';
  *   *bold* or **bold**     → bold
  *   # / ## / ### Heading   → heading
  *   ---                    → divider
- *   - item  or  • item     → bullet list
+ *   - item, • item, 𒊹 item, ➤ item → bullet list
  *   blank line             → new paragraph (single line breaks are kept)
  *   https://…              → link
  * A stray * that has no partner on its line is dropped.
@@ -48,7 +48,11 @@ function lines(block: string[], keyBase: string): ReactNode[] {
 }
 
 export default function ArticleBody({ text }: { text: string }) {
-  const src = text.replace(/\r\n?/g, '\n').split('\n');
+  // 𒊹 (a WhatsApp decoration) has no font on most phones and shows as a box: draw it as ◉.
+  const src = text
+    .replace(/\r\n?/g, '\n')
+    .replace(/\u{122B9}[\uFE0E\uFE0F]*/gu, '◉')
+    .split('\n');
   const nodes: ReactNode[] = [];
   let para: string[] = [];
   let list: string[] = [];
@@ -98,7 +102,8 @@ export default function ArticleBody({ text }: { text: string }) {
       nodes.push(heading[1].length <= 2 ? <h2 key={key}>{content}</h2> : <h3 key={key}>{content}</h3>);
       continue;
     }
-    const bullet = /^[-•]\s+(.*)$/.exec(t);
+    // WhatsApp posts often use 𒊹 (now ◉), ➤ or ► as bullets; they render as a normal list.
+    const bullet = /^(?:[-•]\s+|[➤►▪◆◉]\s*)(.*)$/u.exec(t);
     if (bullet) {
       flushPara();
       list.push(bullet[1]);

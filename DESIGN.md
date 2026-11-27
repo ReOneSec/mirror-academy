@@ -110,3 +110,9 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Notice expiry: `notices.expires_on` (last day to show, IST). Set when posting or from the list. Public board hides expired notices.
 - WhatsApp share (`ShareWhatsApp.tsx`) on every notice and article; reads the site address in the browser at tap time.
 - Migration 006 adds all of the above; code falls back to seed data until it runs.
+
+## Layout and motion (2026-11-27)
+- Header: at 1180px and wider, 7 main section tabs with a sliding highlight pill, Register, language, theme. Narrower: logo, (Register from 600px), language, theme and a Menu button opening a sheet with every section plus Register, Call and WhatsApp. Subpages use the same header (`SubpageHeader` = `Header base="/"`).
+- Hero callout buttons: Register full width, Call and WhatsApp side by side. Stats: 3 batches.
+- Motion (`Motion.tsx`, no libraries): fade-up on scroll with stagger, stats count up, hero lines rise on load, button press, ↗ nudge, card lift on hover (computer), "New" glow, menu drop, success tick draws. All off with reduced motion; without JS everything shows.
+- Article renderer: 𒊹 (no font on phones) shows as ◉ and counts as a bullet.

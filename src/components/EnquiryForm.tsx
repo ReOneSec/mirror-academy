@@ -286,7 +286,7 @@ export default function EnquiryForm({ lang = 'en' }: { lang?: Lang }) {
             {status === 'success' ? (
               <div className="stack" role="alert" aria-live="polite" style={{ justifyItems: 'start' }}>
                 <span style={{ color: 'var(--fill-system-green)' }}>
-                  <CheckCircleIcon className="h-10 w-10" aria-hidden="true" />
+                  <CheckCircleIcon className="h-10 w-10 tick-draw" aria-hidden="true" />
                 </span>
                 <h3>{t.successTitle}</h3>
                 <p className="sub">
