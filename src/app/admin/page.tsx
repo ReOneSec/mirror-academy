@@ -9,6 +9,7 @@ import { SITE, COURSE_STREAMS } from '@/lib/constants';
 import type { RegistrationRecord } from '@/types';
 import ThemeToggle from '@/components/ThemeToggle';
 import AdminFollowUp from '@/components/AdminFollowUp';
+import AdminNotices from '@/components/AdminNotices';
 
 /** Today's date on this device as YYYY-MM-DD (the institute's admins are in IST). */
 function todayKey(): string {
@@ -64,6 +65,7 @@ export default function AdminPage() {
   const [streamFilter, setStreamFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [genderFilter, setGenderFilter] = useState('all');
+  const [view, setView] = useState<'registrations' | 'notices'>('registrations');
   const [dayFilter, setDayFilter] = useState<'all' | 'today' | 'due'>('all');
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
@@ -492,6 +494,19 @@ export default function AdminPage() {
       </header>
 
       <main className="main">
+        <div className="tabs adm-tabs" role="tablist" aria-label="Admin sections">
+          <button type="button" role="tab" aria-selected={view === 'registrations'} onClick={() => setView('registrations')}>
+            Registrations
+          </button>
+          <button type="button" role="tab" aria-selected={view === 'notices'} onClick={() => setView('notices')}>
+            Notice board
+          </button>
+        </div>
+
+        {view === 'notices' ? (
+          <AdminNotices onToast={showToast} />
+        ) : (
+          <>
         <section className="adm-section adm-section--intro" aria-labelledby="adm-title">
           <div className="head">
             <p className="head__eyebrow">Admissions</p>
@@ -770,6 +785,8 @@ export default function AdminPage() {
             Open the public website
           </Link>
         </footer>
+          </>
+        )}
       </main>
 
       {selectedRecord && (

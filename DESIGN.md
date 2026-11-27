@@ -87,3 +87,10 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Duplicate check: same phone + course, not cancelled → 409 `duplicate: true`; the form offers Check my registration or Register again anyway (`allowDuplicate`).
 - Registration slip: PNG drawn on canvas (`src/lib/slip.ts`), from the success screen and each lookup result.
 - Turnstile: `Turnstile.tsx` renders when `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set; the API refuses missing or failed tokens whenever `TURNSTILE_SECRET_KEY` is set, and fails closed if Cloudflare is unreachable.
+
+## Notice board (2026-11-27)
+- `NoticeBoard.tsx` (server component, streamed in `<Suspense>` after `connection()`) sits right after the hero. Anyone can read it; no sign-in. Pinned first, then newest, up to 12. "New" chip for 7 days.
+- Data: `notices` table + public `notices` storage bucket (migration 004). Public read via RLS (`published = true`); all writes go through `/api/admin/notices` with the service role.
+- Admin: Notices tab in /admin (`AdminNotices.tsx`): post title, text, optional link, optional PDF/JPG/PNG/WebP up to 4 MB; pin, hide/show, delete (deletes the file too).
+- If the table can't be read (migration not run yet), the board falls back to `FALLBACK_NOTICES` in `src/lib/notices.ts`. Migration 004 also seeds the first notice: WBPSC Clerkship Part-I, 26 and 27 Dec 2026, admit cards from 14 Dec, pinned.
+- Class prefix `nb-` (the older `.notice` class is the form alert box).

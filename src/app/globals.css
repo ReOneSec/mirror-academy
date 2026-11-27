@@ -580,4 +580,33 @@
   .adm-follow__row > label { flex: 1 1 180px; }
   .adm-due { display: block; margin-top: 4px; font: var(--type-caption); color: var(--text-secondary); }
   .adm-due[data-due="true"] { color: var(--fill-system-orange); font-weight: var(--weight-medium); }
+
+  /* Notice board (homepage): pinned first, newest first */
+  .nb-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .nb-item {
+    display: grid; gap: 8px; justify-items: start; min-width: 0;
+    padding: 20px 24px; border-radius: var(--r-m); background: var(--fill-tertiary);
+  }
+  .nb-item[data-pinned] { box-shadow: inset 3px 0 0 var(--fill-system-orange); }
+  .nb-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font: var(--type-small); color: var(--text-secondary); }
+  .nb-new { color: var(--fill-system-orange); }
+  .nb-new::before { background: var(--fill-system-orange); box-shadow: none; }
+  .nb-title { font: var(--type-heading); text-wrap: balance; overflow-wrap: anywhere; }
+  .nb-body { color: var(--text-secondary); max-width: 68ch; white-space: pre-line; overflow-wrap: anywhere; }
+  .nb-img { display: block; max-width: min(100%, 420px); border-radius: var(--r-s, 12px); overflow: hidden; }
+  .nb-img img { display: block; width: 100%; height: auto; }
+  .nb-links { margin-top: 4px; }
+  .nb-empty { padding: 24px; border-radius: var(--r-m); border: 1px dashed var(--stroke-primary); color: var(--text-secondary); }
+  @media (max-width: 599px) { .nb-item { padding: 18px; } .nb-links { width: 100%; } .nb-links .btn { flex: 1; justify-content: center; } }
+
+  /* Admin: notices tab */
+  .adm-tabs { margin-top: clamp(20px, 3vw, 32px); width: fit-content; }
+  .adm-nform { display: grid; gap: 14px; }
+  .adm-nform__row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+  .adm-check { display: inline-flex; align-items: center; gap: 8px; min-height: var(--tap); font: var(--type-body); cursor: pointer; }
+  .adm-check input { width: 18px; height: 18px; accent-color: var(--fill-system-orange); }
+  .adm-nlist { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+  .adm-nlist .nb-item[data-hidden] { opacity: 0.6; }
+  .adm-nactions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 4px; }
+  @media (max-width: 599px) { .adm-tabs { width: 100%; } .adm-tabs button { flex: 1; } }
 }

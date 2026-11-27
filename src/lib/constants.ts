@@ -97,6 +97,7 @@ export const ALL_COURSES = COURSE_STREAMS.flatMap((s) =>
 );
 
 export const NAV_LINKS = [
+  { label: 'Notices', href: '#notices' },
   { label: 'Courses', href: '#courses' },
   { label: 'Why us', href: '#why-mirror' },
   { label: 'Admission', href: '#admission' },
