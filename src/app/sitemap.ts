@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { listArticles } from '@/lib/articlesData';
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mirroracademy.in';
+import { SITE_URL } from '@/lib/siteUrl';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await listArticles(500);

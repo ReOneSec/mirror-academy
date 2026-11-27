@@ -13,6 +13,7 @@ import DownloadsSection from '@/components/DownloadsSection';
 import ArticlesSection from '@/components/ArticlesSection';
 import MobileActionBar from '@/components/MobileActionBar';
 import { SITE, ALL_COURSES } from '@/lib/constants';
+import { SITE_URL } from '@/lib/siteUrl';
 import { getDict, type Lang } from '@/lib/i18n';
 
 // Tells search engines what Mirror Academy is and where, for local results and the map pack.
@@ -22,7 +23,7 @@ const SCHEMA = {
   name: SITE.name,
   slogan: SITE.tagline,
   foundingDate: String(SITE.since),
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mirroracademy.in',
+  url: SITE_URL,
   logo: '/brand/logo.jpg',
   telephone: `+91${SITE.phone}`,
   email: SITE.email,

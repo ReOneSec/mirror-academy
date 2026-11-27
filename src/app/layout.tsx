@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
+import { SITE_URL } from "@/lib/siteUrl";
 
 // Geist for everything, Geist Mono for IDs and figures that must line up.
 // The same pair the Mirror Academy Admissions Page uses (see DESIGN.md).
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
     "Mirror Academy, Berhampore: coaching for WBCS and WBPSC exams, NEET, JENPAS, JEXPO, WB Police, Agniveer, NET, SET, TET and mock interviews since 2018. Register as a student or call 9732424300.",
   alternates: { canonical: "/" },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://mirroracademy.in"
+    SITE_URL
   ),
   openGraph: {
     title: "Mirror Academy, Berhampore | Reflect Your Strength!",
