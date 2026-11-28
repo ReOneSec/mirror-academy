@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { connection } from 'next/server';
 import SubpageHeader from '@/components/SubpageHeader';
 import Footer from '@/components/Footer';
 import ArticleBody from '@/components/ArticleBody';
 import ShareWhatsApp from '@/components/ShareWhatsApp';
-import { getArticle } from '@/lib/articlesData';
+import { findArticleRedirect, getArticle } from '@/lib/articlesData';
 import { articleExcerpt, formatArticleDate } from '@/lib/articles';
 import { SITE } from '@/lib/constants';
 
@@ -16,7 +16,12 @@ type Params = Promise<{ slug: string }>;
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticle(slug);
-  if (!article) return { title: 'Article not found | Mirror Academy' };
+  if (!article) {
+    // An old link to an article whose slug changed: send it (and search engines) to the new address.
+    const next = await findArticleRedirect(slug);
+    if (next) permanentRedirect(`/articles/${next}`);
+    return { title: 'Article not found | Mirror Academy' };
+  }
   const description = articleExcerpt(article, 160);
   return {
     title: `${article.title} | Mirror Academy`,
@@ -30,7 +35,11 @@ async function ArticleView({ params }: { params: Params }) {
   await connection();
   const { slug } = await params;
   const article = await getArticle(slug);
-  if (!article) notFound();
+  if (!article) {
+    const next = await findArticleRedirect(slug);
+    if (next) permanentRedirect(`/articles/${next}`);
+    notFound();
+  }
 
   const schema = {
     '@context': 'https://schema.org',

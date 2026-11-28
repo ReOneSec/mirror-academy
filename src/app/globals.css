@@ -956,4 +956,10 @@
   .map__addr { max-width: 38ch; font-size: 15px; line-height: 1.4; opacity: .9; }
   .map__show { pointer-events: none; }
   @media (prefers-reduced-motion: reduce) { .hero__what { animation: none; } }
+
+  /* Admin: article slug field */
+  .adm-slug { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; }
+  .adm-slug__preview { word-break: break-all; }
+  .adm-slug__preview strong { color: var(--text-primary); font-weight: 600; }
+  .adm-slug__line { margin: 2px 0 0; font: var(--type-small); color: var(--text-secondary); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
 }

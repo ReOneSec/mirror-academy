@@ -8,6 +8,7 @@ import {
   ARTICLE_SUMMARY_MAX,
   ARTICLE_TITLE_MAX,
   slugBase,
+  slugProblem,
   toArticle,
   type ArticleRow,
 } from '@/lib/articles';
@@ -16,8 +17,9 @@ function fail(message: string, status: number) {
   return NextResponse.json({ success: false, message }, { status });
 }
 const unauthorized = () => fail('Unauthorized. Please sign in.', 401);
+const SLUG_TAKEN = 'Another article already uses that link. Choose a different slug.';
 
-type Fields = { title?: string; category?: string | null; summary?: string | null; body?: string; published?: boolean };
+type Fields = { slug?: string; title?: string; category?: string | null; summary?: string | null; body?: string; published?: boolean };
 
 /** Validates the editable fields present in the input. Returns an error message or the cleaned fields. */
 function readFields(input: Record<string, unknown>, requireAll: boolean): string | Fields {
@@ -43,6 +45,16 @@ function readFields(input: Record<string, unknown>, requireAll: boolean): string
     const summary = String(input.summary ?? '').trim();
     if (summary.length > ARTICLE_SUMMARY_MAX) return `Keep the summary under ${ARTICLE_SUMMARY_MAX} characters.`;
     out.summary = summary || null;
+  }
+  if ('slug' in input) {
+    const slug = String(input.slug ?? '').trim().toLowerCase();
+    if (slug) {
+      const problem = slugProblem(slug);
+      if (problem) return problem;
+      out.slug = slug;
+    } else if (!requireAll) {
+      return 'Add a link (slug) for the article.';
+    }
   }
   if (typeof input.published === 'boolean') out.published = input.published;
   return out;
@@ -83,6 +95,19 @@ export async function POST(request: NextRequest) {
   if (typeof fields === 'string') return fail(fields, 400);
 
   const admin = createAdminClient();
+  if (fields.slug) {
+    const { data, error } = await admin
+      .from('articles')
+      .insert({ ...fields, published: fields.published ?? true })
+      .select(ARTICLE_COLUMNS)
+      .single();
+    if (!error && data) {
+      return NextResponse.json({ success: true, article: toArticle(data as ArticleRow), message: 'Article published.' });
+    }
+    if (error?.code === '23505') return fail(SLUG_TAKEN, 409);
+    console.error('Article insert error:', error);
+    return fail('Could not save the article. Has migration 005 been run?', 500);
+  }
   const base = slugBase(fields.title!);
   for (let attempt = 0; attempt < 4; attempt++) {
     const slug = attempt === 0 && base !== 'article' ? base : `${base}-${crypto.randomUUID().slice(0, 6)}`;
@@ -118,6 +143,8 @@ export async function PATCH(request: NextRequest) {
     .eq('id', id)
     .select(ARTICLE_COLUMNS)
     .single();
+  if (error?.code === '23505') return fail(SLUG_TAKEN, 409);
+  if (error?.code === '23514') return fail('That link has characters the website does not allow.', 400);
   if (error || !data) {
     console.error('Article update error:', error);
     return fail('Could not update the article.', 500);

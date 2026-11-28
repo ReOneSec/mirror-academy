@@ -129,3 +129,8 @@ Google Maps embed in a card, closing callout) → footer with section chips and 
 - Hero: gold line under the slogan, "WBCS, WBPSC, Police and NEET coaching in Berhampore" (and Bengali).
 - Speed: the Google Map loads only on tap (`MapEmbed`); Turnstile's script loads only when the form is within 600px of the screen; hero logo sizes 112px on phones.
 - Search: FAQPage JSON-LD on / and /bn; organisation logo and image as absolute URLs.
+
+## Editable article links (2026-11-28)
+- Admin Articles: "Link (slug)" field on Write and Edit, with a live URL preview. English titles suggest a slug; Bengali titles leave it empty with a hint (empty still falls back to article-xxxxxx).
+- API validates ^[a-z0-9]+(-[a-z0-9]+)*$, max 80; 23505 returns "Another article already uses that link."
+- Migration 008: article_slug_redirects + trigger keeps the old slug on every slug change; /articles/[old] permanentRedirects to the new slug. Sitemap and canonical use the current slug.

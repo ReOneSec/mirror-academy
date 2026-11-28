@@ -4,6 +4,35 @@ export const ARTICLE_TITLE_MAX = 200;
 export const ARTICLE_CATEGORY_MAX = 60;
 export const ARTICLE_SUMMARY_MAX = 400;
 export const ARTICLE_BODY_MAX = 30000;
+export const ARTICLE_SLUG_MAX = 80;
+/** Same rule as the database check: lowercase letters and digits, single hyphens between words. */
+export const ARTICLE_SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** Tidies what an admin types into a slug: lowercase, spaces and underscores to hyphens, other marks dropped. */
+export function cleanSlugInput(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-{2,}/g, '-')
+    .replace(/^-+/g, '')
+    .slice(0, ARTICLE_SLUG_MAX);
+}
+
+/** Suggested slug for an English title; empty for a title with Bengali or other non-English letters. */
+export function suggestSlug(title: string): string {
+  if (/[^\x00-\x7F]/.test(title)) return '';
+  const base = slugBase(title);
+  return base === 'article' ? '' : base;
+}
+
+/** Error message for a slug, or null when it is fine. */
+export function slugProblem(slug: string): string | null {
+  if (slug.length > ARTICLE_SLUG_MAX) return `Keep the link under ${ARTICLE_SLUG_MAX} characters.`;
+  if (!ARTICLE_SLUG_RE.test(slug))
+    return 'Use only English lowercase letters, numbers and single hyphens, with no hyphen at the start or end.';
+  return null;
+}
 
 export const ARTICLE_COLUMNS = 'id, slug, title, category, summary, body, published, created_at, updated_at';
 

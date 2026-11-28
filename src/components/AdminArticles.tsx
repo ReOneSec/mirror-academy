@@ -2,16 +2,21 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import type { Article } from '@/types';
+import { SITE_URL } from '@/lib/siteUrl';
 import {
   ARTICLE_BODY_MAX,
   ARTICLE_CATEGORY_MAX,
   ARTICLE_SUMMARY_MAX,
+  ARTICLE_SLUG_MAX,
   ARTICLE_TITLE_MAX,
   articleExcerpt,
+  cleanSlugInput,
+  slugProblem,
+  suggestSlug,
   formatArticleDate,
 } from '@/lib/articles';
 
-const EMPTY = { title: '', category: '', summary: '', body: '', published: true };
+const EMPTY = { title: '', slug: '', category: '', summary: '', body: '', published: true };
 
 export default function AdminArticles({ onToast }: { onToast: (msg: string) => void }) {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -21,6 +26,9 @@ export default function AdminArticles({ onToast }: { onToast: (msg: string) => v
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  // While writing a new article, the slug follows an English title until the admin types their own.
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [editingSlug, setEditingSlug] = useState('');
 
   async function load() {
     setLoading(true);
@@ -57,15 +65,27 @@ export default function AdminArticles({ onToast }: { onToast: (msg: string) => v
     setForm((f) => ({ ...f, [key]: value }));
   }
 
+  function setTitle(title: string) {
+    setForm((f) => ({ ...f, title, slug: !editingId && !slugTouched ? suggestSlug(title) : f.slug }));
+  }
+
+  const slugValue = form.slug.replace(/-+$/g, '');
+  const slugError = slugValue ? slugProblem(slugValue) : null;
+  const titleNotEnglish = /[^\x00-\x7F]/.test(form.title);
+
   function startEdit(a: Article) {
     setEditingId(a.id);
-    setForm({ title: a.title, category: a.category ?? '', summary: a.summary ?? '', body: a.body, published: a.published });
+    setSlugTouched(true);
+    setEditingSlug(a.slug);
+    setForm({ title: a.title, slug: a.slug, category: a.category ?? '', summary: a.summary ?? '', body: a.body, published: a.published });
     setFormError('');
     document.getElementById('adm-article-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function cancelEdit() {
     setEditingId(null);
+    setSlugTouched(false);
+    setEditingSlug('');
     setForm(EMPTY);
     setFormError('');
   }
@@ -75,13 +95,16 @@ export default function AdminArticles({ onToast }: { onToast: (msg: string) => v
     setFormError('');
     if (!form.title.trim()) return setFormError('Add a title.');
     if (!form.body.trim()) return setFormError('Write the article.');
+    if (editingId && !slugValue) return setFormError('Add a link (slug) for the article.');
+    if (slugError) return setFormError(slugError);
+    const payload = { ...form, slug: slugValue };
 
     setSaving(true);
     try {
       const res = await fetch('/api/admin/articles', {
         method: editingId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
+        body: JSON.stringify(editingId ? { id: editingId, ...payload } : payload),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) {
@@ -147,10 +170,48 @@ export default function AdminArticles({ onToast }: { onToast: (msg: string) => v
               className="field"
               value={form.title}
               maxLength={ARTICLE_TITLE_MAX}
-              onChange={(e) => set('title', e.target.value)}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. ক্লার্কশিপ পরীক্ষা: পরীক্ষার ধারা ও সিলেবাস"
               required
             />
+          </label>
+          <label>
+            <span className="field-label">
+              Link (slug){' '}
+              <span className="sub">
+                {editingId ? 'Required' : 'Optional'} · {slugValue.length}/{ARTICLE_SLUG_MAX}
+              </span>
+            </span>
+            <input
+              className="field adm-slug"
+              value={form.slug}
+              maxLength={ARTICLE_SLUG_MAX}
+              inputMode="url"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              aria-invalid={slugError ? true : undefined}
+              onChange={(e) => {
+                setSlugTouched(true);
+                set('slug', cleanSlugInput(e.target.value));
+              }}
+              placeholder="e.g. wbpsc-clerkship-syllabus-2026"
+            />
+            <span className="field-hint adm-slug__preview" translate="no">
+              {SITE_URL.replace(/^https?:\/\//, '')}/articles/<strong>{slugValue || 'article-xxxxxx'}</strong>
+            </span>
+            {slugError ? (
+              <span className="field-error">{slugError}</span>
+            ) : editingId && slugValue && slugValue !== editingSlug ? (
+              <span className="field-hint">The old link will forward to this one, so shared links keep working.</span>
+            ) : !editingId && !slugValue && titleNotEnglish ? (
+              <span className="field-hint">
+                Bengali title: type a short English slug for Google, for example the exam name and year. Left empty,
+                the link becomes article plus a random code.
+              </span>
+            ) : (
+              <span className="field-hint">English lowercase letters, numbers and hyphens. Short and with the exam name works best in Google.</span>
+            )}
           </label>
           <div className="adm-follow__row">
             <label>
@@ -248,6 +309,7 @@ export default function AdminArticles({ onToast }: { onToast: (msg: string) => v
                 {!a.published && <span className="chip">Hidden</span>}
               </div>
               <p className="nb-title">{a.title}</p>
+              <p className="adm-slug__line" translate="no">/articles/{a.slug}</p>
               <p className="nb-body">{articleExcerpt(a, 200)}</p>
               <div className="adm-nactions">
                 {a.published && (
