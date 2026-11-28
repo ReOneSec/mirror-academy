@@ -25,6 +25,33 @@ export async function listArticles(limit = 50): Promise<Article[]> {
   }
 }
 
+/**
+ * The current slug for an old article link, when the article's slug was changed (migration 008).
+ * Returns null when there is no redirect, the article is hidden, or the table is not there yet.
+ */
+export async function findArticleRedirect(slug: string): Promise<string | null> {
+  const supabase = createPublicClient();
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('article_slug_redirects')
+      .select('article_id')
+      .eq('old_slug', slug)
+      .maybeSingle();
+    if (error || !data) return null;
+    const { data: row } = await supabase
+      .from('articles')
+      .select('slug')
+      .eq('id', (data as { article_id: string }).article_id)
+      .eq('published', true)
+      .maybeSingle();
+    const next = (row as { slug: string } | null)?.slug;
+    return next && next !== slug ? next : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getArticle(slug: string): Promise<Article | null> {
   const fallback = FALLBACK_ARTICLES.find((a) => a.slug === slug) ?? null;
   const supabase = createPublicClient();
